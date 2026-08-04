@@ -1,0 +1,6 @@
+# Local packaging files are generated for manual Netlify uploads.
+*.zip
+
+# Operating-system files
+.DS_Store
+Thumbs.db

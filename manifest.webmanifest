@@ -1,0 +1,10 @@
+{
+  "name": "Lumio",
+  "short_name": "Lumio",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ff",
+  "theme_color": "#6759db",
+  "description": "Een rustige, speelse leerwereld voor kinderen.",
+  "icons": []
+}
