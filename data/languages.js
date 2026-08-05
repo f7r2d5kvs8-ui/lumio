@@ -10,13 +10,13 @@ const dutchWords = [
 function words(start, end) { return dutchWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
 
 export const languageCatalog = [
-  { id: 'nl', name: 'Nederlands', nativeName: 'Nederlands', flag: '🇳🇱 🇧🇪', locale: 'nl-NL', status: 'ready' },
-  { id: 'en', name: 'Engels', nativeName: 'English', flag: '🇬🇧', icon: '🦊', locale: 'en-GB', status: 'comingSoon' },
-  { id: 'de', name: 'Duits', nativeName: 'Deutsch', flag: '🇩🇪', icon: '🐻', locale: 'de-DE', status: 'comingSoon' },
-  { id: 'fr', name: 'Frans', nativeName: 'Français', flag: '🇫🇷', icon: '🦋', locale: 'fr-FR', status: 'comingSoon' },
-  { id: 'es', name: 'Spaans', nativeName: 'Español', flag: '🇪🇸', icon: '🌞', locale: 'es-ES', status: 'comingSoon' },
-  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', icon: '🪷', locale: 'fa-IR', status: 'comingSoon' },
-  { id: 'ar', name: 'Arabisch', nativeName: 'العربية', flag: '🌍', icon: '🌙', locale: 'ar', status: 'comingSoon' }
+  { id: 'nl', name: 'Nederlands', nativeName: 'Nederlands', flag: '🇳🇱 🇧🇪', flagCodes: ['nl', 'be'], locale: 'nl-NL', status: 'ready' },
+  { id: 'en', name: 'Engels', nativeName: 'English', flag: '🇬🇧', flagCodes: ['gb'], icon: '🦊', locale: 'en-GB', status: 'comingSoon' },
+  { id: 'de', name: 'Duits', nativeName: 'Deutsch', flag: '🇩🇪', flagCodes: ['de'], icon: '🐻', locale: 'de-DE', status: 'comingSoon' },
+  { id: 'fr', name: 'Frans', nativeName: 'Français', flag: '🇫🇷', flagCodes: ['fr'], icon: '🦋', locale: 'fr-FR', status: 'comingSoon' },
+  { id: 'es', name: 'Spaans', nativeName: 'Español', flag: '🇪🇸', flagCodes: ['es'], icon: '🌞', locale: 'es-ES', status: 'comingSoon' },
+  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', flagCodes: ['ir'], icon: '🪷', locale: 'fa-IR', status: 'comingSoon' },
+  { id: 'ar', name: 'Arabisch', nativeName: 'العربية', flag: '🇸🇦', flagCodes: ['sa'], icon: '🌙', locale: 'ar', status: 'comingSoon' }
 ];
 
 export const languagePackages = {
