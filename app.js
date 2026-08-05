@@ -12,7 +12,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.2';
+const RELEASE = '0.6.3';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -40,13 +40,26 @@ function renderAuth() {
     root.innerHTML = `<main class="screen account-screen"><section class="hero auth-choice"><div class="eyebrow">Lumio</div><h1>Welkom!</h1><p>Begin jouw leeravontuur.</p><div class="account-choices"><button class="choice-button guest-choice" data-action="guest"><span class="choice-icon" aria-hidden="true">▶</span><span><strong>Speel als gast</strong><small>Begin meteen met oefenen</small></span></button><button class="choice-button account-choice" data-action="signup"><span class="choice-icon" aria-hidden="true">★</span><span><strong>Maak een account</strong><small>Bewaar jouw voortgang</small></span></button></div><button class="login-link" data-action="login">Al een account? <strong>Log in</strong></button></section></main>`;
     root.querySelector('[data-action="signup"]').addEventListener('click', () => { authMode = 'signup'; render(); });
     root.querySelector('[data-action="login"]').addEventListener('click', () => { authMode = 'login'; render(); });
-    root.querySelector('[data-action="guest"]').addEventListener('click', () => { cloudUser = null; profile.account = null; saveProfile(profile); view = 'languages'; render(); });
+    root.querySelector('[data-action="guest"]').addEventListener('click', () => { cloudUser = null; profile.account = null; saveProfile(profile); view = 'child-name'; render(); });
     return;
   }
   root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><button class="back-auth" data-action="back-auth" aria-label="Terug">←</button><div class="eyebrow">Lumio</div><h1>${login ? 'Welkom terug' : 'Maak een account'}</h1><p>${login ? 'Ga verder met jouw leerreis.' : 'Bewaar de groei van je leerheld voor later.'}</p><form id="auth-form" class="auth-form"><label>E-mailadres<input id="auth-email" type="email" autocomplete="email" required placeholder="jij@voorbeeld.nl"></label><label>Wachtwoord<input id="auth-password" type="password" minlength="4" required placeholder="minimaal 4 tekens"></label><button class="button primary" type="submit">${login ? 'Inloggen' : 'Account maken'}</button></form><p class="auth-message" id="auth-message"></p><button class="login-link" data-action="auth-mode">${login ? 'Nog geen account? Maak er een' : 'Al een account? Log in'}</button></section></main>`;
-  root.querySelector('#auth-form').addEventListener('submit', async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? 'Inloggen…' : 'Account maken…'; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = 'Controleer je e-mail en bevestig je account. Daarna kun je inloggen.'; return; } cloudUser = result.data.user; profile.account = { email, provider: 'supabase' }; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages'; render(); });
+  root.querySelector('#auth-form').addEventListener('submit', async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? 'Inloggen…' : 'Account maken…'; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = 'Controleer je e-mail en bevestig je account. Daarna kun je inloggen.'; return; } cloudUser = result.data.user; profile.account = { email, provider: 'supabase' }; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; render(); });
   root.querySelector('[data-action="auth-mode"]').addEventListener('click', () => { authMode = login ? 'signup' : 'login'; render(); });
   root.querySelector('[data-action="back-auth"]').addEventListener('click', () => { authMode = 'choice'; render(); });
+}
+
+function renderChildName() {
+  const existing = escape(profile.childName || '');
+  root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card"><div class="eyebrow">Lumio</div><div class="name-orb" aria-hidden="true">✏️</div><h1>Hoe heet jij?</h1><p>We gebruiken jouw naam om een speciale schrijfoefening voor jou te maken.</p><form id="child-name-form" class="auth-form"><label>Jouw voornaam<input id="child-name" type="text" autocomplete="given-name" maxlength="24" required placeholder="Bijvoorbeeld: Noor" value="${existing}"></label><button class="button primary" type="submit">Verder</button></form></section></main>`;
+  root.querySelector('#child-name-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const name = root.querySelector('#child-name').value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    profile.childName = name; saveProfile(profile);
+    view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages';
+    render();
+  });
 }
 
 function header() { return `<header class="topbar"><button class="brand" data-action="languages" aria-label="Lumio">Lu<span>mio</span></button><div class="stat-row"><button class="chip" data-action="parent" aria-label="Ouders">👨‍👩‍👧</button><span class="chip">🔥 ${profile.rewards.streak || 0}</span><span class="chip">⭐ ${profile.rewards.stars || 0}</span></div></header>`; }
@@ -71,7 +84,21 @@ function renderLetters() {
   root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← Spellen</button><div class="eyebrow">Letterspoor</div><h1>Kies een letter</h1><p>Oefen telkens de hoofdletter én de kleine letter.</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} letters geoefend</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="Oefen letter ${drill.letter} en ${drill.lowercase}"><strong>${drill.letter}<small>${drill.lowercase}</small></strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div><button class="button primary alphabet-next" data-action="alphabet-next" ${doneCount === language.writing.length ? '' : 'disabled'}>Volgende →</button></section></main>${adBanner()}`;
   root.querySelector('[data-action="games"]').addEventListener('click', () => { view = 'games'; render(); });
   root.querySelectorAll('[data-trace-letter]').forEach(button => button.addEventListener('click', () => startTracing(button.dataset.traceLetter)));
+  if (profile.childName) {
+    root.querySelector('.letter-picker-grid').insertAdjacentHTML('afterend', `<button class="name-letter-choice ${progress.namePracticeCompleted ? 'done' : ''}" data-action="my-name"><span aria-hidden="true">✍️</span><span><strong>Mijn naam schrijven</strong><small>${progress.namePracticeCompleted ? 'Klaar — nog eens oefenen?' : `Oefen ${escape(profile.childName)}`}</small></span><b aria-hidden="true">${progress.namePracticeCompleted ? '✓' : '→'}</b></button>`);
+    root.querySelector('[data-action="my-name"]').addEventListener('click', startNameTracing);
+  }
   bindHeader();
+}
+
+function nameCharacters() { return Array.from((profile.childName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()).filter(char => /^[a-z]$/.test(char)); }
+function startNameTracing() { const letters = nameCharacters(); if (!letters.length) return; startNameLetter(letters, 0); }
+function startNameLetter(letters, index) {
+  const lowercase = letters[index]; const isFirst = index === 0; const display = isFirst ? lowercase.toUpperCase() : lowercase;
+  const form = { id: `name-${lowercase}-${index}`, label: isFirst ? 'hoofdletter' : 'kleine letter', pathId: `${isFirst ? 'capital' : 'lowercase'}-${lowercase}` };
+  const drill = { id: 'my-name', letter: display, lowercase: display, phoneme: profile.childName, title: 'Mijn naam', forms: [form] };
+  tracingSession = { drill, form, formIndex: 0, path: writingPaths[form.pathId], dragging: false, completed: false, strokeIndex: 0, furthest: 0, namePractice: true, nameLetters: letters, nameIndex: index };
+  view = 'tracing'; render();
 }
 
 function startTracing(drillId, formIndex = 0) {
@@ -109,8 +136,24 @@ function setupTracing() {
 }
 
 async function finishTracing() {
+  if (tracingSession.namePractice) return finishNameTracing();
   tracingSession.completed = true;
   const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const retry = root.querySelector('[data-action="retry-trace"]'); retry.disabled = tracingSession.formIndex === 0; retry.textContent = 'Opnieuw'; speak(ui().great); setTimeout(() => { if (tracingSession?.completed && tracingSession.formIndex === 0) startTracing(tracingSession.drill.id, 1); else if (tracingSession?.completed) { tracingSession = null; view = 'letters'; render(); } }, 900);
+}
+
+function finishNameTracing() {
+  tracingSession.completed = true;
+  rewardPractice(profile);
+  const feedback = root.querySelector('#trace-feedback');
+  const lastLetter = tracingSession.nameIndex === tracingSession.nameLetters.length - 1;
+  feedback.className = 'feedback success celebrate';
+  feedback.textContent = lastLetter ? `Fantastisch, ${profile.childName}! Jij hebt jouw naam geschreven. ⭐` : 'Goed gedaan! Nu de volgende letter.';
+  speak(lastLetter ? ui().great : 'Goed zo');
+  setTimeout(() => {
+    if (!tracingSession?.completed) return;
+    if (lastLetter) { const language = pack(); updateLanguageProgress(profile, language.metadata.id, { namePracticeCompleted: true }); tracingSession = null; view = 'letters'; render(); }
+    else startNameLetter(tracingSession.nameLetters, tracingSession.nameIndex + 1);
+  }, 900);
 }
 
 function renderHome() {
@@ -152,6 +195,6 @@ async function nextWord(lesson) { const language = pack(); const progress = lang
 
 function renderParent() { const language = pack(); const homeLanguage = languageCatalog.find(item => item.id === profile.homeLanguage); const progress = languageProgress(profile, language.metadata.id); root.innerHTML = `${header()}<main class="screen parent"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">${ui().parents}</div><h1>${ui().parentTitle}</h1><div class="parent-grid"><div class="metric"><strong>${progress.completed.length}</strong><small>${ui().worldsDone}</small></div><div class="metric"><strong>${profile.rewards.streak}</strong><small>${ui().days}</small></div><div class="metric"><strong>${profile.rewards.stars}</strong><small>${ui().stars}</small></div></div><div class="switch-row"><span>${ui().homeLanguage}</span><button class="speaker" data-action="home-language">${homeLanguage.flag} ${homeLanguage.nativeName}</button></div><div class="switch-row"><span>${ui().adSetting}</span><label><input id="ads" type="checkbox" ${profile.preferences.adsEnabled ? 'checked' : ''}> ${ui().on}</label></div><p class="intro">${ui().savedNote}</p></main>${adBanner()}`; bindHeader(); root.querySelector('[data-action="home"]').addEventListener('click', () => { view = 'home'; render(); }); root.querySelector('[data-action="home-language"]').addEventListener('click', () => { languageTarget = 'native'; view = 'languages'; render(); }); root.querySelector('#ads').addEventListener('change', event => { profile.preferences.adsEnabled = event.target.checked; saveProfile(profile); render(); }); }
 function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = 'Uitloggen'; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
-function render() { if (view === 'auth') renderAuth(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
-async function boot() { try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
+function render() { if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+async function boot() { try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
 boot();

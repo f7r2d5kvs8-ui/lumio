@@ -14,9 +14,9 @@
 .game-picker{position:relative}.game-picker-back{margin-bottom:18px}.game-grid{display:grid;gap:14px;margin-top:24px}.game-choice{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:15px;width:100%;border:0;border-radius:22px;padding:16px;background:#fff;color:var(--ink);box-shadow:0 9px 24px #405b8514;text-align:left;cursor:pointer;transition:transform .2s,box-shadow .2s}.game-choice:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 14px 28px #405b8520}.game-choice:disabled{opacity:.72;cursor:not-allowed}.game-choice-icon{display:grid;place-items:center;width:64px;height:64px;border-radius:19px;background:var(--purple);font-size:2rem}.game-choice strong,.game-choice small{display:block}.game-choice strong{font-size:1.14rem}.game-choice small{margin-top:4px;color:var(--muted);font-weight:700;line-height:1.3}.game-choice-arrow{font-size:1.7rem;color:var(--violet);font-weight:900}.game-choice em{background:var(--purple);border-radius:999px;padding:5px 8px;color:var(--violet);font-size:.72rem;font-style:normal;font-weight:900}.level-heading{display:flex;align-items:center;gap:13px;margin:24px 0 13px}.level-heading h2{margin:2px 0 0;font-size:1.45rem;letter-spacing:-.04em}@media(max-width:540px){.game-choice{grid-template-columns:54px minmax(0,1fr);gap:12px;padding:14px}.game-choice-icon{width:54px;height:54px;font-size:1.7rem}.game-choice-arrow,.game-choice em{grid-column:2}.game-choice small{font-size:.88rem}.level-heading{align-items:flex-start}}
 .tracing-screen{padding:21px}.tracing-card{padding:4px 0;text-align:center}.tracing-card h1{margin:7px 0;font-size:clamp(1.9rem,7vw,2.65rem);letter-spacing:-.05em}.tracing-card>p:not(.feedback){max-width:440px;margin:0 auto;color:var(--muted);font-weight:750;line-height:1.45}.trace-stage{width:min(100%,430px);margin:18px auto;background:linear-gradient(145deg,#f4f7ff,#fdfaff);border-radius:28px;padding:10px;box-shadow:inset 0 0 0 2px #e8eaf6}.trace-stage svg{display:block;width:100%;height:auto;touch-action:none;user-select:none}.trace-shadow{fill:none;stroke:#d7dbe7;stroke-width:47;stroke-linecap:round;stroke-linejoin:round}.trace-progress{fill:none;stroke:#7669e5;stroke-width:16;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .08s linear}.trace-marker{stroke:#fff;stroke-width:5}.trace-marker.start{fill:#6759db}.trace-marker.end{fill:#b8efd9}.trace-dot{fill:#ffbd45;stroke:#fff;stroke-width:7;filter:drop-shadow(0 4px 3px #44398d55);cursor:grab}.trace-dot:active{cursor:grabbing}.tracing-card .feedback{margin:5px 0 14px}@media(max-width:540px){.tracing-screen{padding:16px}.trace-stage{border-radius:23px;padding:6px}.trace-shadow{stroke-width:43}.trace-progress{stroke-width:14}}
 
-.letter-picker{position:relative}.trace-total{margin:20px 0 18px;font-weight:850;color:var(--ink)}.trace-total .progress{margin-top:8px}.letter-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.letter-choice{position:relative;display:grid;place-items:center;min-height:68px;border:0;border-radius:18px;background:#f3f0ff;color:var(--violet-dark);box-shadow:0 4px 0 #d8d1fb;font-size:1.7rem;font-weight:900;cursor:pointer;transition:transform .18s,background .18s}.letter-choice:hover{transform:translateY(-3px);background:#e6e0ff}.letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 4px 0 #9edfc8}.letter-choice>span{position:absolute;right:7px;bottom:5px;font-size:.78rem}@media(max-width:540px){.letter-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.letter-choice{min-height:62px;font-size:1.55rem}}
+.letter-picker{position:relative}.trace-total{margin:20px 0 18px;font-weight:850;color:var(--ink)}.trace-total .progress{margin-top:8px}.letter-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.letter-choice{position:relative;display:grid;place-items:center;min-height:68px;border:0;border-radius:18px;background:#f3f0ff;color:var(--violet-dark);box-shadow:0 4px 0 #d8d1fb;font-size:1.7rem;font-weight:900;cursor:pointer;transition:transform .18s,background .18s}.letter-choice:hover{transform:translateY(-3px);background:#e6e0ff}.letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 4px 0 #9edfc8}.letter-choice>span{position:absolute;right:7px;bottom:5px;font-size:.78rem}.name-letter-choice{display:flex;align-items:center;gap:13px;width:100%;margin-top:18px;border:0;border-radius:21px;padding:15px 17px;background:#fff0ca;color:#644b00;box-shadow:0 5px 0 #e6bc44;text-align:left;cursor:pointer}.name-letter-choice>span:first-child{font-size:2rem}.name-letter-choice>span:nth-child(2){display:grid;gap:3px;flex:1}.name-letter-choice strong{font-size:1.08rem}.name-letter-choice small{font-weight:750}.name-letter-choice b{font-size:1.45rem}.name-letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 5px 0 #9edfc8}@media(max-width:540px){.letter-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.letter-choice{min-height:62px;font-size:1.55rem}}
 
-.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}.alphabet-next{display:none!important}
+.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}.alphabet-next{display:none!important}.child-name-card{text-align:center}.child-name-card .auth-form{text-align:left}.name-orb{display:grid;place-items:center;width:68px;height:68px;margin:6px auto 16px;border-radius:24px;background:var(--yellow);font-size:2rem;box-shadow:0 5px 0 #e5b93a}
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -151,6 +151,7 @@ const KEY = 'lumio-profile-v1';
 
 const freshProfile = () => ({
   account: null,
+  childName: '',
   selectedLanguage: null,
   selectedGame: null,
   homeLanguage: 'nl',
@@ -240,7 +241,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.2';
+const RELEASE = '0.6.3';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -268,13 +269,26 @@ function renderAuth() {
     root.innerHTML = `<main class="screen account-screen"><section class="hero auth-choice"><div class="eyebrow">Lumio</div><h1>Welkom!</h1><p>Begin jouw leeravontuur.</p><div class="account-choices"><button class="choice-button guest-choice" data-action="guest"><span class="choice-icon" aria-hidden="true">▶</span><span><strong>Speel als gast</strong><small>Begin meteen met oefenen</small></span></button><button class="choice-button account-choice" data-action="signup"><span class="choice-icon" aria-hidden="true">★</span><span><strong>Maak een account</strong><small>Bewaar jouw voortgang</small></span></button></div><button class="login-link" data-action="login">Al een account? <strong>Log in</strong></button></section></main>`;
     root.querySelector('[data-action="signup"]').addEventListener('click', () => { authMode = 'signup'; render(); });
     root.querySelector('[data-action="login"]').addEventListener('click', () => { authMode = 'login'; render(); });
-    root.querySelector('[data-action="guest"]').addEventListener('click', () => { cloudUser = null; profile.account = null; saveProfile(profile); view = 'languages'; render(); });
+    root.querySelector('[data-action="guest"]').addEventListener('click', () => { cloudUser = null; profile.account = null; saveProfile(profile); view = 'child-name'; render(); });
     return;
   }
   root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><button class="back-auth" data-action="back-auth" aria-label="Terug">←</button><div class="eyebrow">Lumio</div><h1>${login ? 'Welkom terug' : 'Maak een account'}</h1><p>${login ? 'Ga verder met jouw leerreis.' : 'Bewaar de groei van je leerheld voor later.'}</p><form id="auth-form" class="auth-form"><label>E-mailadres<input id="auth-email" type="email" autocomplete="email" required placeholder="jij@voorbeeld.nl"></label><label>Wachtwoord<input id="auth-password" type="password" minlength="4" required placeholder="minimaal 4 tekens"></label><button class="button primary" type="submit">${login ? 'Inloggen' : 'Account maken'}</button></form><p class="auth-message" id="auth-message"></p><button class="login-link" data-action="auth-mode">${login ? 'Nog geen account? Maak er een' : 'Al een account? Log in'}</button></section></main>`;
-  root.querySelector('#auth-form').addEventListener('submit', async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? 'Inloggen…' : 'Account maken…'; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = 'Controleer je e-mail en bevestig je account. Daarna kun je inloggen.'; return; } cloudUser = result.data.user; profile.account = { email, provider: 'supabase' }; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages'; render(); });
+  root.querySelector('#auth-form').addEventListener('submit', async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? 'Inloggen…' : 'Account maken…'; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = 'Controleer je e-mail en bevestig je account. Daarna kun je inloggen.'; return; } cloudUser = result.data.user; profile.account = { email, provider: 'supabase' }; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; render(); });
   root.querySelector('[data-action="auth-mode"]').addEventListener('click', () => { authMode = login ? 'signup' : 'login'; render(); });
   root.querySelector('[data-action="back-auth"]').addEventListener('click', () => { authMode = 'choice'; render(); });
+}
+
+function renderChildName() {
+  const existing = escape(profile.childName || '');
+  root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card"><div class="eyebrow">Lumio</div><div class="name-orb" aria-hidden="true">✏️</div><h1>Hoe heet jij?</h1><p>We gebruiken jouw naam om een speciale schrijfoefening voor jou te maken.</p><form id="child-name-form" class="auth-form"><label>Jouw voornaam<input id="child-name" type="text" autocomplete="given-name" maxlength="24" required placeholder="Bijvoorbeeld: Noor" value="${existing}"></label><button class="button primary" type="submit">Verder</button></form></section></main>`;
+  root.querySelector('#child-name-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const name = root.querySelector('#child-name').value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    profile.childName = name; saveProfile(profile);
+    view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages';
+    render();
+  });
 }
 
 function header() { return `<header class="topbar"><button class="brand" data-action="languages" aria-label="Lumio">Lu<span>mio</span></button><div class="stat-row"><button class="chip" data-action="parent" aria-label="Ouders">👨‍👩‍👧</button><span class="chip">🔥 ${profile.rewards.streak || 0}</span><span class="chip">⭐ ${profile.rewards.stars || 0}</span></div></header>`; }
@@ -299,7 +313,21 @@ function renderLetters() {
   root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← Spellen</button><div class="eyebrow">Letterspoor</div><h1>Kies een letter</h1><p>Oefen telkens de hoofdletter én de kleine letter.</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} letters geoefend</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="Oefen letter ${drill.letter} en ${drill.lowercase}"><strong>${drill.letter}<small>${drill.lowercase}</small></strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div><button class="button primary alphabet-next" data-action="alphabet-next" ${doneCount === language.writing.length ? '' : 'disabled'}>Volgende →</button></section></main>${adBanner()}`;
   root.querySelector('[data-action="games"]').addEventListener('click', () => { view = 'games'; render(); });
   root.querySelectorAll('[data-trace-letter]').forEach(button => button.addEventListener('click', () => startTracing(button.dataset.traceLetter)));
+  if (profile.childName) {
+    root.querySelector('.letter-picker-grid').insertAdjacentHTML('afterend', `<button class="name-letter-choice ${progress.namePracticeCompleted ? 'done' : ''}" data-action="my-name"><span aria-hidden="true">✍️</span><span><strong>Mijn naam schrijven</strong><small>${progress.namePracticeCompleted ? 'Klaar — nog eens oefenen?' : `Oefen ${escape(profile.childName)}`}</small></span><b aria-hidden="true">${progress.namePracticeCompleted ? '✓' : '→'}</b></button>`);
+    root.querySelector('[data-action="my-name"]').addEventListener('click', startNameTracing);
+  }
   bindHeader();
+}
+
+function nameCharacters() { return Array.from((profile.childName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()).filter(char => /^[a-z]$/.test(char)); }
+function startNameTracing() { const letters = nameCharacters(); if (!letters.length) return; startNameLetter(letters, 0); }
+function startNameLetter(letters, index) {
+  const lowercase = letters[index]; const isFirst = index === 0; const display = isFirst ? lowercase.toUpperCase() : lowercase;
+  const form = { id: `name-${lowercase}-${index}`, label: isFirst ? 'hoofdletter' : 'kleine letter', pathId: `${isFirst ? 'capital' : 'lowercase'}-${lowercase}` };
+  const drill = { id: 'my-name', letter: display, lowercase: display, phoneme: profile.childName, title: 'Mijn naam', forms: [form] };
+  tracingSession = { drill, form, formIndex: 0, path: writingPaths[form.pathId], dragging: false, completed: false, strokeIndex: 0, furthest: 0, namePractice: true, nameLetters: letters, nameIndex: index };
+  view = 'tracing'; render();
 }
 
 function startTracing(drillId, formIndex = 0) {
@@ -337,8 +365,24 @@ function setupTracing() {
 }
 
 async function finishTracing() {
+  if (tracingSession.namePractice) return finishNameTracing();
   tracingSession.completed = true;
   const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const retry = root.querySelector('[data-action="retry-trace"]'); retry.disabled = tracingSession.formIndex === 0; retry.textContent = 'Opnieuw'; speak(ui().great); setTimeout(() => { if (tracingSession?.completed && tracingSession.formIndex === 0) startTracing(tracingSession.drill.id, 1); else if (tracingSession?.completed) { tracingSession = null; view = 'letters'; render(); } }, 900);
+}
+
+function finishNameTracing() {
+  tracingSession.completed = true;
+  rewardPractice(profile);
+  const feedback = root.querySelector('#trace-feedback');
+  const lastLetter = tracingSession.nameIndex === tracingSession.nameLetters.length - 1;
+  feedback.className = 'feedback success celebrate';
+  feedback.textContent = lastLetter ? `Fantastisch, ${profile.childName}! Jij hebt jouw naam geschreven. ⭐` : 'Goed gedaan! Nu de volgende letter.';
+  speak(lastLetter ? ui().great : 'Goed zo');
+  setTimeout(() => {
+    if (!tracingSession?.completed) return;
+    if (lastLetter) { const language = pack(); updateLanguageProgress(profile, language.metadata.id, { namePracticeCompleted: true }); tracingSession = null; view = 'letters'; render(); }
+    else startNameLetter(tracingSession.nameLetters, tracingSession.nameIndex + 1);
+  }, 900);
 }
 
 function renderHome() {
@@ -380,8 +424,8 @@ async function nextWord(lesson) { const language = pack(); const progress = lang
 
 function renderParent() { const language = pack(); const homeLanguage = languageCatalog.find(item => item.id === profile.homeLanguage); const progress = languageProgress(profile, language.metadata.id); root.innerHTML = `${header()}<main class="screen parent"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">${ui().parents}</div><h1>${ui().parentTitle}</h1><div class="parent-grid"><div class="metric"><strong>${progress.completed.length}</strong><small>${ui().worldsDone}</small></div><div class="metric"><strong>${profile.rewards.streak}</strong><small>${ui().days}</small></div><div class="metric"><strong>${profile.rewards.stars}</strong><small>${ui().stars}</small></div></div><div class="switch-row"><span>${ui().homeLanguage}</span><button class="speaker" data-action="home-language">${homeLanguage.flag} ${homeLanguage.nativeName}</button></div><div class="switch-row"><span>${ui().adSetting}</span><label><input id="ads" type="checkbox" ${profile.preferences.adsEnabled ? 'checked' : ''}> ${ui().on}</label></div><p class="intro">${ui().savedNote}</p></main>${adBanner()}`; bindHeader(); root.querySelector('[data-action="home"]').addEventListener('click', () => { view = 'home'; render(); }); root.querySelector('[data-action="home-language"]').addEventListener('click', () => { languageTarget = 'native'; view = 'languages'; render(); }); root.querySelector('#ads').addEventListener('change', event => { profile.preferences.adsEnabled = event.target.checked; saveProfile(profile); render(); }); }
 function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = 'Uitloggen'; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
-function render() { if (view === 'auth') renderAuth(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
-async function boot() { try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
+function render() { if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+async function boot() { try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
 boot();
 
 </script>
