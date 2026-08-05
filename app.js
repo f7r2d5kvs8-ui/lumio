@@ -1,4 +1,5 @@
 import { languageCatalog, languagePackages } from './data/languages.js';
+import { writingPaths } from './data/writing-paths.js';
 import { loadProfile, saveProfile, languageProgress, updateLanguageProgress, rewardPractice } from './modules/storage.js';
 import { currentSession, signUp, signIn, signOut, readProgress, writeProgress } from './modules/cloud.js';
 
@@ -9,6 +10,7 @@ let session = null;
 let languageTarget = 'learning';
 let authMode = 'choice';
 let cloudUser = null;
+let tracingSession = null;
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -56,8 +58,44 @@ function renderGames() {
   const language = pack(); const text = ui();
   root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>Kies een spel</h1><p>Kies hoe je vandaag wilt oefenen.</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled aria-disabled="true"' : ''}><span class="game-choice-icon" aria-hidden="true">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow" aria-hidden="true">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`;
   root.querySelector('[data-action="languages"]').addEventListener('click', () => { view = 'languages'; render(); });
-  root.querySelectorAll('[data-game]').forEach(button => button.addEventListener('click', () => { profile.selectedGame = button.dataset.game; saveProfile(profile); view = 'home'; render(); }));
+  root.querySelectorAll('[data-game]').forEach(button => button.addEventListener('click', () => { profile.selectedGame = button.dataset.game; saveProfile(profile); if (button.dataset.game === 'letter-trail') startTracing(); else { view = 'home'; render(); } }));
   bindHeader();
+}
+
+function startTracing() {
+  const drill = pack().writing?.[0];
+  if (!drill || !writingPaths[drill.pathId]) { view = 'games'; render(); return; }
+  tracingSession = { drill, path: writingPaths[drill.pathId], dragging: false, completed: false, furthest: 0 };
+  view = 'tracing'; render();
+}
+
+function renderTracing() {
+  const { drill, path } = tracingSession;
+  root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="games">← Spellen</button><span class="count">${drill.title}</span></div><section class="tracing-card"><div class="eyebrow">Letterspoor</div><h1>Volg de letter ${drill.letter}</h1><p>Luister naar de klank. Houd de cirkel vast en volg het grijze spoor.</p><div class="trace-stage"><svg id="trace-svg" viewBox="${path.viewBox}" role="img" aria-label="Volg de hoofdletter ${drill.letter}"><path class="trace-shadow" d="${path.path}"/><path id="trace-progress" class="trace-progress" d="${path.path}"/><circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="Sleep de cirkel over de letter ${drill.letter}"/></svg></div><p id="trace-feedback" class="feedback">Luister en begin bij de paarse cirkel.</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 Luister</button><button class="button primary" data-action="retry-trace" disabled>Opnieuw</button></div></section></main>${adBanner()}`;
+  bindHeader();
+  root.querySelector('[data-action="games"]').addEventListener('click', () => { tracingSession = null; view = 'games'; render(); });
+  root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(drill.phoneme));
+  root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => startTracing());
+  setupTracing();
+  setTimeout(() => speak(drill.phoneme), 250);
+}
+
+function setupTracing() {
+  const svg = root.querySelector('#trace-svg'); const shadow = svg.querySelector('.trace-shadow'); const progress = svg.querySelector('#trace-progress'); const dot = svg.querySelector('#trace-dot'); const start = svg.querySelector('#trace-start'); const end = svg.querySelector('#trace-end');
+  const length = shadow.getTotalLength(); const samples = Array.from({ length: 181 }, (_, index) => shadow.getPointAtLength(length * index / 180));
+  const place = (node, point) => { node.setAttribute('cx', point.x); node.setAttribute('cy', point.y); };
+  place(dot, samples[0]); place(start, samples[0]); place(end, samples[samples.length - 1]); progress.style.strokeDasharray = String(length); progress.style.strokeDashoffset = String(length);
+  const nearestPoint = event => { const bounds = svg.getBoundingClientRect(); const x = (event.clientX - bounds.left) * svg.viewBox.baseVal.width / bounds.width; const y = (event.clientY - bounds.top) * svg.viewBox.baseVal.height / bounds.height; let nearest = 0; let distance = Infinity; samples.forEach((point, index) => { const candidate = (point.x - x) ** 2 + (point.y - y) ** 2; if (candidate < distance) { distance = candidate; nearest = index; } }); return nearest; };
+  const update = index => { tracingSession.furthest = Math.max(tracingSession.furthest, index); place(dot, samples[index]); progress.style.strokeDashoffset = String(length * (1 - tracingSession.furthest / (samples.length - 1))); if (!tracingSession.completed && tracingSession.furthest >= samples.length - 8) finishTracing(); };
+  const startDrag = event => { event.preventDefault(); tracingSession.dragging = true; svg.setPointerCapture?.(event.pointerId); update(nearestPoint(event)); };
+  const move = event => { if (tracingSession.dragging) update(nearestPoint(event)); };
+  const stop = () => { tracingSession.dragging = false; };
+  dot.addEventListener('pointerdown', startDrag); svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', stop); svg.addEventListener('pointercancel', stop);
+}
+
+function finishTracing() {
+  tracingSession.completed = true;
+  const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = 'Goed gedaan! Je hebt de S gevolgd. ⭐'; root.querySelector('[data-action="retry-trace"]').disabled = false; speak(ui().great);
 }
 
 function renderHome() {
@@ -99,6 +137,6 @@ async function nextWord(lesson) { const language = pack(); const progress = lang
 
 function renderParent() { const language = pack(); const homeLanguage = languageCatalog.find(item => item.id === profile.homeLanguage); const progress = languageProgress(profile, language.metadata.id); root.innerHTML = `${header()}<main class="screen parent"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">${ui().parents}</div><h1>${ui().parentTitle}</h1><div class="parent-grid"><div class="metric"><strong>${progress.completed.length}</strong><small>${ui().worldsDone}</small></div><div class="metric"><strong>${profile.rewards.streak}</strong><small>${ui().days}</small></div><div class="metric"><strong>${profile.rewards.stars}</strong><small>${ui().stars}</small></div></div><div class="switch-row"><span>${ui().homeLanguage}</span><button class="speaker" data-action="home-language">${homeLanguage.flag} ${homeLanguage.nativeName}</button></div><div class="switch-row"><span>${ui().adSetting}</span><label><input id="ads" type="checkbox" ${profile.preferences.adsEnabled ? 'checked' : ''}> ${ui().on}</label></div><p class="intro">${ui().savedNote}</p></main>${adBanner()}`; bindHeader(); root.querySelector('[data-action="home"]').addEventListener('click', () => { view = 'home'; render(); }); root.querySelector('[data-action="home-language"]').addEventListener('click', () => { languageTarget = 'native'; view = 'languages'; render(); }); root.querySelector('#ads').addEventListener('change', event => { profile.preferences.adsEnabled = event.target.checked; saveProfile(profile); render(); }); }
 function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = 'Uitloggen'; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
-function render() { if (view === 'auth') renderAuth(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); }
+function render() { if (view === 'auth') renderAuth(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); }
 async function boot() { try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); view = profile.selectedLanguage ? (profile.selectedGame ? 'home' : 'games') : 'languages'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
 boot();

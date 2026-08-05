@@ -35,7 +35,10 @@ export const languagePackages = {
     },
     games: [
       { id: 'word-builder', title: 'Woordbouwers', description: 'Luister, kies letters en bouw woorden.', icon: '🧩', status: 'ready' },
-      { id: 'sound-safari', title: 'Klanken Safari', description: 'Een nieuw luisterspel komt hier binnenkort.', icon: '🦁', status: 'comingSoon' }
+      { id: 'letter-trail', title: 'Letterspoor', description: 'Luister naar een klank en volg het letterspoor.', icon: '✍️', status: 'ready' }
+    ],
+    writing: [
+      { id: 'capital-s', letter: 'S', phoneme: 'ssss', pathId: 'capital-s', title: 'De letter S' }
     ],
     curriculum: [
       { id: 'sounds-1', title: 'Eerste klanken', icon: '🔤', skill: 'letter', words: words(0, 10) },
