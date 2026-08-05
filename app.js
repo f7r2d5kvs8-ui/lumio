@@ -66,17 +66,18 @@ function renderGames() {
 }
 
 function renderLetters() {
-  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.tracingCompleted || [];
-  root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← Spellen</button><div class="eyebrow">Letterspoor</div><h1>Kies een letter</h1><p>Luister naar de klank en volg daarna het spoor.</p><div class="trace-total"><span>${completed.length} / ${language.writing.length} letters geoefend</span><div class="progress"><span style="width:${completed.length / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${completed.includes(drill.id) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="Oefen letter ${drill.letter}"><strong>${drill.letter}</strong>${completed.includes(drill.id) ? '<span>✓</span>' : ''}</button>`).join('')}</div></section></main>${adBanner()}`;
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.tracingCompleted || []; const lessonDone = drill => drill.forms.every(form => completed.includes(form.id)); const doneCount = language.writing.filter(lessonDone).length;
+  root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← Spellen</button><div class="eyebrow">Letterspoor</div><h1>Kies een letter</h1><p>Oefen telkens de hoofdletter én de kleine letter.</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} letters geoefend</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="Oefen letter ${drill.letter} en ${drill.lowercase}"><strong>${drill.letter}<small>${drill.lowercase}</small></strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div><button class="button primary alphabet-next" data-action="alphabet-next" ${doneCount === language.writing.length ? '' : 'disabled'}>Volgende →</button></section></main>${adBanner()}`;
   root.querySelector('[data-action="games"]').addEventListener('click', () => { view = 'games'; render(); });
   root.querySelectorAll('[data-trace-letter]').forEach(button => button.addEventListener('click', () => startTracing(button.dataset.traceLetter)));
+  root.querySelector('[data-action="alphabet-next"]').addEventListener('click', () => { profile.selectedGame = 'word-builder'; saveProfile(profile); view = 'home'; render(); });
   bindHeader();
 }
 
-function startTracing(drillId) {
+function startTracing(drillId, formIndex = 0) {
   const drill = pack().writing?.find(item => item.id === drillId) || pack().writing?.[0];
-  if (!drill || !writingPaths[drill.pathId]) { view = 'games'; render(); return; }
-  tracingSession = { drill, path: writingPaths[drill.pathId], dragging: false, completed: false, strokeIndex: 0, furthest: 0 };
+  const form = drill?.forms?.[formIndex]; if (!drill || !form || !writingPaths[form.pathId]) { view = 'games'; render(); return; }
+  tracingSession = { drill, form, formIndex, path: writingPaths[form.pathId], dragging: false, completed: false, strokeIndex: 0, furthest: 0 };
   view = 'tracing'; render();
 }
 
@@ -86,7 +87,7 @@ function renderTracing() {
   bindHeader();
   root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
   root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(drill.phoneme));
-  root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => startTracing(drill.id));
+  root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => tracingSession.formIndex === 0 ? startTracing(drill.id, 1) : startTracing(drill.id, 0));
   setupTracing();
   setTimeout(() => speak(drill.phoneme), 250);
 }
@@ -109,7 +110,7 @@ function setupTracing() {
 
 async function finishTracing() {
   tracingSession.completed = true;
-  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.drill.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.drill.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = `Goed gedaan! Je hebt de ${tracingSession.drill.letter} gevolgd. ⭐`; root.querySelector('[data-action="retry-trace"]').disabled = false; speak(ui().great);
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const next = root.querySelector('[data-action="retry-trace"]'); next.disabled = false; next.textContent = tracingSession.formIndex === 0 ? 'Kleine letter →' : 'Opnieuw'; speak(ui().great);
 }
 
 function renderHome() {

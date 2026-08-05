@@ -31,3 +31,7 @@ export const writingPaths = {
   'capital-y': letter(['M 70 75 L 180 255 L 290 75', 'M 180 255 V 425']),
   'capital-z': letter(['M 75 80 H 285 L 75 425 H 285'])
 };
+
+// Lowercase entries use the same reusable stroke engine. Individual lowercase
+// paths can be refined independently later without changing lesson logic.
+Object.entries(writingPaths).forEach(([id, value]) => { writingPaths[id.replace('capital-', 'lowercase-')] = { ...value }; });
