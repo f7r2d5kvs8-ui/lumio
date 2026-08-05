@@ -320,6 +320,573 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
+const RELEASE = '0.6.12';
+
+const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
+const shuffle = values => [...values].sort(() => Math.random() - .5);
+const pack = () => languagePackages[profile.learningLanguage || profile.selectedLanguage];
+const ui = () => languagePackages[profile.appLanguage || 'nl'].ui;
+const baseUi = ui;
+const appCopy = {
+  nl: { welcome:'Welkom!', beginJourney:'Begin jouw leeravontuur.', playGuest:'Speel als gast', beginNow:'Begin meteen met oefenen', createAccount:'Maak een account', saveProgress:'Bewaar jouw voortgang', haveAccount:'Al een account?', logIn:'Log in', welcomeBack:'Welkom terug', continueJourney:'Ga verder met jouw leerreis.', saveHero:'Bewaar de groei van je leerheld voor later.', email:'E-mailadres', password:'Wachtwoord', login:'Inloggen', signup:'Account maken', checkEmail:'Controleer je e-mail en bevestig je account. Daarna kun je inloggen.', childName:'Hoe heet jij?', changeName:'Naam wijzigen', childNameHelp:'We gebruiken jouw naam om een speciale schrijfoefening voor jou te maken.', firstName:'Jouw voornaam', exampleName:'Bijvoorbeeld: Noor', continue:'Verder', child:'Kind', changeChildName:'Naam van kind wijzigen', parents:'Ouders', signOut:'Uitloggen', chooseGame:'Kies een spel', gameIntro:'Kies hoe je vandaag wilt oefenen.', games:'Spellen', chooseLetter:'Kies een letter', bothCases:'Oefen telkens de hoofdletter én de kleine letter.', lettersPractised:'letters geoefend', myName:'Mijn naam schrijven', readyAgain:'Klaar — nog eens oefenen?', practise:'Oefen', letters:'Letters', letterTrail:'Letterspoor', followLetter:'Volg de letter', traceIntro:'Luister naar de klank. Houd de cirkel vast en volg het grijze spoor.', startPurple:'Luister en begin bij de paarse cirkel.', listen:'Luister', retry:'Opnieuw', write:'Schrijf', nameTrail:'Letterspoor · jouw naam', nameIntro:'Een naam bestaat uit losse letters. Volg ze van links naar rechts.', nameStart:'Begin bij de paarse cirkel en volg jouw hele naam.', nextLine:'Goed zo! Volg nu de volgende lijn.', lowercaseNext:'Goed gedaan! Nu de kleine', letterDone:'Goed gedaan! Je hebt de', nameDone:'Fantastisch, {name}! Jij hebt jouw hele naam geschreven.', wordBuilders:'Woordbouwers', chooseLevel:'Kies een niveau' },
+  en: { welcome:'Welcome!', beginJourney:'Start your learning adventure.', playGuest:'Play as guest', beginNow:'Start practising right away', createAccount:'Create an account', saveProgress:'Save your progress', haveAccount:'Already have an account?', logIn:'Log in', welcomeBack:'Welcome back', continueJourney:'Continue your learning journey.', saveHero:'Save your little learner’s progress for later.', email:'Email address', password:'Password', login:'Log in', signup:'Create account', checkEmail:'Check your email and confirm your account. Then you can log in.', childName:'What is your name?', changeName:'Change name', childNameHelp:'We use your name to create a special writing activity just for you.', firstName:'Your first name', exampleName:'For example: Sam', continue:'Continue', child:'Child', changeChildName:'Change child name', parents:'Parents', signOut:'Sign out', chooseGame:'Choose a game', gameIntro:'Choose how you would like to practise today.', games:'Games', chooseLetter:'Choose a letter', bothCases:'Practise the capital and lowercase letter each time.', lettersPractised:'letters practised', myName:'Write my name', readyAgain:'Done — practise again?', practise:'Practise', letters:'Letters', letterTrail:'Letter trail', followLetter:'Trace the letter', traceIntro:'Listen to the sound. Hold the circle and follow the grey path.', startPurple:'Listen and start at the purple circle.', listen:'Listen', retry:'Try again', write:'Write', nameTrail:'Letter trail · your name', nameIntro:'A name is made of letters. Follow them from left to right.', nameStart:'Start at the purple circle and follow your whole name.', nextLine:'Nice! Now follow the next line.', lowercaseNext:'Great job! Now the lowercase', letterDone:'Great job! You practised the', nameDone:'Fantastic, {name}! You wrote your whole name.', wordBuilders:'Word builders', chooseLevel:'Choose a level' }
+};
+appCopy.fa = { welcome:'خوش آمدی!', beginJourney:'ماجراجویی یادگیری خودت را شروع کن.', playGuest:'بازی به‌عنوان مهمان', beginNow:'همین حالا تمرین را شروع کن', createAccount:'ساخت حساب', saveProgress:'پیشرفت خودت را ذخیره کن', haveAccount:'حساب داری؟', logIn:'ورود', welcomeBack:'خوش برگشتی', continueJourney:'سفر یادگیری‌ات را ادامه بده.', saveHero:'پیشرفت کودک را برای بعد ذخیره کن.', email:'ایمیل', password:'رمز عبور', login:'ورود', signup:'ساخت حساب', checkEmail:'ایمیل خود را بررسی و حسابت را تأیید کن. سپس وارد شو.', childName:'نام تو چیست؟', changeName:'تغییر نام', childNameHelp:'از نام تو برای ساخت یک تمرین نوشتن ویژه استفاده می‌کنیم.', firstName:'نام کوچک تو', exampleName:'مثلاً: علی', continue:'ادامه', child:'کودک', changeChildName:'تغییر نام کودک', parents:'برای والدین', signOut:'خروج', chooseGame:'یک بازی انتخاب کن', gameIntro:'انتخاب کن امروز چطور تمرین کنی.', games:'بازی‌ها', chooseLetter:'یک حرف انتخاب کن', bothCases:'هر بار حرف بزرگ و کوچک را تمرین کن.', lettersPractised:'حرف تمرین شده', myName:'نوشتن نام من', readyAgain:'تمام شد — دوباره تمرین کن', practise:'تمرین', letters:'حروف', letterTrail:'مسیر حرف', followLetter:'حرف را دنبال کن', traceIntro:'به صدا گوش کن. دایره را نگه دار و مسیر خاکستری را دنبال کن.', startPurple:'گوش کن و از دایره بنفش شروع کن.', listen:'گوش کن', retry:'دوباره', write:'بنویس', nameTrail:'مسیر حرف · نام تو', nameIntro:'هر نام از چند حرف ساخته شده است. از راست به چپ آن‌ها را دنبال کن.', nameStart:'از دایره بنفش شروع کن و نام کاملت را دنبال کن.', nextLine:'آفرین! حالا خط بعدی را دنبال کن.', lowercaseNext:'آفرین! حالا حرف کوچک', letterDone:'آفرین! این حروف را تمرین کردی:', nameDone:'آفرین {name}! تو نام کاملت را نوشتی.', wordBuilders:'واژه‌ساز', chooseLevel:'یک سطح انتخاب کن' };
+const copy = () => appCopy[profile.appLanguage || 'nl'];
+const languageFlags = language => `<span class="flag-set" aria-label="${escape(language.name)}">${(language.flagCodes || []).map(code => `<span class="country-flag flag-${code}" aria-hidden="true"></span>`).join('')}</span>`;
+const games = () => pack()?.games || [];
+
+function speak(text, locale = pack()?.metadata.locale) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const say = () => { const voices = speechSynthesis.getVoices(); const languageCode = locale?.split('-')[0]?.toLowerCase(); const voice = voices.find(item => item.lang.toLowerCase().startsWith(languageCode)) || voices.find(item => item.name.toLowerCase().includes(languageCode === 'fa' ? 'persian' : languageCode)); const utterance = new SpeechSynthesisUtterance(text); utterance.lang = voice?.lang || locale || document.documentElement.lang; utterance.rate = .78; if (voice) utterance.voice = voice; speechSynthesis.resume(); speechSynthesis.speak(utterance); };
+  speechSynthesis.getVoices().length ? say() : speechSynthesis.addEventListener('voiceschanged', say, { once: true });
+}
+
+async function syncCloudProgress() { const language = pack(); if (!cloudUser || !language) return; const rows = (await readProgress(cloudUser.id)).filter(row => row.level >= 1 && row.level <= language.curriculum.length); const progress = languageProgress(profile, language.metadata.id); if (!rows.length && (progress.completed.length || progress.wordIndex)) { for (const lessonIndex of progress.completed) await writeProgress(cloudUser.id, lessonIndex + 1, 0, true); await writeProgress(cloudUser.id, progress.activeLesson + 1, progress.wordIndex || 0, progress.completed.includes(progress.activeLesson)); return; } const completed = rows.filter(row => row.completed).map(row => row.level - 1); const active = rows.filter(row => !row.completed).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0]; updateLanguageProgress(profile, language.metadata.id, { completed, activeLesson: active ? Math.max(0, active.level - 1) : progress.activeLesson, wordIndex: active?.word_index || 0 }); }
+async function persistCloudProgress() { if (!cloudUser || !pack() || !session) return; const progress = languageProgress(profile, pack().metadata.id); const currentLevel = session.lessonIndex + 1; await writeProgress(cloudUser.id, currentLevel, progress.activeLesson === session.lessonIndex ? progress.wordIndex : 0, progress.completed.includes(session.lessonIndex)); }
+async function syncTracingProgress() { if (!cloudUser || !pack()?.writing?.length) return; const rows = await readProgress(cloudUser.id); const tracingCompleted = rows.filter(row => row.level > TRACE_LEVEL_OFFSET && row.level <= TRACE_LEVEL_OFFSET + pack().writing.length && row.completed).map(row => pack().writing[row.level - TRACE_LEVEL_OFFSET - 1]?.id).filter(Boolean); if (tracingCompleted.length) { const progress = languageProgress(profile, pack().metadata.id); updateLanguageProgress(profile, pack().metadata.id, { tracingCompleted: [...new Set([...(progress.tracingCompleted || []), ...tracingCompleted])] }); } }
+async function persistTracingProgress(drillId) { if (!cloudUser || !pack()?.writing?.length) return; const index = pack().writing.findIndex(item => item.id === drillId); if (index >= 0) await writeProgress(cloudUser.id, TRACE_LEVEL_OFFSET + index + 1, 0, true); }
+function renderAuth() {
+  const choosing = authMode === 'choice';
+  const login = authMode === 'login';
+  if (choosing) {
+    root.innerHTML = `<main class="screen account-screen"><section class="hero auth-choice"><div class="eyebrow">Lumio</div><h1>Welkom!</h1><p>Begin jouw leeravontuur.</p><div class="account-choices"><button class="choice-button guest-choice" data-action="guest"><span class="choice-icon" aria-hidden="true">▶</span><span><strong>Speel als gast</strong><small>Begin meteen met oefenen</small></span></button><button class="choice-button account-choice" data-action="signup"><span class="choice-icon" aria-hidden="true">★</span><span><strong>Maak een account</strong><small>Bewaar jouw voortgang</small></span></button></div><button class="login-link" data-action="login">Al een account? <strong>Log in</strong></button></section></main>`;
+    root.querySelector('[data-action="signup"]').addEventListener('click', () => { authMode = 'signup'; render(); });
+    root.querySelector('[data-action="login"]').addEventListener('click', () => { authMode = 'login'; render(); });
+    root.querySelector('[data-action="guest"]').addEventListener('click', () => { cloudUser = null; profile.account = null; saveProfile(profile); view = 'child-name'; render(); });
+    return;
+  }
+  root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><button class="back-auth" data-action="back-auth" aria-label="Terug">←</button><div class="eyebrow">Lumio</div><h1>${login ? 'Welkom terug' : 'Maak een account'}</h1><p>${login ? 'Ga verder met jouw leerreis.' : 'Bewaar de groei van je leerheld voor later.'}</p><form id="auth-form" class="auth-form"><label>E-mailadres<input id="auth-email" type="email" autocomplete="email" required placeholder="jij@voorbeeld.nl"></label><label>Wachtwoord<input id="auth-password" type="password" minlength="4" required placeholder="minimaal 4 tekens"></label><button class="button primary" type="submit">${login ? 'Inloggen' : 'Account maken'}</button></form><p class="auth-message" id="auth-message"></p><button class="login-link" data-action="auth-mode">${login ? 'Nog geen account? Maak er een' : 'Al een account? Log in'}</button></section></main>`;
+  root.querySelector('#auth-form').addEventListener('submit', async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? 'Inloggen…' : 'Account maken…'; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = 'Controleer je e-mail en bevestig je account. Daarna kun je inloggen.'; return; } cloudUser = result.data.user; profile.account = { email, provider: 'supabase' }; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; render(); });
+  root.querySelector('[data-action="auth-mode"]').addEventListener('click', () => { authMode = login ? 'signup' : 'login'; render(); });
+  root.querySelector('[data-action="back-auth"]').addEventListener('click', () => { authMode = 'choice'; render(); });
+}
+
+function renderChildName() {
+  const existing = escape(profile.childName || '');
+  root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card"><div class="eyebrow">Lumio</div><div class="name-orb" aria-hidden="true">✏️</div><h1>${profile.childName ? 'Naam wijzigen' : 'Hoe heet jij?'}</h1><p>We gebruiken jouw naam om een speciale schrijfoefening voor jou te maken.</p><form id="child-name-form" class="auth-form"><label>Jouw voornaam<input id="child-name" type="text" autocomplete="given-name" maxlength="24" required placeholder="Bijvoorbeeld: Noor" value="${existing}"></label><button class="button primary" type="submit">Verder</button></form></section></main>`;
+  root.querySelector('#child-name-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const name = root.querySelector('#child-name').value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    const changed = profile.childName !== name; profile.childName = name; if (changed && pack()) updateLanguageProgress(profile, pack().metadata.id, { namePracticeCompleted: false }); saveProfile(profile);
+    view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages';
+    render();
+  });
+}
+
+function renderAppLanguage() {
+  const choices = languageCatalog.filter(language => ['nl', 'en', 'fa'].includes(language.id));
+  root.innerHTML = `<main class="screen account-screen"><section class="hero app-language-card"><div class="eyebrow">Lumio</div><h1>Choose app language</h1><p>Kies de taal voor knoppen en uitleg.</p><div class="app-language-options">${choices.map(language => `<button class="choice-button account-choice" data-app-language="${language.id}">${languageFlags(language)}<span><strong>${language.nativeName}</strong><small>${language.id === 'nl' ? 'Nederlands' : 'English'}</small></span></button>`).join('')}</div></section></main>`;
+  root.querySelectorAll('[data-app-language]').forEach(button => button.addEventListener('click', () => { profile.appLanguage = button.dataset.appLanguage; saveProfile(profile); view = 'auth'; render(); }));
+}
+
+function header() { return `<header class="topbar"><button class="brand" data-action="languages" aria-label="Lumio">Lu<span>mio</span></button><div class="stat-row"><button class="chip child-account" data-action="child-name" aria-label="Naam van kind wijzigen">👤 <span>${escape(profile.childName || 'Kind')}</span></button><button class="chip" data-action="parent" aria-label="Ouders">👨‍👩‍👧</button><span class="chip">🔥 ${profile.rewards.streak || 0}</span><span class="chip">⭐ ${profile.rewards.stars || 0}</span></div></header>`; }
+
+function renderLanguages() {
+  const text = baseUi();
+  root.innerHTML = `<main class="screen"><section class="hero"><div class="eyebrow">Lumio</div><h1>${text.chooseWorld}</h1><p>${text.languageIntro}</p><div class="language-grid">${languageCatalog.map(language => { const unavailable = language.status !== 'ready' && languageTarget !== 'native'; return `<article class="language-card"><button class="language-select" data-language="${language.id}" ${unavailable ? 'disabled' : ''}>${languageFlags(language)}<strong>${escape(language.nativeName)}</strong>${unavailable ? `<span class="badge">${text.comingSoon}</span>` : ''}</button><button class="speaker" data-say="${language.id}" aria-label="${text.listen} ${escape(language.nativeName)}">🔊</button></article>`; }).join('')}</div></section></main>`;
+  root.querySelectorAll('[data-language]').forEach(button => button.addEventListener('click', () => { const id = button.dataset.language; if (languageTarget === 'native') profile.homeLanguage = id; else { profile.selectedLanguage = id; profile.learningLanguage = id; profile.selectedGame = null; } saveProfile(profile); view = languageTarget === 'native' ? 'home' : 'games'; languageTarget = 'learning'; speak(languageCatalog.find(item => item.id === id).nativeName, languageCatalog.find(item => item.id === id).locale); render(); }));
+  root.querySelectorAll('[data-say]').forEach(button => button.addEventListener('click', () => { const language = languageCatalog.find(item => item.id === button.dataset.say); speak(language.nativeName, language.locale); }));
+}
+
+function renderGames() {
+  const language = pack(); const text = ui();
+  root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>Kies een spel</h1><p>Kies hoe je vandaag wilt oefenen.</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled aria-disabled="true"' : ''}><span class="game-choice-icon" aria-hidden="true">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow" aria-hidden="true">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`;
+  root.querySelector('[data-action="languages"]').addEventListener('click', () => { view = 'languages'; render(); });
+  root.querySelectorAll('[data-game]').forEach(button => button.addEventListener('click', () => { profile.selectedGame = button.dataset.game; saveProfile(profile); if (button.dataset.game === 'letter-trail') { view = 'letters'; render(); } else { view = 'home'; render(); } }));
+  bindHeader();
+}
+
+function renderLetters() {
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.tracingCompleted || []; const lessonDone = drill => drill.forms.every(form => completed.includes(form.id)); const doneCount = language.writing.filter(lessonDone).length;
+  root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← Spellen</button><div class="eyebrow">Letterspoor</div><h1>Kies een letter</h1><p>Oefen telkens de hoofdletter én de kleine letter.</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} letters geoefend</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="Oefen letter ${drill.letter} en ${drill.lowercase}"><strong>${drill.letter}<small>${drill.lowercase}</small></strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div><button class="button primary alphabet-next" data-action="alphabet-next" ${doneCount === language.writing.length ? '' : 'disabled'}>Volgende →</button></section></main>${adBanner()}`;
+  root.querySelector('[data-action="games"]').addEventListener('click', () => { view = 'games'; render(); });
+  root.querySelectorAll('[data-trace-letter]').forEach(button => button.addEventListener('click', () => startTracing(button.dataset.traceLetter)));
+  if (profile.childName) {
+    root.querySelector('.letter-picker-grid').insertAdjacentHTML('afterend', `<button class="name-letter-choice ${progress.namePracticeCompleted ? 'done' : ''}" data-action="my-name"><span aria-hidden="true">✍️</span><span><strong>Mijn naam schrijven</strong><small>${progress.namePracticeCompleted ? 'Klaar — nog eens oefenen?' : `Oefen ${escape(profile.childName)}`}</small></span><b aria-hidden="true">${progress.namePracticeCompleted ? '✓' : '→'}</b></button>`);
+    root.querySelector('[data-action="my-name"]').addEventListener('click', startNameTracing);
+  }
+  bindHeader();
+}
+
+function nameCharacters() { return Array.from((profile.childName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()).filter(char => /^[a-z]$/.test(char)); }
+function startNameTracing() {
+  const letters = nameCharacters(); if (!letters.length) return;
+  const namePaths = letters.map((letter, index) => writingPaths[`${index === 0 ? 'capital' : 'lowercase'}-${letter}`]);
+  const drill = { id: 'my-name', letter: profile.childName, lowercase: profile.childName, phoneme: profile.childName, title: 'Mijn naam' };
+  tracingSession = { drill, form: { id: 'my-name', label: 'jouw naam' }, formIndex: 0, path: namePaths[0], namePaths, dragging: false, completed: false, strokeIndex: 0, furthest: 0, namePractice: true, nameLetters: letters };
+  view = 'tracing'; render();
+}
+
+function startTracing(drillId, formIndex = 0) {
+  const drill = pack().writing?.find(item => item.id === drillId) || pack().writing?.[0];
+  const form = drill?.forms?.[formIndex]; if (!drill || !form || !writingPaths[form.pathId]) { view = 'games'; render(); return; }
+  tracingSession = { drill, form, formIndex, path: writingPaths[form.pathId], dragging: false, completed: false, strokeIndex: 0, furthest: 0 };
+  view = 'tracing'; render();
+}
+
+function renderTracing() {
+  if (tracingSession.namePractice) { renderNameTracing(); return; }
+  const { drill, path } = tracingSession;
+  root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← Letters</button><span class="count">${drill.title}</span></div><section class="tracing-card"><div class="eyebrow">Letterspoor</div><h1>Volg de letter ${drill.letter}</h1><p>Luister naar de klank. Houd de cirkel vast en volg het grijze spoor.</p><div class="trace-stage"><svg id="trace-svg" viewBox="${path.viewBox}" role="img" aria-label="Volg de hoofdletter ${drill.letter}">${path.strokes.map((stroke, index) => `<path class="trace-shadow" d="${stroke}"/><path class="trace-progress" data-trace-progress="${index}" d="${stroke}"/>`).join('')}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="Sleep de cirkel over de letter ${drill.letter}"/></svg></div><p id="trace-feedback" class="feedback">Luister en begin bij de paarse cirkel.</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 Luister</button><button class="button primary" data-action="retry-trace" disabled>Opnieuw</button></div></section></main>${adBanner()}`;
+  bindHeader();
+  root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
+  root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(drill.phoneme));
+  root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => startTracing(drill.id, tracingSession.formIndex));
+  setupTracing();
+  setTimeout(() => speak(drill.phoneme), 250);
+}
+
+function renderNameTracing() {
+  const { namePaths, nameLetters } = tracingSession;
+  const spacing = 280; const width = Math.max(360, namePaths.length * spacing + 50);
+  const letterMap = nameLetters.map((letter, index) => `<span class="name-progress-letter" data-name-letter="${index}">${index === 0 ? letter.toUpperCase() : letter}</span>`).join('');
+  const strokes = namePaths.map((path, letterIndex) => path.strokes.map((stroke, strokeIndex) => `<g transform="translate(${25 + letterIndex * spacing},0)"><path class="trace-shadow" data-offset-x="${25 + letterIndex * spacing}" d="${stroke}"/><path class="trace-progress" data-trace-progress="${letterIndex}-${strokeIndex}" data-offset-x="${25 + letterIndex * spacing}" d="${stroke}"/></g>`).join('')).join('');
+  root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← Letters</button><span class="count">Mijn naam</span></div><section class="tracing-card"><div class="eyebrow">Letterspoor · jouw naam</div><h1>Schrijf: ${escape(profile.childName)}</h1><p>Een naam bestaat uit losse letters. Volg ze van links naar rechts.</p><div class="name-progress" aria-label="Letters van ${escape(profile.childName)}">${letterMap}</div><div class="trace-stage name-stage"><svg id="trace-svg" class="name-svg" style="width:${width}px" viewBox="0 0 ${width} 500" role="img" aria-label="Schrijf jouw naam ${escape(profile.childName)}">${strokes}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="Sleep de cirkel over jouw naam ${escape(profile.childName)}"/></svg></div><p id="trace-feedback" class="feedback">Begin bij de paarse cirkel en volg jouw hele naam.</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 Luister</button><button class="button primary" data-action="retry-trace">Opnieuw</button></div></section></main>${adBanner()}`;
+  bindHeader();
+  root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
+  root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(profile.childName));
+  root.querySelector('[data-action="retry-trace"]').addEventListener('click', startNameTracing);
+  setupTracing(); setTimeout(() => speak(profile.childName), 250);
+}
+
+function setupTracing() {
+  const svg = root.querySelector('#trace-svg'); const shadows = [...svg.querySelectorAll('.trace-shadow')]; const progresses = [...svg.querySelectorAll('[data-trace-progress]')]; const dot = svg.querySelector('#trace-dot'); const start = svg.querySelector('#trace-start'); const end = svg.querySelector('#trace-end');
+  const place = (node, point) => { node.setAttribute('cx', point.x); node.setAttribute('cy', point.y); };
+  const activateStroke = () => {
+    const shadow = shadows[tracingSession.strokeIndex]; const progress = progresses[tracingSession.strokeIndex]; const length = shadow.getTotalLength(); const offsetX = Number(shadow.dataset.offsetX || 0); const samples = Array.from({ length: 181 }, (_, index) => { const point = shadow.getPointAtLength(length * index / 180); return { x: point.x + offsetX, y: point.y }; });
+    tracingSession.samples = samples; tracingSession.length = length; tracingSession.furthest = 0; tracingSession.acceptedMoves = 0; shadows.forEach((node, index) => node.classList.toggle('active-stroke', index === tracingSession.strokeIndex)); progresses.forEach((node, index) => { const segmentLength = shadows[index].getTotalLength(); node.style.strokeDasharray = `${segmentLength} ${segmentLength}`; node.style.strokeDashoffset = String(index < tracingSession.strokeIndex ? 0 : segmentLength); }); if (tracingSession.namePractice) { let cursor = 0; let activeLetter = 0; tracingSession.namePaths.forEach((glyph, letterIndex) => { if (tracingSession.strokeIndex >= cursor && tracingSession.strokeIndex < cursor + glyph.strokes.length) activeLetter = letterIndex; cursor += glyph.strokes.length; }); root.querySelectorAll('[data-name-letter]').forEach((node, letterIndex) => node.classList.toggle('done', letterIndex < activeLetter)); root.querySelector(`[data-name-letter="${activeLetter}"]`)?.classList.add('active'); } place(dot, samples[0]); place(start, samples[0]); place(end, samples[samples.length - 1]); progress.style.strokeDasharray = `${length} ${length}`; progress.style.strokeDashoffset = String(length);
+  };
+  activateStroke();
+  const nearestPoint = event => { const bounds = svg.getBoundingClientRect(); const x = (event.clientX - bounds.left) * svg.viewBox.baseVal.width / bounds.width; const y = (event.clientY - bounds.top) * svg.viewBox.baseVal.height / bounds.height; let nearest = 0; let distance = Infinity; tracingSession.samples.forEach((point, index) => { const candidate = (point.x - x) ** 2 + (point.y - y) ** 2; if (candidate < distance) { distance = candidate; nearest = index; } }); return nearest; };
+  const update = index => { const maximumStep = 12; if (index > tracingSession.furthest + maximumStep) return; const progress = progresses[tracingSession.strokeIndex]; if (index > tracingSession.furthest) tracingSession.acceptedMoves = (tracingSession.acceptedMoves || 0) + 1; tracingSession.furthest = Math.max(tracingSession.furthest, index); place(dot, tracingSession.samples[index]); progress.style.strokeDashoffset = String(tracingSession.length * (1 - tracingSession.furthest / (tracingSession.samples.length - 1))); if (!tracingSession.completed && tracingSession.acceptedMoves >= 14 && tracingSession.furthest >= tracingSession.samples.length - 8) { if (tracingSession.strokeIndex < shadows.length - 1) { tracingSession.strokeIndex += 1; root.querySelector('#trace-feedback').textContent = 'Goed zo! Volg nu de volgende lijn.'; activateStroke(); } else finishTracing(); } };
+  const startDrag = event => { event.preventDefault(); tracingSession.dragging = true; svg.setPointerCapture?.(event.pointerId); if (tracingSession.length < 20 && !tracingSession.completed) { const last = tracingSession.samples.length - 1; tracingSession.furthest = last - 12; tracingSession.acceptedMoves = 14; update(last); } };
+  const move = event => { if (tracingSession.dragging) update(nearestPoint(event)); };
+  const stop = () => { tracingSession.dragging = false; };
+  dot.addEventListener('pointerdown', startDrag); svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', stop); svg.addEventListener('pointercancel', stop);
+}
+
+async function finishTracing() {
+  if (tracingSession.namePractice) return finishNameTracing();
+  tracingSession.completed = true;
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const retry = root.querySelector('[data-action="retry-trace"]'); retry.disabled = tracingSession.formIndex === 0; retry.textContent = 'Opnieuw'; speak(ui().great); setTimeout(() => { if (tracingSession?.completed && tracingSession.formIndex === 0) startTracing(tracingSession.drill.id, 1); else if (tracingSession?.completed) { tracingSession = null; view = 'letters'; render(); } }, 900);
+}
+
+function finishNameTracing() {
+  tracingSession.completed = true;
+  rewardPractice(profile);
+  const feedback = root.querySelector('#trace-feedback');
+  feedback.className = 'feedback success celebrate';
+  feedback.textContent = `Fantastisch, ${profile.childName}! Jij hebt jouw hele naam geschreven. ⭐`;
+  speak(ui().great);
+  setTimeout(() => {
+    if (!tracingSession?.completed) return;
+    const language = pack(); updateLanguageProgress(profile, language.metadata.id, { namePracticeCompleted: true }); tracingSession = null; view = 'letters'; render();
+  }, 1100);
+}
+
+function renderHome() {
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.completed.length;
+  root.innerHTML = `${header()}<main class="screen"><section class="home-grid"><div class="welcome"><div class="eyebrow" style="color:#e9e5ff">${language.metadata.flag} ${language.metadata.nativeName}</div><h1>${ui().hello}</h1><p>${ui().dailyIntro}</p><button class="daily" data-action="daily">▶ ${ui().daily}</button></div><aside class="reward"><div class="eyebrow">${ui().growth}</div><div class="stars">${'⭐'.repeat(Math.min(3, Math.max(1, profile.rewards.stars || 1)))}</div><strong>${completed} / ${language.curriculum.length} ${ui().worlds}</strong><div class="progress"><span style="width:${completed / language.curriculum.length * 100}%"></span></div></aside></section><div class="level-heading"><button class="back" data-action="games">← Spellen</button><div><div class="eyebrow">Woordbouwers</div><h2>Kies een niveau</h2></div></div><section class="lesson-list" aria-label="${ui().worlds}">${language.curriculum.map((lesson, index) => { const locked = index > completed; return `<button class="lesson" data-lesson="${index}" ${locked ? 'disabled aria-disabled="true"' : ''}><span class="lesson-icon">${locked ? '🔒' : lesson.icon}</span><span><strong>${lesson.title}</strong><small>${lesson.skill === 'letter' ? ui().sounds : ui().building}</small></span><span class="lesson-progress">${progress.completed.includes(index) ? '✓' : `${Math.min(10, progress.activeLesson === index ? progress.wordIndex || 0 : 0)}/10`}</span></button>`; }).join('')}</section></main>${adBanner()}`;
+  root.querySelector('[data-action="daily"]').addEventListener('click', () => startLesson(progress.activeLesson || 0));
+  root.querySelector('[data-action="games"]').addEventListener('click', () => { view = 'games'; render(); });
+  root.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => startLesson(Number(button.dataset.lesson))));
+  bindHeader();
+}
+
+function adBanner() { const text = pack() ? ui() : baseUi(); return profile.preferences.adsEnabled ? `<aside class="ad-banner" aria-label="${text.ad}"><span>${text.ad}</span> ${text.adMessage}</aside>` : ''; }
+
+function startLesson(index) {
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const lesson = language.curriculum[index];
+  const wordIndex = progress.activeLesson === index ? (progress.wordIndex || 0) : 0;
+  session = { lessonIndex: index, wordIndex: Math.min(wordIndex, lesson.words.length - 1), picks: [], pickButtons: [], mistakes: 0, hintUsed: false, solved: false };
+  view = 'game'; render();
+}
+
+function renderGame() {
+  const language = pack(); const lesson = language.curriculum[session.lessonIndex]; const item = lesson.words[session.wordIndex]; const letters = shuffle([...item.word, ...shuffle(language.alphabet.filter(letter => !item.word.includes(letter))).slice(0, 3)]);
+  root.innerHTML = `${header()}<main class="screen game"><div class="game-head"><button class="back" data-action="home">← ${ui().back}</button><div class="progress"><span style="width:${session.wordIndex / lesson.words.length * 100}%"></span></div><span class="count">${session.wordIndex + 1}/10</span></div><section class="game-card"><div class="eyebrow">${lesson.title}</div><div class="picture" role="img" aria-label="${item.word}">${item.emoji}</div><p class="instruction">${lesson.skill === 'letter' ? ui().find : ui().build}</p><div class="answer" id="answer">${'_ '.repeat(item.word.length)}</div><p class="feedback" id="feedback">${ui().gameIntro}</p><div class="letters" id="letters">${letters.map((letter, index) => `<button class="letter" data-letter="${letter}" data-index="${index}">${letter}</button>`).join('')}</div><div class="controls"><button class="button soft" data-action="listen">🔊 ${ui().listen}</button><button class="button soft" data-action="hint">💡 ${ui().hint}</button><button class="button soft" data-action="undo" disabled>⌫</button><button class="button primary" data-action="check" disabled>${ui().check}</button></div></section></main>${adBanner()}`;
+  bindHeader();
+  root.querySelector('[data-action="home"]').addEventListener('click', async () => { updateLanguageProgress(profile, language.metadata.id, { activeLesson: session.lessonIndex, wordIndex: session.wordIndex }); await persistCloudProgress(); view = 'home'; render(); });
+  root.querySelector('[data-action="listen"]').addEventListener('click', () => speak(item.word));
+  root.querySelector('[data-action="hint"]').addEventListener('click', event => useHint(item, event.currentTarget));
+  root.querySelector('[data-action="undo"]').addEventListener('click', undoPick);
+  root.querySelector('[data-action="check"]').addEventListener('click', () => check(item, lesson));
+  root.querySelectorAll('[data-letter]').forEach(button => button.addEventListener('click', () => selectLetter(button, item)));
+}
+
+function selectLetter(button, item) { if (session.solved || button.classList.contains('selected') || session.picks.length >= item.word.length) return; const expected = item.word[session.picks.length]; if (button.dataset.letter !== expected) { button.classList.add('wrong'); speak(button.dataset.letter); setTimeout(() => button.classList.remove('wrong'), 650); return; } button.classList.add('selected', 'correct'); session.picks.push(button.dataset.letter); session.pickButtons.push(button); updateAnswer(item); }
+function updateAnswer(item) { const joining = pack().writingRules?.joining; const selected = joining ? session.picks.join('') : session.picks.join(' '); const answer = root.querySelector('#answer'); answer.dir = joining ? 'rtl' : 'ltr'; answer.textContent = selected + (selected ? ' ' : '') + '_ '.repeat(item.word.length - session.picks.length); root.querySelector('[data-action="undo"]').disabled = !session.picks.length; root.querySelector('[data-action="check"]').disabled = session.picks.length !== item.word.length; }
+function undoPick() { const button = session.pickButtons.pop(); if (button) button.classList.remove('selected'); session.picks.pop(); const item = pack().curriculum[session.lessonIndex].words[session.wordIndex]; updateAnswer(item); }
+function useHint(item, button) { if (session.hintUsed) return; const target = [...root.querySelectorAll('[data-letter]')].find(node => node.dataset.letter === item.word[session.picks.length] && !node.classList.contains('selected')); if (target) target.classList.add('hinted'); session.hintUsed = true; button.disabled = true; root.querySelector('#feedback').textContent = `${ui().listenPrompt} ${item.word[session.picks.length]}`; speak(item.word[session.picks.length]); }
+async function check(item, lesson) { const feedback = root.querySelector('#feedback'); if (session.solved) return nextWord(lesson); if (session.picks.join('') === item.word) { session.solved = true; session.pickButtons.forEach(button => button.classList.add('correct')); feedback.className = 'feedback success celebrate'; feedback.textContent = `${ui().great} ⭐`; root.querySelector('[data-action="check"]').textContent = `✅ ${ui().next}`; root.querySelector('[data-action="undo"]').disabled = true; rewardPractice(profile); await persistCloudProgress(); speak(ui().great); } else { session.mistakes += 1; feedback.className = 'feedback error'; session.pickButtons.forEach(button => button.classList.add('wrong')); if (session.mistakes >= 3) { feedback.textContent = ui().restart; setTimeout(() => { session = null; view = 'home'; render(); }, 1100); } else { feedback.textContent = `${ui().tryAgain} (${3 - session.mistakes})`; setTimeout(() => session.pickButtons.forEach(button => button.classList.remove('wrong')), 650); session.picks = []; session.pickButtons.forEach(button => button.classList.remove('selected', 'correct')); session.pickButtons = []; updateAnswer(item); speak(item.word); } } }
+async function nextWord(lesson) { const language = pack(); const progress = languageProgress(profile, language.metadata.id); if (session.wordIndex >= lesson.words.length - 1) { const completed = [...new Set([...progress.completed, session.lessonIndex])]; updateLanguageProgress(profile, language.metadata.id, { completed, activeLesson: Math.min(session.lessonIndex + 1, language.curriculum.length - 1), wordIndex: 0 }); await persistCloudProgress(); session = null; view = 'home'; render(); return; } session.wordIndex += 1; session.picks = []; session.pickButtons = []; session.solved = false; session.hintUsed = false; updateLanguageProgress(profile, language.metadata.id, { activeLesson: session.lessonIndex, wordIndex: session.wordIndex }); await persistCloudProgress(); render(); }
+
+function renderParent() { const language = pack(); const homeLanguage = languageCatalog.find(item => item.id === profile.homeLanguage); const progress = languageProgress(profile, language.metadata.id); root.innerHTML = `${header()}<main class="screen parent"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">${ui().parents}</div><h1>${ui().parentTitle}</h1><div class="parent-grid"><div class="metric"><strong>${progress.completed.length}</strong><small>${ui().worldsDone}</small></div><div class="metric"><strong>${profile.rewards.streak}</strong><small>${ui().days}</small></div><div class="metric"><strong>${profile.rewards.stars}</strong><small>${ui().stars}</small></div></div><div class="switch-row"><span>${ui().homeLanguage}</span><button class="speaker" data-action="home-language">${homeLanguage.flag} ${homeLanguage.nativeName}</button></div><div class="switch-row"><span>${ui().adSetting}</span><label><input id="ads" type="checkbox" ${profile.preferences.adsEnabled ? 'checked' : ''}> ${ui().on}</label></div><p class="intro">${ui().savedNote}</p></main>${adBanner()}`; bindHeader(); root.querySelector('[data-action="home"]').addEventListener('click', () => { view = 'home'; render(); }); root.querySelector('[data-action="home-language"]').addEventListener('click', () => { languageTarget = 'native'; view = 'languages'; render(); }); root.querySelector('#ads').addEventListener('change', event => { profile.preferences.adsEnabled = event.target.checked; saveProfile(profile); render(); }); }
+function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="child-name"]')?.addEventListener('click', () => { view = 'child-name'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = 'Uitloggen'; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
+function renderAuth() {
+  const t = copy(); const choosing = authMode === 'choice'; const login = authMode === 'login';
+  if (choosing) {
+    root.innerHTML = `<main class="screen account-screen"><section class="hero auth-choice"><div class="eyebrow">Lumio</div><h1>${t.welcome}</h1><p>${t.beginJourney}</p><div class="account-choices"><button class="choice-button guest-choice" data-action="guest"><span class="choice-icon">▶</span><span><strong>${t.playGuest}</strong><small>${t.beginNow}</small></span></button><button class="choice-button account-choice" data-action="signup"><span class="choice-icon">★</span><span><strong>${t.createAccount}</strong><small>${t.saveProgress}</small></span></button></div><button class="login-link" data-action="login">${t.haveAccount} <strong>${t.logIn}</strong></button></section></main>`;
+    root.querySelector('[data-action="signup"]').onclick = () => { authMode = 'signup'; render(); };
+    root.querySelector('[data-action="login"]').onclick = () => { authMode = 'login'; render(); };
+    root.querySelector('[data-action="guest"]').onclick = () => { cloudUser = null; profile.account = null; saveProfile(profile); view = 'child-name'; render(); }; return;
+  }
+  root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><button class="back-auth" data-action="back-auth" aria-label="${ui().back}">←</button><div class="eyebrow">Lumio</div><h1>${login ? t.welcomeBack : t.createAccount}</h1><p>${login ? t.continueJourney : t.saveHero}</p><form id="auth-form" class="auth-form"><label>${t.email}<input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>${t.password}<input id="auth-password" type="password" minlength="4" required placeholder="${profile.appLanguage === 'en' ? 'at least 4 characters' : 'minimaal 4 tekens'}"></label><button class="button primary">${login ? t.login : t.signup}</button></form><p class="auth-message" id="auth-message"></p><button class="login-link" data-action="auth-mode">${login ? t.createAccount : `${t.haveAccount} ${t.logIn}`}</button></section></main>`;
+  root.querySelector('#auth-form').onsubmit = async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? `${t.login}…` : `${t.signup}…`; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = t.checkEmail; return; } cloudUser = result.data.user; profile.account = { email, provider: 'supabase' }; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; render(); };
+  root.querySelector('[data-action="auth-mode"]').onclick = () => { authMode = login ? 'signup' : 'login'; render(); };
+  root.querySelector('[data-action="back-auth"]').onclick = () => { authMode = 'choice'; render(); };
+}
+
+function renderChildName() { const t = copy(); const existing = escape(profile.childName || ''); root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card"><div class="eyebrow">Lumio</div><div class="name-orb">✏️</div><h1>${profile.childName ? t.changeName : t.childName}</h1><p>${t.childNameHelp}</p><form id="child-name-form" class="auth-form"><label>${t.firstName}<input id="child-name" type="text" autocomplete="given-name" maxlength="24" required placeholder="${t.exampleName}" value="${existing}"></label><button class="button primary">${t.continue}</button></form></section></main>`; root.querySelector('#child-name-form').onsubmit = event => { event.preventDefault(); const name = root.querySelector('#child-name').value.trim().replace(/\s+/g, ' '); if (!name) return; const changed = profile.childName !== name; profile.childName = name; if (changed && pack()) updateLanguageProgress(profile, pack().metadata.id, { namePracticeCompleted: false }); saveProfile(profile); view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages'; render(); }; }
+
+function header() { const t = copy(); return `<header class="topbar"><button class="brand" data-action="languages" aria-label="Lumio">Lu<span>mio</span></button><div class="stat-row"><button class="chip child-account" data-action="child-name" aria-label="${t.changeChildName}">👤 <span>${escape(profile.childName || t.child)}</span></button><button class="chip" data-action="parent" aria-label="${t.parents}">👨‍👩‍👧</button><span class="chip">🔥 ${profile.rewards.streak || 0}</span><span class="chip">⭐ ${profile.rewards.stars || 0}</span></div></header>`; }
+
+function renderGames() { const language = pack(); const text = ui(); const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>${t.chooseGame}</h1><p>${t.gameIntro}</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled' : ''}><span class="game-choice-icon">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="languages"]').onclick = () => { view = 'languages'; render(); }; root.querySelectorAll('[data-game]').forEach(button => button.onclick = () => { profile.selectedGame = button.dataset.game; saveProfile(profile); view = button.dataset.game === 'letter-trail' ? 'letters' : 'home'; render(); }); bindHeader(); }
+
+function renderLetters() { const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.tracingCompleted || []; const lessonDone = drill => drill.forms.every(form => completed.includes(form.id)); const doneCount = language.writing.filter(lessonDone).length; const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← ${t.games}</button><div class="eyebrow">${t.letterTrail}</div><h1>${t.chooseLetter}</h1><p>${t.bothCases}</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} ${t.lettersPractised}</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="${t.practise} ${drill.letter} ${t.letters}"><strong>${drill.letter}<small>${drill.lowercase}</small></strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="games"]').onclick = () => { view = 'games'; render(); }; root.querySelectorAll('[data-trace-letter]').forEach(button => button.onclick = () => startTracing(button.dataset.traceLetter)); if (profile.childName) { root.querySelector('.letter-picker-grid').insertAdjacentHTML('afterend', `<button class="name-letter-choice ${progress.namePracticeCompleted ? 'done' : ''}" data-action="my-name"><span>✍️</span><span><strong>${t.myName}</strong><small>${progress.namePracticeCompleted ? t.readyAgain : `${t.practise} ${escape(profile.childName)}`}</small></span><b>${progress.namePracticeCompleted ? '✓' : '→'}</b></button>`); root.querySelector('[data-action="my-name"]').onclick = startNameTracing; } bindHeader(); }
+async function boot() { if (!profile.appLanguage) { view = 'app-language'; render(); return; } try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
+function renderHome() { const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.completed.length; const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="home-grid"><div class="welcome"><div class="eyebrow" style="color:#e9e5ff">${language.metadata.flag} ${language.metadata.nativeName}</div><h1>${ui().hello}</h1><p>${ui().dailyIntro}</p><button class="daily" data-action="daily">▶ ${ui().daily}</button></div><aside class="reward"><div class="eyebrow">${ui().growth}</div><div class="stars">${'⭐'.repeat(Math.min(3, Math.max(1, profile.rewards.stars || 1)))}</div><strong>${completed} / ${language.curriculum.length} ${ui().worlds}</strong><div class="progress"><span style="width:${completed / language.curriculum.length * 100}%"></span></div></aside></section><div class="level-heading"><button class="back" data-action="games">← ${t.games}</button><div><div class="eyebrow">${t.wordBuilders}</div><h2>${t.chooseLevel}</h2></div></div><section class="lesson-list" aria-label="${ui().worlds}">${language.curriculum.map((lesson, index) => { const locked = index > completed; return `<button class="lesson" data-lesson="${index}" ${locked ? 'disabled' : ''}><span class="lesson-icon">${locked ? '🔒' : lesson.icon}</span><span><strong>${lesson.title}</strong><small>${lesson.skill === 'letter' ? ui().sounds : ui().building}</small></span><span class="lesson-progress">${progress.completed.includes(index) ? '✓' : `${Math.min(10, progress.activeLesson === index ? progress.wordIndex || 0 : 0)}/10`}</span></button>`; }).join('')}</section></main>${adBanner()}`; root.querySelector('[data-action="daily"]').onclick = () => startLesson(progress.activeLesson || 0); root.querySelector('[data-action="games"]').onclick = () => { view = 'games'; render(); }; root.querySelectorAll('[data-lesson]').forEach(button => button.onclick = () => startLesson(Number(button.dataset.lesson))); bindHeader(); }
+
+function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="child-name"]')?.addEventListener('click', () => { view = 'child-name'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = copy().signOut; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
+
+function render() { if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+
+function renderAppLanguage() { const choices = languageCatalog.filter(language => ['nl', 'en', 'fa'].includes(language.id)); const returningToParent = languageTarget === 'app'; root.innerHTML = `<main class="screen account-screen"><section class="hero app-language-card">${returningToParent ? `<button class="back" data-action="back-parent">← ${copy().parents}</button>` : ''}<div class="eyebrow">Lumio</div><h1>Choose app language<br><small>Kies app-taal<br>زبان برنامه را انتخاب کن</small></h1><p>Language for buttons and instructions.</p><div class="account-choices">${choices.map(language => `<button class="choice-button account-choice" data-app-language="${language.id}">${languageFlags(language)}<span><strong>${language.nativeName}</strong></span></button>`).join('')}</div></section></main>`; root.querySelector('[data-action="back-parent"]')?.addEventListener('click', () => { languageTarget = 'learning'; view = 'parent'; render(); }); root.querySelectorAll('[data-app-language]').forEach(button => button.addEventListener('click', () => { profile.appLanguage = button.dataset.appLanguage; saveProfile(profile); view = returningToParent ? 'parent' : 'auth'; languageTarget = 'learning'; render(); })); }
+
+function renderParent() { const language = pack(); const progress = languageProgress(profile, language.metadata.id); const appLanguage = languageCatalog.find(item => item.id === profile.appLanguage); const t = copy(); const labels = profile.appLanguage === 'en' ? { app:'App language', practice:'Practice language' } : { app:'App-taal', practice:'Oefentaal' }; root.innerHTML = `${header()}<main class="screen parent"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">${ui().parents}</div><h1>${ui().parentTitle}</h1><div class="parent-grid"><div class="metric"><strong>${progress.completed.length}</strong><small>${ui().worldsDone}</small></div><div class="metric"><strong>${profile.rewards.streak}</strong><small>${ui().days}</small></div><div class="metric"><strong>${profile.rewards.stars}</strong><small>${ui().stars}</small></div></div><div class="switch-row"><span>${labels.app}</span><button class="speaker" data-action="app-language">${languageFlags(appLanguage)} ${appLanguage.nativeName}</button></div><div class="switch-row"><span>${labels.practice}</span><button class="speaker" data-action="practice-language">${languageFlags(language.metadata)} ${language.metadata.nativeName}</button></div><div class="switch-row"><span>${ui().adSetting}</span><label><input id="ads" type="checkbox" ${profile.preferences.adsEnabled ? 'checked' : ''}> ${ui().on}</label></div><p class="intro">${ui().savedNote}</p></main>${adBanner()}`; bindHeader(); root.querySelector('[data-action="home"]').onclick = () => { view = 'home'; render(); }; root.querySelector('[data-action="app-language"]').onclick = () => { languageTarget = 'app'; view = 'app-language'; render(); }; root.querySelector('[data-action="practice-language"]').onclick = () => { languageTarget = 'learning'; view = 'languages'; render(); }; root.querySelector('#ads').onchange = event => { profile.preferences.adsEnabled = event.target.checked; saveProfile(profile); render(); }; }
+
+root.addEventListener('click', event => { const languageButton = event.target.closest('[data-app-language]'); if (languageButton) document.documentElement.dir = languageButton.dataset.appLanguage === 'fa' ? 'rtl' : 'ltr'; if (!event.target.closest('.parent [data-action="home"]')) return; event.preventDefault(); event.stopImmediatePropagation(); view = 'games'; render(); }, true);
+
+boot();
+
+</script>
+</body>
+</html>
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#6759db">
+  <meta name="description" content="Lumio — spelenderwijs lezen en schrijven leren.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+:root{--ink:#28375b;--muted:#687899;--violet:#6759db;--violet-dark:#493bb8;--purple:#efeaff;--mint:#b8efd9;--yellow:#ffe38a;--coral:#ffb59d;--paper:#fffefa;--line:#dfe5f4;--danger:#c45b62}*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#eaf6ff,#fbf2ff 60%,#fff8df);color:var(--ink);font-family:ui-rounded,"Nunito",system-ui,sans-serif;min-height:100dvh}button{font:inherit}button:focus-visible{outline:4px solid #ffbd45;outline-offset:3px}.app-shell{max-width:760px;min-height:100dvh;margin:auto;padding:18px 18px 88px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{font-size:1.7rem;font-weight:900;color:var(--violet);letter-spacing:-.04em}.brand span{color:#f58b63}.stat-row{display:flex;gap:8px;align-items:center}.chip{border:0;background:#fff;padding:8px 11px;border-radius:999px;box-shadow:0 4px 14px #516f9f18;color:var(--ink);font-weight:900}.screen{animation:rise .35s ease both}.hero,.panel{background:var(--paper);border-radius:30px;box-shadow:0 16px 50px #405b8518}.hero{padding:28px}.eyebrow{color:var(--violet);font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.hero h1{font-size:clamp(2rem,7vw,3.1rem);line-height:1.02;letter-spacing:-.055em;margin:8px 0 12px}.hero p{color:var(--muted);font-weight:700;line-height:1.45;margin:0}.language-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:20px}.language{position:relative;min-height:112px;border:3px solid transparent;border-radius:23px;background:#fff;color:var(--ink);padding:16px;text-align:left;box-shadow:0 7px 18px #5773a111;cursor:pointer;transition:.2s}.language:not(:disabled):hover{transform:translateY(-3px);border-color:#c5bfff}.language:disabled{opacity:.64;cursor:not-allowed}.language .flag{font-size:1.65rem}.language .icon{float:right;font-size:1.7rem}.language strong,.language small{display:block}.language strong{font-size:1.05rem;margin-top:10px}.language small{color:var(--muted);font-weight:700}.badge{position:absolute;right:10px;bottom:10px;background:var(--purple);border-radius:999px;padding:4px 7px;color:var(--violet);font-size:.67rem;font-weight:900}.speaker{border:0;border-radius:12px;background:var(--purple);color:var(--violet);padding:8px 10px;font-weight:900;cursor:pointer}.home-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:15px;margin-top:16px}.welcome{padding:25px;background:linear-gradient(135deg,#6759db,#8b7ff1);color:#fff;border-radius:27px;min-height:210px}.welcome h1{margin:8px 0;font-size:2.15rem;letter-spacing:-.05em}.welcome p{font-weight:700;opacity:.9}.daily{border:0;border-radius:18px;background:var(--yellow);color:#634a00;font-weight:900;padding:13px 16px;box-shadow:0 4px 0 #e7bc38;cursor:pointer}.reward{padding:23px;background:var(--paper);border-radius:27px;box-shadow:0 12px 35px #405b8518}.reward .stars{font-size:2.2rem;margin:7px 0}.lesson-list{display:grid;gap:12px;margin-top:16px}.lesson{display:flex;align-items:center;width:100%;gap:15px;border:0;border-radius:22px;padding:14px;background:var(--paper);color:var(--ink);text-align:left;box-shadow:0 8px 25px #405b8512;cursor:pointer}.lesson:hover{transform:translateY(-2px)}.lesson-icon{width:55px;height:55px;display:grid;place-items:center;background:var(--purple);border-radius:18px;font-size:1.65rem}.lesson strong,.lesson small{display:block}.lesson strong{font-size:1.05rem}.lesson small{margin-top:3px;color:var(--muted);font-weight:700}.lesson .lesson-progress{margin-left:auto;color:var(--violet);font-weight:900}.progress{height:11px;background:#e6eafb;border-radius:99px;overflow:hidden}.progress>span{display:block;height:100%;background:linear-gradient(90deg,#7c70e6,#64cead);border-radius:inherit}.game{padding:21px}.game-head{display:flex;align-items:center;gap:12px;margin-bottom:15px}.back{border:0;background:var(--purple);color:var(--violet);font-weight:900;border-radius:13px;padding:10px 13px;cursor:pointer}.game-head .progress{flex:1}.count{font-weight:900;white-space:nowrap}.game-card{text-align:center;padding:16px 4px}.picture{height:185px;display:grid;place-items:center;font-size:6.7rem;background:linear-gradient(145deg,#eef6ff,#f5efff);border-radius:28px;margin:14px 0}.instruction{font-size:1.4rem;font-weight:900;margin:5px 0}.answer{min-height:72px;display:flex;align-items:center;justify-content:center;gap:7px;margin:14px auto;border:3px dashed #cbd5ed;border-radius:18px;color:var(--violet);font-size:2rem;font-weight:900;letter-spacing:.1em}.letters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}.letter{min-width:59px;height:63px;border:3px solid #dce4f5;border-radius:17px;background:#fff;color:var(--ink);box-shadow:0 4px 0 #cbd7ec;font-size:1.75rem;font-weight:900;cursor:pointer}.letter.selected{background:var(--violet);color:#fff;border-color:var(--violet);box-shadow:0 4px 0 var(--violet-dark)}.letter.hinted{border-color:#e6af28;background:#fff4cf}.controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}.button{border:0;border-radius:15px;padding:13px 16px;font-weight:900;cursor:pointer}.button.primary{background:var(--violet);color:white;box-shadow:0 4px 0 var(--violet-dark)}.button.soft{background:var(--yellow);color:#5e4908;box-shadow:0 4px 0 #e2b938}.button:disabled{opacity:.5;box-shadow:none;cursor:not-allowed}.feedback{min-height:30px;font-weight:900;margin:14px 0}.feedback.success{color:#168064}.feedback.error{color:var(--danger)}.parent{padding:25px}.parent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.metric{padding:16px;background:#f5f3ff;border-radius:18px}.metric strong{display:block;font-size:1.55rem;color:var(--violet)}.metric small{color:var(--muted);font-weight:800}.switch-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--line);font-weight:800}.ad-banner{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);min-height:48px;display:flex;align-items:center;justify-content:center;background:#ffffffeb;border-top:1px solid #e2e5ee;color:#79839b;font-size:.72rem;font-weight:800}.ad-banner span{margin-left:7px;color:#a7afc0}.celebrate{animation:pop .55s ease both}@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes pop{50%{transform:scale(1.04)}100%{transform:scale(1)}}@media(max-width:540px){.app-shell{padding:13px 13px 84px}.hero,.game,.parent{padding:20px}.home-grid{grid-template-columns:1fr}.welcome{min-height:auto}.language-grid{gap:10px}.language{min-height:103px}.picture{height:155px}.parent-grid{grid-template-columns:1fr}.lesson{padding:12px}.topbar{margin-bottom:14px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.language-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.language-card{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;min-width:0;align-items:stretch}.language-select{position:relative;display:flex;align-items:center;gap:11px;min-width:0;min-height:76px;border:3px solid transparent;border-radius:20px;background:#fff;color:var(--ink);padding:13px 15px;text-align:left;box-shadow:0 7px 18px #5773a111;cursor:pointer;transition:.2s}.language-select:not(:disabled):hover{transform:translateY(-3px);border-color:#c5bfff}.language-select:disabled{opacity:.64;cursor:not-allowed}.language-select strong{min-width:0;font-size:1.05rem;overflow-wrap:anywhere}.language-card .speaker{width:52px;min-width:0;border-radius:18px}.language-select .badge{position:absolute;right:10px;bottom:8px}.flag-set{display:inline-flex;flex:none;gap:5px;align-items:center}.country-flag{display:inline-block;width:27px;height:19px;flex:none;border-radius:3px;box-shadow:0 1px 3px #24375b38;background:#ddd}.flag-nl{background:linear-gradient(#ae1c28 0 33%,#fff 33% 66%,#21468b 66%)}.flag-be{background:linear-gradient(90deg,#1b1b1b 0 33%,#fdda24 33% 66%,#ef3340 66%)}.flag-gb{background:linear-gradient(#fff 0 40%,#cf142b 40% 60%,#fff 60%);background-color:#012169}.flag-de{background:linear-gradient(#202020 0 33%,#dd202c 33% 66%,#ffce00 66%)}.flag-fr{background:linear-gradient(90deg,#002395 0 33%,#fff 33% 66%,#ed2939 66%)}.flag-es{background:linear-gradient(#aa151b 0 25%,#f1bf00 25% 75%,#aa151b 75%)}.flag-ir{background:linear-gradient(#239f40 0 33%,#fff 33% 66%,#da0000 66%)}.flag-sa{background:#006c35}@media(max-width:540px){.language-grid{grid-template-columns:1fr;gap:12px}.language-card{grid-template-columns:minmax(0,1fr) 54px}.language-select{min-height:80px}.language-card .speaker{width:54px}}
+.account-screen{display:grid;place-items:start center;min-height:calc(100dvh - 105px);padding-top:20px}.account-screen .hero{width:min(100%,470px)}.auth-choice{padding:30px}.auth-choice h1{margin-top:7px}.account-choices{display:grid;gap:14px;margin:27px 0 19px}.choice-button{display:flex;align-items:center;gap:15px;width:100%;min-height:88px;border:0;border-radius:22px;padding:16px 18px;text-align:left;cursor:pointer;transition:transform .2s,box-shadow .2s}.choice-button:hover{transform:translateY(-3px)}.choice-button:active{transform:translateY(1px);box-shadow:none}.choice-button span:not(.choice-icon){display:grid;gap:3px}.choice-button strong{font-size:1.15rem}.choice-button small{font-weight:750}.choice-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:15px;font-size:1.25rem;font-weight:900}.guest-choice{background:var(--yellow);color:#5e4908;box-shadow:0 5px 0 #e2b938}.guest-choice .choice-icon{background:#fff2b8}.account-choice{background:var(--purple);color:var(--violet-dark);box-shadow:0 5px 0 #c8bef7}.account-choice .choice-icon{background:#fff;color:var(--violet)}.login-link,.link-button{display:block;width:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:750;text-align:center;cursor:pointer;padding:10px 5px}.login-link strong{color:var(--violet);text-decoration:underline;text-underline-offset:3px}.auth-form-card{position:relative;padding:30px}.back-auth{position:absolute;top:18px;right:18px;width:40px;height:40px;border:0;border-radius:50%;background:var(--purple);color:var(--violet);font-size:1.45rem;font-weight:900;cursor:pointer}.auth-form{display:grid;gap:12px;margin-top:22px}.auth-form label{display:grid;gap:6px;color:var(--ink);font-weight:850}.auth-form input{width:100%;border:2px solid var(--line);border-radius:13px;background:#fff;padding:12px 13px;color:var(--ink);font:inherit}.auth-form input:focus{border-color:var(--violet);outline:3px solid #ddd8ff}.auth-form .button{justify-self:start;margin-top:4px}.auth-message{min-height:24px;margin:13px 0 0;color:var(--danger);font-weight:800}@media(max-width:540px){.account-screen{min-height:calc(100dvh - 97px);padding-top:7px}.auth-choice,.auth-form-card{padding:25px 22px}.choice-button{min-height:82px;padding:14px}.choice-button strong{font-size:1.08rem}}
+
+.game-picker{position:relative}.game-picker-back{margin-bottom:18px}.game-grid{display:grid;gap:14px;margin-top:24px}.game-choice{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:15px;width:100%;border:0;border-radius:22px;padding:16px;background:#fff;color:var(--ink);box-shadow:0 9px 24px #405b8514;text-align:left;cursor:pointer;transition:transform .2s,box-shadow .2s}.game-choice:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 14px 28px #405b8520}.game-choice:disabled{opacity:.72;cursor:not-allowed}.game-choice-icon{display:grid;place-items:center;width:64px;height:64px;border-radius:19px;background:var(--purple);font-size:2rem}.game-choice strong,.game-choice small{display:block}.game-choice strong{font-size:1.14rem}.game-choice small{margin-top:4px;color:var(--muted);font-weight:700;line-height:1.3}.game-choice-arrow{font-size:1.7rem;color:var(--violet);font-weight:900}.game-choice em{background:var(--purple);border-radius:999px;padding:5px 8px;color:var(--violet);font-size:.72rem;font-style:normal;font-weight:900}.level-heading{display:flex;align-items:center;gap:13px;margin:24px 0 13px}.level-heading h2{margin:2px 0 0;font-size:1.45rem;letter-spacing:-.04em}@media(max-width:540px){.game-choice{grid-template-columns:54px minmax(0,1fr);gap:12px;padding:14px}.game-choice-icon{width:54px;height:54px;font-size:1.7rem}.game-choice-arrow,.game-choice em{grid-column:2}.game-choice small{font-size:.88rem}.level-heading{align-items:flex-start}}
+.tracing-screen{padding:21px}.tracing-card{padding:4px 0;text-align:center}.tracing-card h1{margin:7px 0;font-size:clamp(1.9rem,7vw,2.65rem);letter-spacing:-.05em}.tracing-card>p:not(.feedback){max-width:440px;margin:0 auto;color:var(--muted);font-weight:750;line-height:1.45}.trace-stage{width:min(100%,430px);margin:18px auto;background:linear-gradient(145deg,#f4f7ff,#fdfaff);border-radius:28px;padding:10px;box-shadow:inset 0 0 0 2px #e8eaf6}.trace-stage svg{display:block;width:100%;height:auto;touch-action:none;user-select:none}.trace-shadow{fill:none;stroke:#d7dbe7;stroke-width:47;stroke-linecap:round;stroke-linejoin:round}.trace-progress{fill:none;stroke:#7669e5;stroke-width:16;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .08s linear}.trace-marker{stroke:#fff;stroke-width:5}.trace-marker.start{fill:#6759db}.trace-marker.end{fill:#b8efd9}.trace-dot{fill:#ffbd45;stroke:#fff;stroke-width:7;filter:drop-shadow(0 4px 3px #44398d55);cursor:grab}.trace-dot:active{cursor:grabbing}.tracing-card .feedback{margin:5px 0 14px}@media(max-width:540px){.tracing-screen{padding:16px}.trace-stage{border-radius:23px;padding:6px}.trace-shadow{stroke-width:43}.trace-progress{stroke-width:14}}
+
+.letter-picker{position:relative}.trace-total{margin:20px 0 18px;font-weight:850;color:var(--ink)}.trace-total .progress{margin-top:8px}.letter-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.letter-choice{position:relative;display:grid;place-items:center;min-height:68px;border:0;border-radius:18px;background:#f3f0ff;color:var(--violet-dark);box-shadow:0 4px 0 #d8d1fb;font-size:1.7rem;font-weight:900;cursor:pointer;transition:transform .18s,background .18s}.letter-choice:hover{transform:translateY(-3px);background:#e6e0ff}.letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 4px 0 #9edfc8}.letter-choice>span{position:absolute;right:7px;bottom:5px;font-size:.78rem}.name-letter-choice{display:flex;align-items:center;gap:13px;width:100%;margin-top:18px;border:0;border-radius:21px;padding:15px 17px;background:#fff0ca;color:#644b00;box-shadow:0 5px 0 #e6bc44;text-align:left;cursor:pointer}.name-letter-choice>span:first-child{font-size:2rem}.name-letter-choice>span:nth-child(2){display:grid;gap:3px;flex:1}.name-letter-choice strong{font-size:1.08rem}.name-letter-choice small{font-weight:750}.name-letter-choice b{font-size:1.45rem}.name-letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 5px 0 #9edfc8}@media(max-width:540px){.letter-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.letter-choice{min-height:62px;font-size:1.55rem}}
+
+.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}.alphabet-next{display:none!important}.child-name-card{text-align:center}.child-name-card .auth-form{text-align:left}.name-orb{display:grid;place-items:center;width:68px;height:68px;margin:6px auto 16px;border-radius:24px;background:var(--yellow);font-size:2rem;box-shadow:0 5px 0 #e5b93a}.name-stage{overflow-x:auto;text-align:left}.name-stage .name-svg{display:block;max-width:none;margin:0 auto}.name-stage::-webkit-scrollbar{height:8px}.name-stage::-webkit-scrollbar-thumb{background:#c7c3eb;border-radius:999px}.name-progress{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:16px auto 4px}.name-progress-letter{display:grid;place-items:center;min-width:38px;height:42px;padding:0 8px;border-radius:13px;background:#ece9f9;color:#7d779f;font-size:1.35rem;font-weight:900}.name-progress-letter.active{background:#7569e5;color:#fff;box-shadow:0 4px 0 #5146b7}.name-progress-letter.done{background:#d9f5e8;color:#148160;box-shadow:0 4px 0 #9adbc3}.child-account{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:540px){.child-account span{display:none}}
+
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Lumio</title>
+</head>
+<body>
+  <div id="app" class="app-shell" aria-live="polite"></div>
+  <script>
+const dutchWords = [
+  ['aap', '🐒'], ['bal', '⚽'], ['bed', '🛏️'], ['bij', '🐝'], ['bok', '🐐'], ['bus', '🚌'], ['dak', '🏠'], ['das', '🦡'], ['ei', '🥚'], ['kat', '🐱'],
+  ['kip', '🐔'], ['koe', '🐄'], ['lam', '🐑'], ['map', '🗺️'], ['mes', '🔪'], ['mus', '🐦'], ['pan', '🍳'], ['pen', '🖊️'], ['pet', '🧢'], ['pop', '🪆'],
+  ['rat', '🐀'], ['rek', '🗄️'], ['sok', '🧦'], ['tas', '👜'], ['vis', '🐟'], ['voet', '🦶'], ['vork', '🍴'], ['wiel', '🛞'], ['wind', '💨'], ['zon', '☀️'],
+  ['boom', '🌳'], ['doos', '📦'], ['eend', '🦆'], ['fles', '🍼'], ['geit', '🐐'], ['gras', '🌱'], ['hand', '✋'], ['huis', '🏠'], ['kaas', '🧀'], ['klok', '🕐'],
+  ['maan', '🌙'], ['noot', '🥜'], ['paard', '🐴'], ['roos', '🌹'], ['schaap', '🐑'], ['spel', '🎲'], ['ster', '⭐'], ['stoel', '🪑'], ['tent', '⛺'], ['uil', '🦉'],
+  ['vacht', '🐕'], ['vlag', '🚩'], ['wolk', '☁️'], ['worm', '🪱'], ['zaag', '🪚'], ['zeep', '🧼'], ['bloem', '🌸'], ['brood', '🍞'], ['kikker', '🐸'], ['regen', '🌧️']
+];
+
+function words(start, end) { return dutchWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
+
+const englishWords = [
+  ['cat','🐱'],['dog','🐶'],['sun','☀️'],['hat','🎩'],['pen','🖊️'],['bed','🛏️'],['bus','🚌'],['cup','🥤'],['fish','🐟'],['frog','🐸'],
+  ['tree','🌳'],['moon','🌙'],['star','⭐'],['book','📘'],['ball','⚽'],['cake','🍰'],['milk','🥛'],['hand','✋'],['duck','🦆'],['boat','⛵'],
+  ['apple','🍎'],['banana','🍌'],['rabbit','🐰'],['tiger','🐯'],['house','🏠'],['chair','🪑'],['spoon','🥄'],['cloud','☁️'],['green','🟢'],['train','🚂'],
+  ['water','💧'],['flower','🌸'],['yellow','🟡'],['purple','🟣'],['garden','🌻'],['little','🐞'],['cookie','🍪'],['monkey','🐒'],['pencil','✏️'],['window','🪟'],
+  ['school','🏫'],['friend','🧑‍🤝‍🧑'],['orange','🍊'],['winter','❄️'],['summer','🏖️'],['rocket','🚀'],['butterfly','🦋'],['rainbow','🌈'],['sandwich','🥪'],['elephant','🐘'],
+  ['dinosaur','🦕'],['birthday','🎂'],['playground','🛝'],['computer','💻'],['umbrella','☂️'],['adventure','🗺️'],['treasure','💎'],['princess','👑'],['unicorn','🦄'],['wonderful','✨']
+];
+function englishLessonWords(start, end) { return englishWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
+
+const persianWords = [
+  ['آب', '💧'], ['بابا', '👨'], ['مامان', '👩'], ['سیب', '🍎'], ['نان', '🍞'], ['گل', '🌷'], ['ماه', '🌙'], ['موش', '🐭'], ['در', '🚪'], ['کتاب', '📘'],
+  ['مداد', '✏️'], ['مدرسه', '🏫'], ['خانه', '🏠'], ['دست', '✋'], ['پا', '🦶'], ['گربه', '🐱'], ['سگ', '🐶'], ['ببر', '🐯'], ['باران', '🌧️'], ['ابر', '☁️'],
+  ['خورشید', '☀️'], ['ستاره', '⭐'], ['دوست', '🧑‍🤝‍🧑'], ['باغ', '🌳'], ['پرنده', '🐦'], ['ماهی', '🐟'], ['درخت', '🌲'], ['پنجره', '🪟'], ['کفش', '👟'], ['لباس', '👕'],
+  ['اتوبوس', '🚌'], ['قطار', '🚆'], ['دوچرخه', '🚲'], ['بازی', '🎲'], ['توپ', '⚽'], ['رنگ', '🎨'], ['موسیقی', '🎵'], ['عروسک', '🧸'], ['پروانه', '🦋'], ['رنگین‌کمان', '🌈'],
+  ['هواپیما', '✈️'], ['بستنی', '🍦'], ['شیر', '🥛'], ['پرتقال', '🍊'], ['موز', '🍌'], ['کیک', '🍰'], ['دریا', '🌊'], ['کوه', '⛰️'], ['زمستان', '❄️'], ['تابستان', '☀️'],
+  ['ماجراجویی', '🗺️'], ['کامپیوتر', '💻'], ['تلفن', '☎️'], ['هدیه', '🎁'], ['تولد', '🎂'], ['دیناسور', '🦕'], ['ربات', '🤖'], ['شاهزاده', '👑'], ['گنج', '💎'], ['شاد', '✨']
+];
+function persianLessonWords(start, end) { return persianWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
+
+const languageCatalog = [
+  { id: 'nl', name: 'Nederlands', nativeName: 'Nederlands', flag: '🇳🇱 🇧🇪', flagCodes: ['nl', 'be'], locale: 'nl-NL', status: 'ready' },
+  { id: 'en', name: 'Engels', nativeName: 'English', flag: '🇬🇧', flagCodes: ['gb'], icon: '🦊', locale: 'en-GB', status: 'ready' },
+  { id: 'de', name: 'Duits', nativeName: 'Deutsch', flag: '🇩🇪', flagCodes: ['de'], icon: '🐻', locale: 'de-DE', status: 'comingSoon' },
+  { id: 'fr', name: 'Frans', nativeName: 'Français', flag: '🇫🇷', flagCodes: ['fr'], icon: '🦋', locale: 'fr-FR', status: 'comingSoon' },
+  { id: 'es', name: 'Spaans', nativeName: 'Español', flag: '🇪🇸', flagCodes: ['es'], icon: '🌞', locale: 'es-ES', status: 'comingSoon' },
+  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', flagCodes: ['ir'], icon: '🪷', locale: 'fa-IR', status: 'ready' },
+  { id: 'ar', name: 'Arabisch', nativeName: 'العربية', flag: '🇸🇦', flagCodes: ['sa'], icon: '🌙', locale: 'ar', status: 'comingSoon' }
+];
+
+const languagePackages = {
+  nl: {
+    metadata: languageCatalog[0],
+    alphabet: ['a', 'e', 'i', 'o', 'u', 'm', 's', 't', 'p', 'n', 'k', 'l', 'b', 'd', 'v', 'r', 'g', 'h', 'w', 'z'],
+    phonics: { a: 'aa', e: 'uh', i: 'ie', o: 'oo', u: 'uu', m: 'mmm', s: 'sss', t: 'tuh', p: 'puh', n: 'nnn', k: 'kuh', l: 'lll' },
+    writingRules: { direction: 'ltr', joining: false, case: 'lowercase-first' },
+    ui: {
+      begin: 'Start', listen: 'Luister', hint: 'Hint', check: '👀 Kijk na', next: 'Volgende', back: 'Terug', great: 'Goed gedaan!', tryAgain: 'Probeer opnieuw', chooseLanguage: 'Kies een taal',
+      chooseWorld: 'Kies jouw leerwereld', languageIntro: 'Druk op de luidspreker om een taal te horen.', comingSoon: 'Binnenkort',
+      hello: 'Hallo, leerheld!', dailyIntro: 'Vandaag oefenen we met luisteren, klanken en woorden.', daily: 'Dagelijkse oefening', growth: 'Jouw groei', worlds: 'werelden',
+      sounds: 'Letters en klanken', building: 'Luisteren en woorden bouwen', locked: 'Nog even oefenen', build: 'Bouw het woord', find: 'Zoek de letters van dit woord',
+      gameIntro: 'Luister goed en kies de letters.', listenPrompt: 'Luister:', restart: 'Even opnieuw proberen in deze wereld.', parents: 'Voor ouders', parentTitle: 'Rustige groei, stap voor stap',
+      worldsDone: 'werelden af', days: 'dagen op rij', stars: 'sterren verdiend', homeLanguage: 'Thuistaal', adSetting: 'Leeradvertentie tonen', on: 'Aan', savedNote: 'Voortgang wordt veilig op dit apparaat bewaard.', ad: 'Advertentie', adMessage: 'Lumio blijft gratis voor gezinnen'
+    },
+    games: [
+      { id: 'word-builder', title: 'Woordbouwers', description: 'Luister, kies letters en bouw woorden.', icon: '🧩', status: 'ready' },
+      { id: 'letter-trail', title: 'Letterspoor', description: 'Luister naar een klank en volg het letterspoor.', icon: '✍️', status: 'ready' }
+    ],
+    writing: [
+      ['A', 'aa'], ['B', 'buh'], ['C', 'suh'], ['D', 'duh'], ['E', 'ee'], ['F', 'fuh'], ['G', 'guh'], ['H', 'huh'], ['I', 'ie'], ['J', 'yuh'], ['K', 'kuh'], ['L', 'luh'], ['M', 'muh'],
+      ['N', 'nuh'], ['O', 'oo'], ['P', 'puh'], ['Q', 'kuu'], ['R', 'ruh'], ['S', 'ssss'], ['T', 'tuh'], ['U', 'uu'], ['V', 'vuh'], ['W', 'wuh'], ['X', 'iks'], ['Y', 'ie'], ['Z', 'zuh']
+    ].map(([letter, phoneme]) => ({ id: `letter-${letter.toLowerCase()}`, letter, lowercase: letter.toLowerCase(), phoneme, forms: [
+      { id: `capital-${letter.toLowerCase()}`, label: 'hoofdletter', pathId: `capital-${letter.toLowerCase()}` },
+      { id: `lowercase-${letter.toLowerCase()}`, label: 'kleine letter', pathId: `lowercase-${letter.toLowerCase()}` }
+    ], title: `De letter ${letter}` })),
+    curriculum: [
+      { id: 'sounds-1', title: 'Eerste klanken', icon: '🔤', skill: 'letter', words: words(0, 10) },
+      { id: 'sounds-2', title: 'Klanken mengen', icon: '🎵', skill: 'build', words: words(10, 20) },
+      { id: 'words-1', title: 'Korte woorden', icon: '🧩', skill: 'build', words: words(20, 30) },
+      { id: 'words-2', title: 'Meer woorden', icon: '🚲', skill: 'build', words: words(30, 40) },
+      { id: 'words-3', title: 'Lange klanken', icon: '🌈', skill: 'build', words: words(40, 50) },
+      { id: 'words-4', title: 'Leesheld', icon: '🏆', skill: 'build', words: words(50, 60) }
+    ]
+  },
+  en: {
+    metadata: languageCatalog[1],
+    alphabet: ['a','e','i','o','u','m','s','t','p','n','k','l','b','d','v','r','g','h','w','z'],
+    phonics: { a: 'a', e: 'e', i: 'i', o: 'o', u: 'u', m: 'mmm', s: 'sss', t: 'tuh', p: 'puh', n: 'nnn', k: 'kuh', l: 'lll' },
+    writingRules: { direction: 'ltr', joining: false, case: 'uppercase-lowercase' },
+    ui: {
+      begin: 'Start', listen: 'Listen', hint: 'Hint', check: '👀 Check', next: 'Next', back: 'Back', great: 'Great job!', tryAgain: 'Try again', chooseLanguage: 'Choose a language',
+      chooseWorld: 'Choose your learning world', languageIntro: 'Press the speaker to hear a language.', comingSoon: 'Coming soon',
+      hello: 'Hello, learning hero!', dailyIntro: 'Today we practise listening, sounds and words.', daily: 'Daily practice', growth: 'Your growth', worlds: 'worlds',
+      sounds: 'Letters and sounds', building: 'Listening and building words', locked: 'Keep practising', build: 'Build the word', find: 'Find the letters in this word',
+      gameIntro: 'Listen carefully and choose the letters.', listenPrompt: 'Listen:', restart: 'Try this world again.', parents: 'For parents', parentTitle: 'Calm growth, one step at a time',
+      worldsDone: 'worlds finished', days: 'days in a row', stars: 'stars earned', homeLanguage: 'Home language', adSetting: 'Show learning advert', on: 'On', savedNote: 'Progress is safely saved on this device.', ad: 'Advertisement', adMessage: 'Lumio stays free for families'
+    },
+    games: [
+      { id: 'word-builder', title: 'Word Builders', description: 'Listen, choose letters and build words.', icon: '🧩', status: 'ready' },
+      { id: 'letter-trail', title: 'Letter Trail', description: 'Listen to a sound and follow the letter trail.', icon: '✍️', status: 'ready' }
+    ],
+    writing: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => ({ id: `letter-${letter.toLowerCase()}`, letter, lowercase: letter.toLowerCase(), phoneme: letter, forms: [
+      { id: `capital-${letter.toLowerCase()}`, label: 'uppercase letter', pathId: `capital-${letter.toLowerCase()}` },
+      { id: `lowercase-${letter.toLowerCase()}`, label: 'lowercase letter', pathId: `lowercase-${letter.toLowerCase()}` }
+    ], title: `The letter ${letter}` })),
+    curriculum: [
+      { id: 'sounds-1', title: 'First sounds', icon: '🔤', skill: 'letter', words: englishLessonWords(0, 10) },
+      { id: 'sounds-2', title: 'Blend sounds', icon: '🎵', skill: 'build', words: englishLessonWords(10, 20) },
+      { id: 'words-1', title: 'Short words', icon: '🧩', skill: 'build', words: englishLessonWords(20, 30) },
+      { id: 'words-2', title: 'More words', icon: '🚲', skill: 'build', words: englishLessonWords(30, 40) },
+      { id: 'words-3', title: 'Longer words', icon: '🌈', skill: 'build', words: englishLessonWords(40, 50) },
+      { id: 'words-4', title: 'Reading hero', icon: '🏆', skill: 'build', words: englishLessonWords(50, 60) }
+    ]
+  },
+  fa: {
+    metadata: languageCatalog[5],
+    alphabet: ['ا','آ','ب','پ','ت','ث','ج','چ','ح','خ','د','ذ','ر','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ه','ی'],
+    phonics: { ا:'ا', آ:'آ', ب:'ب', پ:'پ', ت:'ت', ج:'ج', چ:'چ', د:'د', ر:'ر', س:'س', ش:'ش', ک:'ک', گ:'گ', ل:'ل', م:'م', ن:'ن', و:'و', ه:'ه', ی:'ی' },
+    writingRules: { direction: 'rtl', joining: true, case: 'single-form' },
+    ui: {
+      begin: 'شروع', listen: 'گوش کن', hint: 'راهنما', check: 'بررسی', next: 'بعدی', back: 'بازگشت', great: 'آفرین!', tryAgain: 'دوباره تلاش کن', chooseLanguage: 'یک زبان انتخاب کن',
+      chooseWorld: 'دنیای یادگیری‌ات را انتخاب کن', languageIntro: 'برای شنیدن زبان، روی بلندگو بزن.', comingSoon: 'به‌زودی',
+      hello: 'سلام، قهرمان یادگیری!', dailyIntro: 'امروز با صداها و واژه‌ها تمرین می‌کنیم.', daily: 'تمرین روزانه', growth: 'رشد تو', worlds: 'مرحله',
+      sounds: 'حروف و صداها', building: 'گوش دادن و ساختن واژه', locked: 'کمی بیشتر تمرین کن', build: 'واژه را بساز', find: 'حروف این واژه را پیدا کن',
+      gameIntro: 'با دقت گوش کن و حروف را انتخاب کن.', listenPrompt: 'گوش کن:', restart: 'این مرحله را دوباره تمرین کن.', parents: 'برای والدین', parentTitle: 'رشد آرام، قدم به قدم',
+      worldsDone: 'مرحله تمام شده', days: 'روز پیاپی', stars: 'ستاره گرفته', homeLanguage: 'زبان خانه', adSetting: 'نمایش تبلیغ آموزشی', on: 'روشن', savedNote: 'پیشرفت با امنیت روی این دستگاه ذخیره می‌شود.', ad: 'تبلیغ', adMessage: 'لومیو برای خانواده‌ها رایگان می‌ماند'
+    },
+    games: [
+      { id: 'word-builder', title: 'واژه‌ساز', description: 'گوش کن، حروف را انتخاب کن و واژه بساز.', icon: '🧩', status: 'ready' },
+      { id: 'letter-trail', title: 'مسیر حرف', description: 'تمرین نوشتن حروف فارسی به‌زودی می‌آید.', icon: '✍️', status: 'comingSoon' }
+    ],
+    writing: [],
+    curriculum: [
+      { id: 'sounds-1', title: 'صداهای نخست', icon: '🔤', skill: 'letter', words: persianLessonWords(0, 10) },
+      { id: 'sounds-2', title: 'ترکیب صداها', icon: '🎵', skill: 'build', words: persianLessonWords(10, 20) },
+      { id: 'words-1', title: 'واژه‌های کوتاه', icon: '🧩', skill: 'build', words: persianLessonWords(20, 30) },
+      { id: 'words-2', title: 'واژه‌های بیشتر', icon: '🚲', skill: 'build', words: persianLessonWords(30, 40) },
+      { id: 'words-3', title: 'واژه‌های بلندتر', icon: '🌈', skill: 'build', words: persianLessonWords(40, 50) },
+      { id: 'words-4', title: 'قهرمان خواندن', icon: '🏆', skill: 'build', words: persianLessonWords(50, 60) }
+    ]
+  }
+};
+
+// Reusable tracing templates. A letter is made from one or more ordered
+// strokes, so languages can define different writing conventions later.
+const box = '0 0 360 500';
+const letter = strokes => ({ viewBox: box, strokes, startLabel: 'Begin', endLabel: 'Klaar' });
+
+const writingPaths = {
+  'capital-a': letter(['M 65 420 L 180 75 L 295 420', 'M 110 290 H 250']),
+  'capital-b': letter(['M 85 70 V 425', 'M 85 70 H 180 C 315 70 315 250 180 250 H 85', 'M 85 250 H 190 C 325 250 325 425 190 425 H 85']),
+  'capital-c': letter(['M 285 115 C 225 55 90 75 75 245 C 65 415 225 455 290 385']),
+  'capital-d': letter(['M 85 70 V 425', 'M 85 70 H 180 C 335 70 335 425 180 425 H 85']),
+  'capital-e': letter(['M 290 85 H 85 V 420 H 290', 'M 85 250 H 245']),
+  'capital-f': letter(['M 90 420 V 85 H 290', 'M 90 245 H 240']),
+  'capital-g': letter(['M 290 125 C 220 55 80 75 75 245 C 70 425 230 445 295 365 V 265 H 195']),
+  'capital-h': letter(['M 85 75 V 425', 'M 275 75 V 425', 'M 85 250 H 275']),
+  'capital-i': letter(['M 100 75 H 260', 'M 180 75 V 425', 'M 100 425 H 260']),
+  'capital-j': letter(['M 100 75 H 270', 'M 205 75 V 350 C 205 470 75 455 75 365']),
+  'capital-k': letter(['M 85 75 V 425', 'M 280 75 L 85 255 L 285 425']),
+  'capital-l': letter(['M 90 75 V 420 H 285']),
+  'capital-m': letter(['M 70 425 V 80 L 180 260 L 290 80 V 425']),
+  'capital-n': letter(['M 80 425 V 75 L 285 425 V 75']),
+  'capital-o': letter(['M 180 65 C 55 65 55 435 180 435 C 305 435 305 65 215 70']),
+  'capital-p': letter(['M 85 425 V 75 H 190 C 320 75 320 255 190 255 H 85']),
+  'capital-q': letter(['M 170 65 C 45 65 45 435 170 435 C 295 435 295 65 205 70', 'M 215 330 L 305 425']),
+  'capital-r': letter(['M 85 425 V 75 H 185 C 315 75 315 255 185 255 H 85', 'M 180 255 L 295 425']),
+  'capital-s': letter(['M 275 105 C 220 45 105 55 85 130 C 60 220 280 220 280 325 C 280 440 110 455 70 375']),
+  'capital-t': letter(['M 65 80 H 295', 'M 180 80 V 425']),
+  'capital-u': letter(['M 80 75 V 330 C 80 470 280 470 280 330 V 75']),
+  'capital-v': letter(['M 70 75 L 180 425 L 290 75']),
+  'capital-w': letter(['M 45 75 L 115 425 L 180 235 L 245 425 L 315 75']),
+  'capital-x': letter(['M 80 75 L 280 425', 'M 280 75 L 80 425']),
+  'capital-y': letter(['M 70 75 L 180 255 L 290 75', 'M 180 255 V 425']),
+  'capital-z': letter(['M 75 80 H 285 L 75 425 H 285'])
+};
+
+// Lowercase paths are deliberately separate from capital letters.  They use
+// the same ordered-stroke format, so future refinements never change lessons.
+Object.assign(writingPaths, {
+  'lowercase-a': letter(['M 245 245 C 190 180 95 215 95 325 C 95 435 220 445 245 360 V 220', 'M 245 245 V 420']),
+  'lowercase-b': letter(['M 95 70 V 420', 'M 95 265 C 180 175 285 235 285 330 C 285 430 175 450 95 370']),
+  'lowercase-c': letter(['M 275 260 C 220 190 105 220 100 330 C 95 430 220 445 275 370']),
+  'lowercase-d': letter(['M 265 70 V 420', 'M 265 265 C 180 175 75 235 75 330 C 75 430 185 450 265 370']),
+  'lowercase-e': letter(['M 90 330 H 275 C 275 220 95 210 90 330 C 90 445 230 440 280 375']),
+  'lowercase-f': letter(['M 235 75 C 140 55 135 175 135 420', 'M 75 245 H 245']),
+  'lowercase-g': letter(['M 270 260 C 200 185 90 225 90 330 C 90 435 205 455 270 370 V 245', 'M 270 370 V 435 C 270 500 110 495 100 425']),
+  'lowercase-h': letter(['M 95 70 V 420', 'M 95 275 C 190 185 265 235 265 330 V 420']),
+  'lowercase-i': letter(['M 180 245 V 420', 'M 180 155 L 180 150']),
+  'lowercase-j': letter(['M 205 245 V 405 C 205 490 90 485 90 420', 'M 205 155 L 205 150']),
+  'lowercase-k': letter(['M 100 70 V 420', 'M 260 245 L 100 335 L 270 420']),
+  'lowercase-l': letter(['M 180 70 V 420']),
+  'lowercase-m': letter(['M 75 420 V 260 C 130 205 185 240 185 315 V 420', 'M 185 285 C 245 210 300 245 300 320 V 420']),
+  'lowercase-n': letter(['M 90 420 V 250', 'M 90 280 C 175 195 270 240 270 335 V 420']),
+  'lowercase-o': letter(['M 180 215 C 65 215 65 440 180 440 C 295 440 295 215 180 215']),
+  'lowercase-p': letter(['M 95 250 V 480', 'M 95 275 C 175 190 285 240 285 335 C 285 435 180 455 95 375']),
+  'lowercase-q': letter(['M 265 250 V 480', 'M 265 275 C 185 190 75 240 75 335 C 75 435 180 455 265 375']),
+  'lowercase-r': letter(['M 100 420 V 250', 'M 100 285 C 145 225 215 230 250 260']),
+  'lowercase-s': letter(['M 265 255 C 210 205 95 215 95 285 C 95 350 275 315 270 390 C 265 465 125 445 80 390']),
+  'lowercase-t': letter(['M 180 120 V 375 C 180 445 245 435 270 400', 'M 105 245 H 245']),
+  'lowercase-u': letter(['M 90 245 V 350 C 90 455 250 450 250 350 V 245', 'M 250 245 V 420']),
+  'lowercase-v': letter(['M 85 245 L 180 420 L 275 245']),
+  'lowercase-w': letter(['M 55 245 L 110 420 L 180 290 L 245 420 L 305 245']),
+  'lowercase-x': letter(['M 95 250 L 270 420', 'M 270 250 L 95 420']),
+  'lowercase-y': letter(['M 85 245 L 180 420 L 275 245', 'M 275 245 L 165 485']),
+  'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
+});
+
+const KEY = 'lumio-profile-v1';
+
+const freshProfile = () => ({
+  account: null,
+  appLanguage: null,
+  childName: '',
+  selectedLanguage: null,
+  selectedGame: null,
+  homeLanguage: 'nl',
+  learningLanguage: 'nl',
+  progress: {},
+  rewards: { stars: 0, streak: 0, lastPractice: null },
+  preferences: { reducedMotion: false, adsEnabled: true }
+});
+
+function loadProfile() {
+  try {
+    const profile = { ...freshProfile(), ...JSON.parse(localStorage.getItem(KEY) || '{}') };
+    if (profile.selectedLanguage === 'nl-BE') profile.selectedLanguage = 'nl';
+    if (profile.learningLanguage === 'nl-BE') profile.learningLanguage = 'nl';
+    if (profile.homeLanguage === 'nl-BE') profile.homeLanguage = 'nl';
+    if (profile.progress?.['nl-BE']) {
+      profile.progress.nl = profile.progress.nl || profile.progress['nl-BE'];
+      delete profile.progress['nl-BE'];
+    }
+    return profile;
+  }
+  catch { return freshProfile(); }
+}
+
+function saveProfile(profile) { localStorage.setItem(KEY, JSON.stringify(profile)); }
+
+function languageProgress(profile, languageId) {
+  return profile.progress[languageId] || { completed: [], tracingCompleted: [], activeLesson: 0, mistakes: 0, dailyCount: 0 };
+}
+
+function updateLanguageProgress(profile, languageId, change) {
+  const current = languageProgress(profile, languageId);
+  profile.progress[languageId] = { ...current, ...change };
+  saveProfile(profile);
+}
+
+function rewardPractice(profile, stars = 1) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (profile.rewards.lastPractice !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    profile.rewards.streak = profile.rewards.lastPractice === yesterday ? profile.rewards.streak + 1 : 1;
+    profile.rewards.lastPractice = today;
+  }
+  profile.rewards.stars += stars;
+  saveProfile(profile);
+}
+
+const createClient = window.supabase?.createClient;
+
+const supabaseUrl = 'https://qmtzmlpgsvtietkqgwnb.supabase.co';
+const publishableKey = 'sb_publishable_5gaVlwMu1tNVDqYjp0Fy0Q_vekCjHjT';
+const lumioSupabase = createClient ? createClient(supabaseUrl, publishableKey) : null;
+
+const offlineError = () => new Error('Online aanmelden is tijdelijk niet beschikbaar. Je kunt als gast spelen.');
+
+async function currentSession() {
+  if (!lumioSupabase) return null;
+  const { data, error } = await lumioSupabase.auth.getSession();
+  if (error) throw error;
+  return data.session;
+}
+
+async function signUp(email, password) { return lumioSupabase ? lumioSupabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } }) : { data: { session: null, user: null }, error: offlineError() }; }
+async function signIn(email, password) { return lumioSupabase ? lumioSupabase.auth.signInWithPassword({ email, password }) : { data: { session: null, user: null }, error: offlineError() }; }
+async function signOut() { return lumioSupabase ? lumioSupabase.auth.signOut() : { error: null }; }
+
+async function readProgress(userId) {
+  if (!lumioSupabase) return [];
+  const { data, error } = await lumioSupabase.from('user_progress').select('level,word_index,completed,updated_at').eq('user_id', userId);
+  if (error) throw error;
+  return data || [];
+}
+
+async function writeProgress(userId, level, wordIndex, completed) {
+  if (!lumioSupabase) return;
+  const { error } = await lumioSupabase.from('user_progress').upsert({ user_id: userId, level, word_index: wordIndex, completed, updated_at: new Date().toISOString() }, { onConflict: 'user_id,level' });
+  if (error) throw error;
+}
+
+
+const root = document.querySelector('#app');
+let profile = loadProfile();
+document.documentElement.dir = profile.appLanguage === 'fa' ? 'rtl' : 'ltr';
+let view = profile.appLanguage ? (profile.account ? (profile.selectedLanguage ? 'home' : 'languages') : 'auth') : 'app-language';
+let session = null;
+let languageTarget = 'learning';
+let authMode = 'choice';
+let cloudUser = null;
+let tracingSession = null;
+const TRACE_LEVEL_OFFSET = 100;
 const RELEASE = '0.6.11';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
