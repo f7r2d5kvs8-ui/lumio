@@ -19,13 +19,23 @@ const englishWords = [
 ];
 function englishLessonWords(start, end) { return englishWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
 
+const persianWords = [
+  ['آب', '💧'], ['بابا', '👨'], ['مامان', '👩'], ['سیب', '🍎'], ['نان', '🍞'], ['گل', '🌷'], ['ماه', '🌙'], ['موش', '🐭'], ['در', '🚪'], ['کتاب', '📘'],
+  ['مداد', '✏️'], ['مدرسه', '🏫'], ['خانه', '🏠'], ['دست', '✋'], ['پا', '🦶'], ['گربه', '🐱'], ['سگ', '🐶'], ['ببر', '🐯'], ['باران', '🌧️'], ['ابر', '☁️'],
+  ['خورشید', '☀️'], ['ستاره', '⭐'], ['دوست', '🧑‍🤝‍🧑'], ['باغ', '🌳'], ['پرنده', '🐦'], ['ماهی', '🐟'], ['درخت', '🌲'], ['پنجره', '🪟'], ['کفش', '👟'], ['لباس', '👕'],
+  ['اتوبوس', '🚌'], ['قطار', '🚆'], ['دوچرخه', '🚲'], ['بازی', '🎲'], ['توپ', '⚽'], ['رنگ', '🎨'], ['موسیقی', '🎵'], ['عروسک', '🧸'], ['پروانه', '🦋'], ['رنگین‌کمان', '🌈'],
+  ['هواپیما', '✈️'], ['بستنی', '🍦'], ['شیر', '🥛'], ['پرتقال', '🍊'], ['موز', '🍌'], ['کیک', '🍰'], ['دریا', '🌊'], ['کوه', '⛰️'], ['زمستان', '❄️'], ['تابستان', '☀️'],
+  ['ماجراجویی', '🗺️'], ['کامپیوتر', '💻'], ['تلفن', '☎️'], ['هدیه', '🎁'], ['تولد', '🎂'], ['دیناسور', '🦕'], ['ربات', '🤖'], ['شاهزاده', '👑'], ['گنج', '💎'], ['شاد', '✨']
+];
+function persianLessonWords(start, end) { return persianWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
+
 export const languageCatalog = [
   { id: 'nl', name: 'Nederlands', nativeName: 'Nederlands', flag: '🇳🇱 🇧🇪', flagCodes: ['nl', 'be'], locale: 'nl-NL', status: 'ready' },
   { id: 'en', name: 'Engels', nativeName: 'English', flag: '🇬🇧', flagCodes: ['gb'], icon: '🦊', locale: 'en-GB', status: 'ready' },
   { id: 'de', name: 'Duits', nativeName: 'Deutsch', flag: '🇩🇪', flagCodes: ['de'], icon: '🐻', locale: 'de-DE', status: 'comingSoon' },
   { id: 'fr', name: 'Frans', nativeName: 'Français', flag: '🇫🇷', flagCodes: ['fr'], icon: '🦋', locale: 'fr-FR', status: 'comingSoon' },
   { id: 'es', name: 'Spaans', nativeName: 'Español', flag: '🇪🇸', flagCodes: ['es'], icon: '🌞', locale: 'es-ES', status: 'comingSoon' },
-  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', flagCodes: ['ir'], icon: '🪷', locale: 'fa-IR', status: 'comingSoon' },
+  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', flagCodes: ['ir'], icon: '🪷', locale: 'fa-IR', status: 'ready' },
   { id: 'ar', name: 'Arabisch', nativeName: 'العربية', flag: '🇸🇦', flagCodes: ['sa'], icon: '🌙', locale: 'ar', status: 'comingSoon' }
 ];
 
@@ -91,6 +101,33 @@ export const languagePackages = {
       { id: 'words-2', title: 'More words', icon: '🚲', skill: 'build', words: englishLessonWords(30, 40) },
       { id: 'words-3', title: 'Longer words', icon: '🌈', skill: 'build', words: englishLessonWords(40, 50) },
       { id: 'words-4', title: 'Reading hero', icon: '🏆', skill: 'build', words: englishLessonWords(50, 60) }
+    ]
+  },
+  fa: {
+    metadata: languageCatalog[5],
+    alphabet: ['ا','آ','ب','پ','ت','ث','ج','چ','ح','خ','د','ذ','ر','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ه','ی'],
+    phonics: { ا:'ا', آ:'آ', ب:'ب', پ:'پ', ت:'ت', ج:'ج', چ:'چ', د:'د', ر:'ر', س:'س', ش:'ش', ک:'ک', گ:'گ', ل:'ل', م:'م', ن:'ن', و:'و', ه:'ه', ی:'ی' },
+    writingRules: { direction: 'rtl', joining: true, case: 'single-form' },
+    ui: {
+      begin: 'شروع', listen: 'گوش کن', hint: 'راهنما', check: 'بررسی', next: 'بعدی', back: 'بازگشت', great: 'آفرین!', tryAgain: 'دوباره تلاش کن', chooseLanguage: 'یک زبان انتخاب کن',
+      chooseWorld: 'دنیای یادگیری‌ات را انتخاب کن', languageIntro: 'برای شنیدن زبان، روی بلندگو بزن.', comingSoon: 'به‌زودی',
+      hello: 'سلام، قهرمان یادگیری!', dailyIntro: 'امروز با صداها و واژه‌ها تمرین می‌کنیم.', daily: 'تمرین روزانه', growth: 'رشد تو', worlds: 'مرحله',
+      sounds: 'حروف و صداها', building: 'گوش دادن و ساختن واژه', locked: 'کمی بیشتر تمرین کن', build: 'واژه را بساز', find: 'حروف این واژه را پیدا کن',
+      gameIntro: 'با دقت گوش کن و حروف را انتخاب کن.', listenPrompt: 'گوش کن:', restart: 'این مرحله را دوباره تمرین کن.', parents: 'برای والدین', parentTitle: 'رشد آرام، قدم به قدم',
+      worldsDone: 'مرحله تمام شده', days: 'روز پیاپی', stars: 'ستاره گرفته', homeLanguage: 'زبان خانه', adSetting: 'نمایش تبلیغ آموزشی', on: 'روشن', savedNote: 'پیشرفت با امنیت روی این دستگاه ذخیره می‌شود.', ad: 'تبلیغ', adMessage: 'لومیو برای خانواده‌ها رایگان می‌ماند'
+    },
+    games: [
+      { id: 'word-builder', title: 'واژه‌ساز', description: 'گوش کن، حروف را انتخاب کن و واژه بساز.', icon: '🧩', status: 'ready' },
+      { id: 'letter-trail', title: 'مسیر حرف', description: 'تمرین نوشتن حروف فارسی به‌زودی می‌آید.', icon: '✍️', status: 'comingSoon' }
+    ],
+    writing: [],
+    curriculum: [
+      { id: 'sounds-1', title: 'صداهای نخست', icon: '🔤', skill: 'letter', words: persianLessonWords(0, 10) },
+      { id: 'sounds-2', title: 'ترکیب صداها', icon: '🎵', skill: 'build', words: persianLessonWords(10, 20) },
+      { id: 'words-1', title: 'واژه‌های کوتاه', icon: '🧩', skill: 'build', words: persianLessonWords(20, 30) },
+      { id: 'words-2', title: 'واژه‌های بیشتر', icon: '🚲', skill: 'build', words: persianLessonWords(30, 40) },
+      { id: 'words-3', title: 'واژه‌های بلندتر', icon: '🌈', skill: 'build', words: persianLessonWords(40, 50) },
+      { id: 'words-4', title: 'قهرمان خواندن', icon: '🏆', skill: 'build', words: persianLessonWords(50, 60) }
     ]
   }
 };
