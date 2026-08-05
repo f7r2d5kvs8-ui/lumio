@@ -12,7 +12,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.3';
+const RELEASE = '0.6.4';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -92,12 +92,11 @@ function renderLetters() {
 }
 
 function nameCharacters() { return Array.from((profile.childName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()).filter(char => /^[a-z]$/.test(char)); }
-function startNameTracing() { const letters = nameCharacters(); if (!letters.length) return; startNameLetter(letters, 0); }
-function startNameLetter(letters, index) {
-  const lowercase = letters[index]; const isFirst = index === 0; const display = isFirst ? lowercase.toUpperCase() : lowercase;
-  const form = { id: `name-${lowercase}-${index}`, label: isFirst ? 'hoofdletter' : 'kleine letter', pathId: `${isFirst ? 'capital' : 'lowercase'}-${lowercase}` };
-  const drill = { id: 'my-name', letter: display, lowercase: display, phoneme: profile.childName, title: 'Mijn naam', forms: [form] };
-  tracingSession = { drill, form, formIndex: 0, path: writingPaths[form.pathId], dragging: false, completed: false, strokeIndex: 0, furthest: 0, namePractice: true, nameLetters: letters, nameIndex: index };
+function startNameTracing() {
+  const letters = nameCharacters(); if (!letters.length) return;
+  const namePaths = letters.map((letter, index) => writingPaths[`${index === 0 ? 'capital' : 'lowercase'}-${letter}`]);
+  const drill = { id: 'my-name', letter: profile.childName, lowercase: profile.childName, phoneme: profile.childName, title: 'Mijn naam' };
+  tracingSession = { drill, form: { id: 'my-name', label: 'jouw naam' }, formIndex: 0, path: namePaths[0], namePaths, dragging: false, completed: false, strokeIndex: 0, furthest: 0, namePractice: true, nameLetters: letters };
   view = 'tracing'; render();
 }
 
@@ -109,6 +108,7 @@ function startTracing(drillId, formIndex = 0) {
 }
 
 function renderTracing() {
+  if (tracingSession.namePractice) { renderNameTracing(); return; }
   const { drill, path } = tracingSession;
   root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← Letters</button><span class="count">${drill.title}</span></div><section class="tracing-card"><div class="eyebrow">Letterspoor</div><h1>Volg de letter ${drill.letter}</h1><p>Luister naar de klank. Houd de cirkel vast en volg het grijze spoor.</p><div class="trace-stage"><svg id="trace-svg" viewBox="${path.viewBox}" role="img" aria-label="Volg de hoofdletter ${drill.letter}">${path.strokes.map((stroke, index) => `<path class="trace-shadow" d="${stroke}"/><path class="trace-progress" data-trace-progress="${index}" d="${stroke}"/>`).join('')}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="Sleep de cirkel over de letter ${drill.letter}"/></svg></div><p id="trace-feedback" class="feedback">Luister en begin bij de paarse cirkel.</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 Luister</button><button class="button primary" data-action="retry-trace" disabled>Opnieuw</button></div></section></main>${adBanner()}`;
   bindHeader();
@@ -119,11 +119,23 @@ function renderTracing() {
   setTimeout(() => speak(drill.phoneme), 250);
 }
 
+function renderNameTracing() {
+  const { namePaths, nameLetters } = tracingSession;
+  const spacing = 280; const width = Math.max(360, namePaths.length * spacing + 50);
+  const strokes = namePaths.map((path, letterIndex) => path.strokes.map((stroke, strokeIndex) => `<g transform="translate(${25 + letterIndex * spacing},0)"><path class="trace-shadow" data-offset-x="${25 + letterIndex * spacing}" d="${stroke}"/><path class="trace-progress" data-trace-progress="${letterIndex}-${strokeIndex}" data-offset-x="${25 + letterIndex * spacing}" d="${stroke}"/></g>`).join('')).join('');
+  root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← Letters</button><span class="count">Mijn naam</span></div><section class="tracing-card"><div class="eyebrow">Letterspoor · jouw naam</div><h1>Schrijf: ${escape(profile.childName)}</h1><p>Volg alle letters van jouw naam, van links naar rechts.</p><div class="trace-stage name-stage"><svg id="trace-svg" class="name-svg" style="width:${width}px" viewBox="0 0 ${width} 500" role="img" aria-label="Schrijf jouw naam ${escape(profile.childName)}">${strokes}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="Sleep de cirkel over jouw naam ${escape(profile.childName)}"/></svg></div><p id="trace-feedback" class="feedback">Begin bij de paarse cirkel en volg jouw hele naam.</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 Luister</button><button class="button primary" data-action="retry-trace">Opnieuw</button></div></section></main>${adBanner()}`;
+  bindHeader();
+  root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
+  root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(profile.childName));
+  root.querySelector('[data-action="retry-trace"]').addEventListener('click', startNameTracing);
+  setupTracing(); setTimeout(() => speak(profile.childName), 250);
+}
+
 function setupTracing() {
   const svg = root.querySelector('#trace-svg'); const shadows = [...svg.querySelectorAll('.trace-shadow')]; const progresses = [...svg.querySelectorAll('[data-trace-progress]')]; const dot = svg.querySelector('#trace-dot'); const start = svg.querySelector('#trace-start'); const end = svg.querySelector('#trace-end');
   const place = (node, point) => { node.setAttribute('cx', point.x); node.setAttribute('cy', point.y); };
   const activateStroke = () => {
-    const shadow = shadows[tracingSession.strokeIndex]; const progress = progresses[tracingSession.strokeIndex]; const length = shadow.getTotalLength(); const samples = Array.from({ length: 181 }, (_, index) => shadow.getPointAtLength(length * index / 180));
+    const shadow = shadows[tracingSession.strokeIndex]; const progress = progresses[tracingSession.strokeIndex]; const length = shadow.getTotalLength(); const offsetX = Number(shadow.dataset.offsetX || 0); const samples = Array.from({ length: 181 }, (_, index) => { const point = shadow.getPointAtLength(length * index / 180); return { x: point.x + offsetX, y: point.y }; });
     tracingSession.samples = samples; tracingSession.length = length; tracingSession.furthest = 0; tracingSession.acceptedMoves = 0; shadows.forEach((node, index) => node.classList.toggle('active-stroke', index === tracingSession.strokeIndex)); progresses.forEach((node, index) => { const segmentLength = shadows[index].getTotalLength(); node.style.strokeDasharray = `${segmentLength} ${segmentLength}`; node.style.strokeDashoffset = String(index < tracingSession.strokeIndex ? 0 : segmentLength); }); place(dot, samples[0]); place(start, samples[0]); place(end, samples[samples.length - 1]); progress.style.strokeDasharray = `${length} ${length}`; progress.style.strokeDashoffset = String(length);
   };
   activateStroke();
@@ -145,15 +157,13 @@ function finishNameTracing() {
   tracingSession.completed = true;
   rewardPractice(profile);
   const feedback = root.querySelector('#trace-feedback');
-  const lastLetter = tracingSession.nameIndex === tracingSession.nameLetters.length - 1;
   feedback.className = 'feedback success celebrate';
-  feedback.textContent = lastLetter ? `Fantastisch, ${profile.childName}! Jij hebt jouw naam geschreven. ⭐` : 'Goed gedaan! Nu de volgende letter.';
-  speak(lastLetter ? ui().great : 'Goed zo');
+  feedback.textContent = `Fantastisch, ${profile.childName}! Jij hebt jouw hele naam geschreven. ⭐`;
+  speak(ui().great);
   setTimeout(() => {
     if (!tracingSession?.completed) return;
-    if (lastLetter) { const language = pack(); updateLanguageProgress(profile, language.metadata.id, { namePracticeCompleted: true }); tracingSession = null; view = 'letters'; render(); }
-    else startNameLetter(tracingSession.nameLetters, tracingSession.nameIndex + 1);
-  }, 900);
+    const language = pack(); updateLanguageProgress(profile, language.metadata.id, { namePracticeCompleted: true }); tracingSession = null; view = 'letters'; render();
+  }, 1100);
 }
 
 function renderHome() {
