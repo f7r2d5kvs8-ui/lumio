@@ -38,8 +38,9 @@ export const languagePackages = {
       { id: 'letter-trail', title: 'Letterspoor', description: 'Luister naar een klank en volg het letterspoor.', icon: '✍️', status: 'ready' }
     ],
     writing: [
-      { id: 'capital-s', letter: 'S', phoneme: 'ssss', pathId: 'capital-s', title: 'De letter S' }
-    ],
+      ['A', 'aa'], ['B', 'buh'], ['C', 'suh'], ['D', 'duh'], ['E', 'ee'], ['F', 'fuh'], ['G', 'guh'], ['H', 'huh'], ['I', 'ie'], ['J', 'yuh'], ['K', 'kuh'], ['L', 'luh'], ['M', 'muh'],
+      ['N', 'nuh'], ['O', 'oo'], ['P', 'puh'], ['Q', 'kuu'], ['R', 'ruh'], ['S', 'ssss'], ['T', 'tuh'], ['U', 'uu'], ['V', 'vuh'], ['W', 'wuh'], ['X', 'iks'], ['Y', 'ie',], ['Z', 'zuh']
+    ].map(([letter, phoneme]) => ({ id: `capital-${letter.toLowerCase()}`, letter, phoneme, pathId: `capital-${letter.toLowerCase()}`, title: `De letter ${letter}` })),
     curriculum: [
       { id: 'sounds-1', title: 'Eerste klanken', icon: '🔤', skill: 'letter', words: words(0, 10) },
       { id: 'sounds-2', title: 'Klanken mengen', icon: '🎵', skill: 'build', words: words(10, 20) },

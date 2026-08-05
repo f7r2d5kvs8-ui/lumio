@@ -29,7 +29,7 @@ export function loadProfile() {
 export function saveProfile(profile) { localStorage.setItem(KEY, JSON.stringify(profile)); }
 
 export function languageProgress(profile, languageId) {
-  return profile.progress[languageId] || { completed: [], activeLesson: 0, mistakes: 0, dailyCount: 0 };
+  return profile.progress[languageId] || { completed: [], tracingCompleted: [], activeLesson: 0, mistakes: 0, dailyCount: 0 };
 }
 
 export function updateLanguageProgress(profile, languageId, change) {
