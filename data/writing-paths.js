@@ -32,6 +32,33 @@ export const writingPaths = {
   'capital-z': letter(['M 75 80 H 285 L 75 425 H 285'])
 };
 
-// Lowercase entries use the same reusable stroke engine. Individual lowercase
-// paths can be refined independently later without changing lesson logic.
-Object.entries(writingPaths).forEach(([id, value]) => { writingPaths[id.replace('capital-', 'lowercase-')] = { ...value }; });
+// Lowercase paths are deliberately separate from capital letters.  They use
+// the same ordered-stroke format, so future refinements never change lessons.
+Object.assign(writingPaths, {
+  'lowercase-a': letter(['M 245 245 C 190 180 95 215 95 325 C 95 435 220 445 245 360 V 220', 'M 245 245 V 420']),
+  'lowercase-b': letter(['M 95 70 V 420', 'M 95 265 C 180 175 285 235 285 330 C 285 430 175 450 95 370']),
+  'lowercase-c': letter(['M 275 260 C 220 190 105 220 100 330 C 95 430 220 445 275 370']),
+  'lowercase-d': letter(['M 265 70 V 420', 'M 265 265 C 180 175 75 235 75 330 C 75 430 185 450 265 370']),
+  'lowercase-e': letter(['M 90 330 H 275 C 275 220 95 210 90 330 C 90 445 230 440 280 375']),
+  'lowercase-f': letter(['M 235 75 C 140 55 135 175 135 420', 'M 75 245 H 245']),
+  'lowercase-g': letter(['M 270 260 C 200 185 90 225 90 330 C 90 435 205 455 270 370 V 245', 'M 270 370 V 435 C 270 500 110 495 100 425']),
+  'lowercase-h': letter(['M 95 70 V 420', 'M 95 275 C 190 185 265 235 265 330 V 420']),
+  'lowercase-i': letter(['M 180 245 V 420', 'M 180 155 L 180 150']),
+  'lowercase-j': letter(['M 205 245 V 405 C 205 490 90 485 90 420', 'M 205 155 L 205 150']),
+  'lowercase-k': letter(['M 100 70 V 420', 'M 260 245 L 100 335 L 270 420']),
+  'lowercase-l': letter(['M 180 70 V 420']),
+  'lowercase-m': letter(['M 75 420 V 260 C 130 205 185 240 185 315 V 420', 'M 185 285 C 245 210 300 245 300 320 V 420']),
+  'lowercase-n': letter(['M 90 420 V 250', 'M 90 280 C 175 195 270 240 270 335 V 420']),
+  'lowercase-o': letter(['M 180 215 C 65 215 65 440 180 440 C 295 440 295 215 180 215']),
+  'lowercase-p': letter(['M 95 250 V 480', 'M 95 275 C 175 190 285 240 285 335 C 285 435 180 455 95 375']),
+  'lowercase-q': letter(['M 265 250 V 480', 'M 265 275 C 185 190 75 240 75 335 C 75 435 180 455 265 375']),
+  'lowercase-r': letter(['M 100 420 V 250', 'M 100 285 C 145 225 215 230 250 260']),
+  'lowercase-s': letter(['M 265 255 C 210 205 95 215 95 285 C 95 350 275 315 270 390 C 265 465 125 445 80 390']),
+  'lowercase-t': letter(['M 180 120 V 375 C 180 445 245 435 270 400', 'M 105 245 H 245']),
+  'lowercase-u': letter(['M 90 245 V 350 C 90 455 250 450 250 350 V 245', 'M 250 245 V 420']),
+  'lowercase-v': letter(['M 85 245 L 180 420 L 275 245']),
+  'lowercase-w': letter(['M 55 245 L 110 420 L 180 290 L 245 420 L 305 245']),
+  'lowercase-x': letter(['M 95 250 L 270 420', 'M 270 250 L 95 420']),
+  'lowercase-y': letter(['M 85 245 L 180 420 L 275 245', 'M 275 245 L 165 485']),
+  'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
+});

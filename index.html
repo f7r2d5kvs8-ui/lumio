@@ -16,7 +16,7 @@
 
 .letter-picker{position:relative}.trace-total{margin:20px 0 18px;font-weight:850;color:var(--ink)}.trace-total .progress{margin-top:8px}.letter-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.letter-choice{position:relative;display:grid;place-items:center;min-height:68px;border:0;border-radius:18px;background:#f3f0ff;color:var(--violet-dark);box-shadow:0 4px 0 #d8d1fb;font-size:1.7rem;font-weight:900;cursor:pointer;transition:transform .18s,background .18s}.letter-choice:hover{transform:translateY(-3px);background:#e6e0ff}.letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 4px 0 #9edfc8}.letter-choice>span{position:absolute;right:7px;bottom:5px;font-size:.78rem}@media(max-width:540px){.letter-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.letter-choice{min-height:62px;font-size:1.55rem}}
 
-.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}
+.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}.alphabet-next{display:none!important}
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -116,9 +116,36 @@ const writingPaths = {
   'capital-z': letter(['M 75 80 H 285 L 75 425 H 285'])
 };
 
-// Lowercase entries use the same reusable stroke engine. Individual lowercase
-// paths can be refined independently later without changing lesson logic.
-Object.entries(writingPaths).forEach(([id, value]) => { writingPaths[id.replace('capital-', 'lowercase-')] = { ...value }; });
+// Lowercase paths are deliberately separate from capital letters.  They use
+// the same ordered-stroke format, so future refinements never change lessons.
+Object.assign(writingPaths, {
+  'lowercase-a': letter(['M 245 245 C 190 180 95 215 95 325 C 95 435 220 445 245 360 V 220', 'M 245 245 V 420']),
+  'lowercase-b': letter(['M 95 70 V 420', 'M 95 265 C 180 175 285 235 285 330 C 285 430 175 450 95 370']),
+  'lowercase-c': letter(['M 275 260 C 220 190 105 220 100 330 C 95 430 220 445 275 370']),
+  'lowercase-d': letter(['M 265 70 V 420', 'M 265 265 C 180 175 75 235 75 330 C 75 430 185 450 265 370']),
+  'lowercase-e': letter(['M 90 330 H 275 C 275 220 95 210 90 330 C 90 445 230 440 280 375']),
+  'lowercase-f': letter(['M 235 75 C 140 55 135 175 135 420', 'M 75 245 H 245']),
+  'lowercase-g': letter(['M 270 260 C 200 185 90 225 90 330 C 90 435 205 455 270 370 V 245', 'M 270 370 V 435 C 270 500 110 495 100 425']),
+  'lowercase-h': letter(['M 95 70 V 420', 'M 95 275 C 190 185 265 235 265 330 V 420']),
+  'lowercase-i': letter(['M 180 245 V 420', 'M 180 155 L 180 150']),
+  'lowercase-j': letter(['M 205 245 V 405 C 205 490 90 485 90 420', 'M 205 155 L 205 150']),
+  'lowercase-k': letter(['M 100 70 V 420', 'M 260 245 L 100 335 L 270 420']),
+  'lowercase-l': letter(['M 180 70 V 420']),
+  'lowercase-m': letter(['M 75 420 V 260 C 130 205 185 240 185 315 V 420', 'M 185 285 C 245 210 300 245 300 320 V 420']),
+  'lowercase-n': letter(['M 90 420 V 250', 'M 90 280 C 175 195 270 240 270 335 V 420']),
+  'lowercase-o': letter(['M 180 215 C 65 215 65 440 180 440 C 295 440 295 215 180 215']),
+  'lowercase-p': letter(['M 95 250 V 480', 'M 95 275 C 175 190 285 240 285 335 C 285 435 180 455 95 375']),
+  'lowercase-q': letter(['M 265 250 V 480', 'M 265 275 C 185 190 75 240 75 335 C 75 435 180 455 265 375']),
+  'lowercase-r': letter(['M 100 420 V 250', 'M 100 285 C 145 225 215 230 250 260']),
+  'lowercase-s': letter(['M 265 255 C 210 205 95 215 95 285 C 95 350 275 315 270 390 C 265 465 125 445 80 390']),
+  'lowercase-t': letter(['M 180 120 V 375 C 180 445 245 435 270 400', 'M 105 245 H 245']),
+  'lowercase-u': letter(['M 90 245 V 350 C 90 455 250 450 250 350 V 245', 'M 250 245 V 420']),
+  'lowercase-v': letter(['M 85 245 L 180 420 L 275 245']),
+  'lowercase-w': letter(['M 55 245 L 110 420 L 180 290 L 245 420 L 305 245']),
+  'lowercase-x': letter(['M 95 250 L 270 420', 'M 270 250 L 95 420']),
+  'lowercase-y': letter(['M 85 245 L 180 420 L 275 245', 'M 275 245 L 165 485']),
+  'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
+});
 
 const KEY = 'lumio-profile-v1';
 
@@ -213,7 +240,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.1';
+const RELEASE = '0.6.2';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -272,7 +299,6 @@ function renderLetters() {
   root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← Spellen</button><div class="eyebrow">Letterspoor</div><h1>Kies een letter</h1><p>Oefen telkens de hoofdletter én de kleine letter.</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} letters geoefend</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="Oefen letter ${drill.letter} en ${drill.lowercase}"><strong>${drill.letter}<small>${drill.lowercase}</small></strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div><button class="button primary alphabet-next" data-action="alphabet-next" ${doneCount === language.writing.length ? '' : 'disabled'}>Volgende →</button></section></main>${adBanner()}`;
   root.querySelector('[data-action="games"]').addEventListener('click', () => { view = 'games'; render(); });
   root.querySelectorAll('[data-trace-letter]').forEach(button => button.addEventListener('click', () => startTracing(button.dataset.traceLetter)));
-  root.querySelector('[data-action="alphabet-next"]').addEventListener('click', () => { profile.selectedGame = 'word-builder'; saveProfile(profile); view = 'home'; render(); });
   bindHeader();
 }
 
