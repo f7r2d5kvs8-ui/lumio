@@ -16,6 +16,8 @@
 
 .letter-picker{position:relative}.trace-total{margin:20px 0 18px;font-weight:850;color:var(--ink)}.trace-total .progress{margin-top:8px}.letter-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.letter-choice{position:relative;display:grid;place-items:center;min-height:68px;border:0;border-radius:18px;background:#f3f0ff;color:var(--violet-dark);box-shadow:0 4px 0 #d8d1fb;font-size:1.7rem;font-weight:900;cursor:pointer;transition:transform .18s,background .18s}.letter-choice:hover{transform:translateY(-3px);background:#e6e0ff}.letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 4px 0 #9edfc8}.letter-choice>span{position:absolute;right:7px;bottom:5px;font-size:.78rem}@media(max-width:540px){.letter-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.letter-choice{min-height:62px;font-size:1.55rem}}
 
+.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <title>Lumio</title>
@@ -288,7 +290,7 @@ function setupTracing() {
   const place = (node, point) => { node.setAttribute('cx', point.x); node.setAttribute('cy', point.y); };
   const activateStroke = () => {
     const shadow = shadows[tracingSession.strokeIndex]; const progress = progresses[tracingSession.strokeIndex]; const length = shadow.getTotalLength(); const samples = Array.from({ length: 181 }, (_, index) => shadow.getPointAtLength(length * index / 180));
-    tracingSession.samples = samples; tracingSession.length = length; tracingSession.furthest = 0; tracingSession.acceptedMoves = 0; place(dot, samples[0]); place(start, samples[0]); place(end, samples[samples.length - 1]); progress.style.strokeDasharray = String(length); progress.style.strokeDashoffset = String(length);
+    tracingSession.samples = samples; tracingSession.length = length; tracingSession.furthest = 0; tracingSession.acceptedMoves = 0; shadows.forEach((node, index) => node.classList.toggle('active-stroke', index === tracingSession.strokeIndex)); place(dot, samples[0]); place(start, samples[0]); place(end, samples[samples.length - 1]); progress.style.strokeDasharray = `${length} ${length}`; progress.style.strokeDashoffset = String(length);
   };
   activateStroke();
   const nearestPoint = event => { const bounds = svg.getBoundingClientRect(); const x = (event.clientX - bounds.left) * svg.viewBox.baseVal.width / bounds.width; const y = (event.clientY - bounds.top) * svg.viewBox.baseVal.height / bounds.height; let nearest = 0; let distance = Infinity; tracingSession.samples.forEach((point, index) => { const candidate = (point.x - x) ** 2 + (point.y - y) ** 2; if (candidate < distance) { distance = candidate; nearest = index; } }); return nearest; };
