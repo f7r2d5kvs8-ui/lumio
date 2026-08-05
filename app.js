@@ -12,7 +12,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.6';
+const RELEASE = '0.6.7';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
