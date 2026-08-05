@@ -1,1 +1,1 @@
-.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}
+.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}

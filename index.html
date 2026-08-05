@@ -16,7 +16,7 @@
 
 .letter-picker{position:relative}.trace-total{margin:20px 0 18px;font-weight:850;color:var(--ink)}.trace-total .progress{margin-top:8px}.letter-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.letter-choice{position:relative;display:grid;place-items:center;min-height:68px;border:0;border-radius:18px;background:#f3f0ff;color:var(--violet-dark);box-shadow:0 4px 0 #d8d1fb;font-size:1.7rem;font-weight:900;cursor:pointer;transition:transform .18s,background .18s}.letter-choice:hover{transform:translateY(-3px);background:#e6e0ff}.letter-choice.done{background:#ddf7eb;color:#148160;box-shadow:0 4px 0 #9edfc8}.letter-choice>span{position:absolute;right:7px;bottom:5px;font-size:.78rem}@media(max-width:540px){.letter-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.letter-choice{min-height:62px;font-size:1.55rem}}
 
-.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}
+.trace-shadow{transition:stroke .2s}.trace-shadow.active-stroke{stroke:#c7c3eb}.release-tag{position:fixed;right:10px;bottom:55px;border-radius:999px;background:#ffffffd9;color:#7c83a1;padding:4px 7px;font-size:.62rem;font-weight:800;z-index:4}
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -213,6 +213,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
+const RELEASE = '0.6.1';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -288,7 +289,7 @@ function renderTracing() {
   bindHeader();
   root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
   root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(drill.phoneme));
-  root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => tracingSession.formIndex === 0 ? startTracing(drill.id, 1) : startTracing(drill.id, 0));
+  root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => startTracing(drill.id, tracingSession.formIndex));
   setupTracing();
   setTimeout(() => speak(drill.phoneme), 250);
 }
@@ -311,7 +312,7 @@ function setupTracing() {
 
 async function finishTracing() {
   tracingSession.completed = true;
-  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const next = root.querySelector('[data-action="retry-trace"]'); next.disabled = false; next.textContent = tracingSession.formIndex === 0 ? 'Kleine letter →' : 'Opnieuw'; speak(ui().great);
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const retry = root.querySelector('[data-action="retry-trace"]'); retry.disabled = tracingSession.formIndex === 0; retry.textContent = 'Opnieuw'; speak(ui().great); setTimeout(() => { if (tracingSession?.completed && tracingSession.formIndex === 0) startTracing(tracingSession.drill.id, 1); else if (tracingSession?.completed) { tracingSession = null; view = 'letters'; render(); } }, 900);
 }
 
 function renderHome() {
@@ -353,7 +354,7 @@ async function nextWord(lesson) { const language = pack(); const progress = lang
 
 function renderParent() { const language = pack(); const homeLanguage = languageCatalog.find(item => item.id === profile.homeLanguage); const progress = languageProgress(profile, language.metadata.id); root.innerHTML = `${header()}<main class="screen parent"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">${ui().parents}</div><h1>${ui().parentTitle}</h1><div class="parent-grid"><div class="metric"><strong>${progress.completed.length}</strong><small>${ui().worldsDone}</small></div><div class="metric"><strong>${profile.rewards.streak}</strong><small>${ui().days}</small></div><div class="metric"><strong>${profile.rewards.stars}</strong><small>${ui().stars}</small></div></div><div class="switch-row"><span>${ui().homeLanguage}</span><button class="speaker" data-action="home-language">${homeLanguage.flag} ${homeLanguage.nativeName}</button></div><div class="switch-row"><span>${ui().adSetting}</span><label><input id="ads" type="checkbox" ${profile.preferences.adsEnabled ? 'checked' : ''}> ${ui().on}</label></div><p class="intro">${ui().savedNote}</p></main>${adBanner()}`; bindHeader(); root.querySelector('[data-action="home"]').addEventListener('click', () => { view = 'home'; render(); }); root.querySelector('[data-action="home-language"]').addEventListener('click', () => { languageTarget = 'native'; view = 'languages'; render(); }); root.querySelector('#ads').addEventListener('change', event => { profile.preferences.adsEnabled = event.target.checked; saveProfile(profile); render(); }); }
 function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = 'Uitloggen'; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
-function render() { if (view === 'auth') renderAuth(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); }
+function render() { if (view === 'auth') renderAuth(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
 async function boot() { try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
 boot();
 
