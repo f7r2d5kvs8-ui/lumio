@@ -2,6 +2,7 @@ const KEY = 'lumio-profile-v1';
 
 const freshProfile = () => ({
   account: null,
+  appLanguage: null,
   childName: '',
   selectedLanguage: null,
   selectedGame: null,
