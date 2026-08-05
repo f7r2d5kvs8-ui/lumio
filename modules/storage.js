@@ -3,6 +3,7 @@ const KEY = 'lumio-profile-v1';
 const freshProfile = () => ({
   account: null,
   selectedLanguage: null,
+  selectedGame: null,
   homeLanguage: 'nl',
   learningLanguage: 'nl',
   progress: {},
