@@ -166,20 +166,32 @@ const languagePackages = {
         ]
       },
       {
-        id: 'letter-beh', letter: 'ب', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ب', title: 'حرف ب',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-beh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-beh-${form}` }))
+        id: 'letter-beh', letter: 'ب', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ب', title: 'حرف ب',
+        forms: [
+          { id: 'persian-beh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-beh-begin-middle' },
+          { id: 'persian-beh-end', label: 'شکل پایانی', pathId: 'persian-beh-end' }
+        ]
       },
       {
-        id: 'letter-peh', letter: 'پ', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'پ', title: 'حرف پ',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-peh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-peh-${form}` }))
+        id: 'letter-peh', letter: 'پ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'پ', title: 'حرف پ',
+        forms: [
+          { id: 'persian-peh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-peh-begin-middle' },
+          { id: 'persian-peh-end', label: 'شکل پایانی', pathId: 'persian-peh-end' }
+        ]
       },
       {
-        id: 'letter-teh', letter: 'ت', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ت', title: 'حرف ت',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-teh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-teh-${form}` }))
+        id: 'letter-teh', letter: 'ت', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ت', title: 'حرف ت',
+        forms: [
+          { id: 'persian-teh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-teh-begin-middle' },
+          { id: 'persian-teh-end', label: 'شکل پایانی', pathId: 'persian-teh-end' }
+        ]
       },
       {
-        id: 'letter-theh', letter: 'ث', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ث', title: 'حرف ث',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-theh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-theh-${form}` }))
+        id: 'letter-theh', letter: 'ث', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ث', title: 'حرف ث',
+        forms: [
+          { id: 'persian-theh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-theh-begin-middle' },
+          { id: 'persian-theh-end', label: 'شکل پایانی', pathId: 'persian-theh-end' }
+        ]
       }
     ],
     curriculum: [
@@ -286,17 +298,14 @@ Object.assign(writingPaths, {
   ])
 });
 
-// The first Persian alphabet family is data-driven: one child-friendly bowl
-// and its dots, reused across ب، پ، ت and ث. Each dot is a small traceable
-// circle, while all joins remain straight and travel right to left.
+// The ب، پ، ت، ث family follows the child's squared two-form reference:
+// a beginning/middle form with joining tails and a separate ending form.
 const persianDot = (x, y) => `M ${x + 9} ${y} A 9 9 0 1 1 ${x - 9} ${y} A 9 9 0 1 1 ${x + 9} ${y}`;
-const persianBehShape = {
-  initial: ['M 325 250 H 275 C 245 330 150 330 105 275 H 35'],
-  medial: ['M 325 250 H 275 C 245 330 150 330 105 275 H 35'],
-  isolated: ['M 275 250 C 245 330 150 330 105 275 H 80'],
-  final: ['M 325 250 H 275 C 245 330 150 330 105 275 H 80']
+const persianBehShapes = {
+  'begin-middle': ['M 325 245 H 275 V 325 H 105 V 245 H 35'],
+  end: ['M 275 245 V 325 H 105 V 245']
 };
-const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShape).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
+const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShapes).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
 Object.assign(writingPaths, {
   // ا forms based on the child-writing reference: beginning hook, isolated
   // middle, and a right-joining middle/ending form.
@@ -406,7 +415,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.26';
+const RELEASE = '0.6.27';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);

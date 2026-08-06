@@ -91,17 +91,14 @@ Object.assign(writingPaths, {
   ])
 });
 
-// The first Persian alphabet family is data-driven: one child-friendly bowl
-// and its dots, reused across ب، پ، ت and ث. Each dot is a small traceable
-// circle, while all joins remain straight and travel right to left.
+// The ب، پ، ت، ث family follows the child's squared two-form reference:
+// a beginning/middle form with joining tails and a separate ending form.
 const persianDot = (x, y) => `M ${x + 9} ${y} A 9 9 0 1 1 ${x - 9} ${y} A 9 9 0 1 1 ${x + 9} ${y}`;
-const persianBehShape = {
-  initial: ['M 325 250 H 275 C 245 330 150 330 105 275 H 35'],
-  medial: ['M 325 250 H 275 C 245 330 150 330 105 275 H 35'],
-  isolated: ['M 275 250 C 245 330 150 330 105 275 H 80'],
-  final: ['M 325 250 H 275 C 245 330 150 330 105 275 H 80']
+const persianBehShapes = {
+  'begin-middle': ['M 325 245 H 275 V 325 H 105 V 245 H 35'],
+  end: ['M 275 245 V 325 H 105 V 245']
 };
-const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShape).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
+const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShapes).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
 Object.assign(writingPaths, {
   // ا forms based on the child-writing reference: beginning hook, isolated
   // middle, and a right-joining middle/ending form.

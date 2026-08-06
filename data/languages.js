@@ -139,20 +139,32 @@ export const languagePackages = {
         ]
       },
       {
-        id: 'letter-beh', letter: 'ب', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ب', title: 'حرف ب',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-beh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-beh-${form}` }))
+        id: 'letter-beh', letter: 'ب', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ب', title: 'حرف ب',
+        forms: [
+          { id: 'persian-beh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-beh-begin-middle' },
+          { id: 'persian-beh-end', label: 'شکل پایانی', pathId: 'persian-beh-end' }
+        ]
       },
       {
-        id: 'letter-peh', letter: 'پ', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'پ', title: 'حرف پ',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-peh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-peh-${form}` }))
+        id: 'letter-peh', letter: 'پ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'پ', title: 'حرف پ',
+        forms: [
+          { id: 'persian-peh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-peh-begin-middle' },
+          { id: 'persian-peh-end', label: 'شکل پایانی', pathId: 'persian-peh-end' }
+        ]
       },
       {
-        id: 'letter-teh', letter: 'ت', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ت', title: 'حرف ت',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-teh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-teh-${form}` }))
+        id: 'letter-teh', letter: 'ت', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ت', title: 'حرف ت',
+        forms: [
+          { id: 'persian-teh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-teh-begin-middle' },
+          { id: 'persian-teh-end', label: 'شکل پایانی', pathId: 'persian-teh-end' }
+        ]
       },
       {
-        id: 'letter-theh', letter: 'ث', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ث', title: 'حرف ث',
-        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-theh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-theh-${form}` }))
+        id: 'letter-theh', letter: 'ث', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ث', title: 'حرف ث',
+        forms: [
+          { id: 'persian-theh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-theh-begin-middle' },
+          { id: 'persian-theh-end', label: 'شکل پایانی', pathId: 'persian-theh-end' }
+        ]
       }
     ],
     curriculum: [
