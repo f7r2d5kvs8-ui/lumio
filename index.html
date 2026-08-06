@@ -300,9 +300,9 @@ const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(p
 Object.assign(writingPaths, {
   // ا forms based on the child-writing reference: beginning hook, isolated
   // middle, and a right-joining middle/ending form.
-  'persian-alef-initial': letter(['M 250 115 C 225 82 174 82 145 108', 'M 195 145 V 420']),
+  'persian-alef-initial': letter(['M 145 115 V 95 H 245 V 130', 'M 195 155 V 420']),
   'persian-alef-isolated': letter(['M 195 105 V 420']),
-  'persian-alef-final': letter(['M 195 105 V 365 H 290']),
+  'persian-alef-final': letter(['M 300 105 V 80 H 145 V 130', 'M 195 155 V 420']),
   ...makePersianDotFamily('beh', [[180, 390]]),
   ...makePersianDotFamily('peh', [[162, 390], [198, 390], [180, 414]]),
   ...makePersianDotFamily('teh', [[162, 130], [198, 130]]),
@@ -406,7 +406,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.23';
+const RELEASE = '0.6.24';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
