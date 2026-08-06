@@ -4,6 +4,7 @@ const freshProfile = () => ({
   account: null,
   appLanguage: null,
   childName: '',
+  localizedNames: {},
   selectedLanguage: null,
   selectedGame: null,
   homeLanguage: 'nl',

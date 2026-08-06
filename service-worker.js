@@ -1,4 +1,4 @@
-const CACHE = 'lumio-v23';
+const CACHE = 'lumio-v24';
 const ASSETS = ['./', './index.html', './styles.css', './games.css', './letters.css', './app.js', './data/languages.js', './data/writing-paths.js', './modules/storage.js'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS))));
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));

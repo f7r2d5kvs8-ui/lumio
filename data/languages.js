@@ -107,7 +107,7 @@ export const languagePackages = {
     metadata: languageCatalog[5],
     alphabet: ['ا','آ','ب','پ','ت','ث','ج','چ','ح','خ','د','ذ','ر','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ه','ی'],
     phonics: { ا:'ا', آ:'آ', ب:'ب', پ:'پ', ت:'ت', ج:'ج', چ:'چ', د:'د', ر:'ر', س:'س', ش:'ش', ک:'ک', گ:'گ', ل:'ل', م:'م', ن:'ن', و:'و', ه:'ه', ی:'ی' },
-    writingRules: { direction: 'rtl', joining: true, case: 'single-form' },
+    writingRules: { direction: 'rtl', joining: true, case: 'single-form', script: 'arabic' },
     ui: {
       begin: 'شروع', listen: 'گوش کن', hint: 'راهنما', check: 'بررسی', next: 'بعدی', back: 'بازگشت', great: 'آفرین!', tryAgain: 'دوباره تلاش کن', chooseLanguage: 'یک زبان انتخاب کن',
       chooseWorld: 'دنیای یادگیری‌ات را انتخاب کن', languageIntro: 'برای شنیدن زبان، روی بلندگو بزن.', comingSoon: 'به‌زودی',
