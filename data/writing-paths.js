@@ -66,7 +66,7 @@ Object.assign(writingPaths, {
 // Persian paths always start on the right and travel to the left. Joining tails
 // therefore extend left for the following letter, matching Persian writing flow.
 Object.assign(writingPaths, {
-  // م — isolated, with no joining tail.
+  // م — isolated ending, with no connection to a preceding letter.
   'persian-meem-isolated': letter([
     'M 290 300 C 255 195 165 185 130 250 C 97 315 150 380 217 360 C 262 347 285 322 290 300'
   ]),
@@ -81,7 +81,7 @@ Object.assign(writingPaths, {
     'M 235 252 C 205 190 122 190 96 248 C 71 307 121 365 185 350 C 218 343 236 316 235 252',
     'M 96 248 C 71 245 49 252 30 270'
   ]),
-  // ـم — ending: joined from the right, with no outgoing tail.
+  // ـم — connected ending: joined from the preceding letter on the right.
   'persian-meem-final': letter([
     'M 325 270 C 288 252 260 247 235 252',
     'M 235 252 C 205 190 122 190 96 248 C 71 307 121 365 185 350 C 218 343 236 316 235 252'

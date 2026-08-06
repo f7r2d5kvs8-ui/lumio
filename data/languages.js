@@ -122,12 +122,12 @@ export const languagePackages = {
     ],
     writing: [
       {
-        id: 'letter-meem', letter: 'م', lowercase: 'تنها · ابتدا · میان · پایان', phoneme: 'م', title: 'حرف م',
+        id: 'letter-meem', letter: 'م', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'م', title: 'حرف م',
         forms: [
-          { id: 'persian-meem-isolated', label: 'شکل تنها', pathId: 'persian-meem-isolated' },
           { id: 'persian-meem-initial', label: 'شکل آغاز', pathId: 'persian-meem-initial' },
           { id: 'persian-meem-medial', label: 'شکل میانی', pathId: 'persian-meem-medial' },
-          { id: 'persian-meem-final', label: 'شکل پایانی', pathId: 'persian-meem-final' }
+          { id: 'persian-meem-isolated', label: 'شکل پایانیِ جدا', pathId: 'persian-meem-isolated' },
+          { id: 'persian-meem-final', label: 'شکل پایانیِ چسبیده', pathId: 'persian-meem-final' }
         ]
       }
     ],
