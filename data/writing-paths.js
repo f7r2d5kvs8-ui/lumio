@@ -63,19 +63,27 @@ Object.assign(writingPaths, {
   'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
 });
 
-// Persian letter forms are separate ordered paths, ready for every joining letter.
+// Persian paths always start on the right and travel to the left. Joining tails
+// therefore extend left for the following letter, matching Persian writing flow.
 Object.assign(writingPaths, {
+  // م — isolated, with no joining tail.
+  'persian-meem-isolated': letter([
+    'M 290 300 C 255 195 165 185 130 250 C 97 315 150 380 217 360 C 262 347 285 322 290 300'
+  ]),
+  // مـ — beginning: the tail joins the next letter on the left.
   'persian-meem-initial': letter([
-    'M 70 300 C 105 195 195 185 230 250 C 263 315 210 380 143 360 C 98 347 75 322 70 300',
-    'M 230 250 C 270 238 302 245 330 260'
+    'M 290 300 C 255 195 165 185 130 250 C 97 315 150 380 217 360 C 262 347 285 322 290 300',
+    'M 130 250 C 90 238 58 245 30 260'
   ]),
+  // ـمـ — middle: connected to the previous letter on the right and next on the left.
   'persian-meem-medial': letter([
-    'M 35 270 C 72 252 100 247 125 252',
-    'M 125 252 C 155 190 238 190 264 248 C 289 307 239 365 175 350 C 142 343 124 316 125 252',
-    'M 264 248 C 289 245 311 252 330 270'
+    'M 325 270 C 288 252 260 247 235 252',
+    'M 235 252 C 205 190 122 190 96 248 C 71 307 121 365 185 350 C 218 343 236 316 235 252',
+    'M 96 248 C 71 245 49 252 30 270'
   ]),
+  // ـم — ending: joined from the right, with no outgoing tail.
   'persian-meem-final': letter([
-    'M 35 270 C 72 252 100 247 125 252',
-    'M 125 252 C 155 190 238 190 264 248 C 289 307 239 365 175 350 C 142 343 124 316 125 252'
+    'M 325 270 C 288 252 260 247 235 252',
+    'M 235 252 C 205 190 122 190 96 248 C 71 307 121 365 185 350 C 218 343 236 316 235 252'
   ])
 });
