@@ -356,7 +356,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.17';
+const RELEASE = '0.6.18';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -468,6 +468,7 @@ function renderTracing() {
   const { drill, path, form } = tracingSession; const t = copy();
   root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← ${t.letters}</button><span class="count">${drill.title}</span></div><section class="tracing-card"><div class="eyebrow">${t.letterTrail}</div><h1>${t.followLetter} ${drill.letter}</h1><p>${t.traceIntro}</p><div class="trace-stage"><svg id="trace-svg" viewBox="${path.viewBox}" role="img" aria-label="${t.followLetter} ${drill.letter}: ${form.label}">${path.strokes.map((stroke, index) => `<path class="trace-shadow" d="${stroke}"/><path class="trace-progress" data-trace-progress="${index}" d="${stroke}"/>`).join('')}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="${t.followLetter} ${drill.letter}"/></svg></div><p id="trace-feedback" class="feedback">${t.startPurple}</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 ${t.listen}</button><button class="button primary" data-action="retry-trace" disabled>${t.retry}</button></div></section></main>${adBanner()}`;
   bindHeader();
+  root.querySelector('.tracing-card h1').insertAdjacentHTML('afterend', `<div style="display:inline-block;margin:0 0 10px;padding:6px 12px;border-radius:999px;background:var(--purple);color:var(--violet);font-size:.88rem;font-weight:900">${tracingSession.form.label}</div>`);
   root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
   root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(drill.phoneme));
   root.querySelector('[data-action="retry-trace"]').addEventListener('click', () => startTracing(drill.id, tracingSession.formIndex));
