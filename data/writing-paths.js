@@ -103,8 +103,11 @@ const persianBehShape = {
 };
 const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShape).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
 Object.assign(writingPaths, {
-  'persian-alef-isolated': letter(['M 200 95 V 420']),
-  'persian-alef-final': letter(['M 325 235 H 200 V 420']),
+  // ا forms based on the child-writing reference: beginning hook, isolated
+  // middle, and a right-joining middle/ending form.
+  'persian-alef-initial': letter(['M 250 115 C 225 82 174 82 145 108', 'M 195 145 V 420']),
+  'persian-alef-isolated': letter(['M 195 105 V 420']),
+  'persian-alef-final': letter(['M 195 105 V 365 H 290']),
   ...makePersianDotFamily('beh', [[180, 390]]),
   ...makePersianDotFamily('peh', [[162, 390], [198, 390], [180, 414]]),
   ...makePersianDotFamily('teh', [[162, 130], [198, 130]]),

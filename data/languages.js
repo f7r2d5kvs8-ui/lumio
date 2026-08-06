@@ -131,10 +131,11 @@ export const languagePackages = {
         ]
       },
       {
-        id: 'letter-alef', letter: 'ا', lowercase: 'پایانِ جدا · پایانِ چسبیده', phoneme: 'ا', title: 'حرف ا',
+        id: 'letter-alef', letter: 'ا', lowercase: 'آغاز · میانیِ جدا · میانی/پایانیِ چسبیده', phoneme: 'ا', title: 'حرف ا',
         forms: [
-          { id: 'persian-alef-isolated', label: 'شکل پایانیِ جدا', pathId: 'persian-alef-isolated' },
-          { id: 'persian-alef-final', label: 'شکل پایانیِ چسبیده', pathId: 'persian-alef-final' }
+          { id: 'persian-alef-initial', label: 'شکل آغاز', pathId: 'persian-alef-initial' },
+          { id: 'persian-alef-isolated', label: 'شکل میانیِ جدا', pathId: 'persian-alef-isolated' },
+          { id: 'persian-alef-final', label: 'شکل میانی/پایانیِ چسبیده', pathId: 'persian-alef-final' }
         ]
       },
       {

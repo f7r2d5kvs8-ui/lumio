@@ -158,10 +158,11 @@ const languagePackages = {
         ]
       },
       {
-        id: 'letter-alef', letter: 'ا', lowercase: 'پایانِ جدا · پایانِ چسبیده', phoneme: 'ا', title: 'حرف ا',
+        id: 'letter-alef', letter: 'ا', lowercase: 'آغاز · میانیِ جدا · میانی/پایانیِ چسبیده', phoneme: 'ا', title: 'حرف ا',
         forms: [
-          { id: 'persian-alef-isolated', label: 'شکل پایانیِ جدا', pathId: 'persian-alef-isolated' },
-          { id: 'persian-alef-final', label: 'شکل پایانیِ چسبیده', pathId: 'persian-alef-final' }
+          { id: 'persian-alef-initial', label: 'شکل آغاز', pathId: 'persian-alef-initial' },
+          { id: 'persian-alef-isolated', label: 'شکل میانیِ جدا', pathId: 'persian-alef-isolated' },
+          { id: 'persian-alef-final', label: 'شکل میانی/پایانیِ چسبیده', pathId: 'persian-alef-final' }
         ]
       },
       {
@@ -297,8 +298,11 @@ const persianBehShape = {
 };
 const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShape).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
 Object.assign(writingPaths, {
-  'persian-alef-isolated': letter(['M 200 95 V 420']),
-  'persian-alef-final': letter(['M 325 235 H 200 V 420']),
+  // ا forms based on the child-writing reference: beginning hook, isolated
+  // middle, and a right-joining middle/ending form.
+  'persian-alef-initial': letter(['M 250 115 C 225 82 174 82 145 108', 'M 195 145 V 420']),
+  'persian-alef-isolated': letter(['M 195 105 V 420']),
+  'persian-alef-final': letter(['M 195 105 V 365 H 290']),
   ...makePersianDotFamily('beh', [[180, 390]]),
   ...makePersianDotFamily('peh', [[162, 390], [198, 390], [180, 414]]),
   ...makePersianDotFamily('teh', [[162, 130], [198, 130]]),
@@ -402,7 +406,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.22';
+const RELEASE = '0.6.23';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
