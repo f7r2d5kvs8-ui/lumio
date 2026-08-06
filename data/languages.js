@@ -129,6 +129,29 @@ export const languagePackages = {
           { id: 'persian-meem-isolated', label: 'شکل پایانیِ جدا', pathId: 'persian-meem-isolated' },
           { id: 'persian-meem-final', label: 'شکل پایانیِ چسبیده', pathId: 'persian-meem-final' }
         ]
+      },
+      {
+        id: 'letter-alef', letter: 'ا', lowercase: 'پایانِ جدا · پایانِ چسبیده', phoneme: 'ا', title: 'حرف ا',
+        forms: [
+          { id: 'persian-alef-isolated', label: 'شکل پایانیِ جدا', pathId: 'persian-alef-isolated' },
+          { id: 'persian-alef-final', label: 'شکل پایانیِ چسبیده', pathId: 'persian-alef-final' }
+        ]
+      },
+      {
+        id: 'letter-beh', letter: 'ب', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ب', title: 'حرف ب',
+        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-beh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-beh-${form}` }))
+      },
+      {
+        id: 'letter-peh', letter: 'پ', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'پ', title: 'حرف پ',
+        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-peh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-peh-${form}` }))
+      },
+      {
+        id: 'letter-teh', letter: 'ت', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ت', title: 'حرف ت',
+        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-teh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-teh-${form}` }))
+      },
+      {
+        id: 'letter-theh', letter: 'ث', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'ث', title: 'حرف ث',
+        forms: ['initial', 'medial', 'isolated', 'final'].map(form => ({ id: `persian-theh-${form}`, label: ({ initial:'شکل آغاز', medial:'شکل میانی', isolated:'شکل پایانیِ جدا', final:'شکل پایانیِ چسبیده' })[form], pathId: `persian-theh-${form}` }))
       }
     ],
     curriculum: [

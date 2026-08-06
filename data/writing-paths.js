@@ -90,3 +90,23 @@ Object.assign(writingPaths, {
     'M 118 270 H 78 V 405'
   ])
 });
+
+// The first Persian alphabet family is data-driven: one child-friendly bowl
+// and its dots, reused across ب، پ، ت and ث. Each dot is a small traceable
+// circle, while all joins remain straight and travel right to left.
+const persianDot = (x, y) => `M ${x + 9} ${y} A 9 9 0 1 1 ${x - 9} ${y} A 9 9 0 1 1 ${x + 9} ${y}`;
+const persianBehShape = {
+  initial: ['M 325 250 H 275 C 245 330 150 330 105 275 H 35'],
+  medial: ['M 325 250 H 275 C 245 330 150 330 105 275 H 35'],
+  isolated: ['M 275 250 C 245 330 150 330 105 275 H 80'],
+  final: ['M 325 250 H 275 C 245 330 150 330 105 275 H 80']
+};
+const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShape).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
+Object.assign(writingPaths, {
+  'persian-alef-isolated': letter(['M 200 95 V 420']),
+  'persian-alef-final': letter(['M 325 235 H 200 V 420']),
+  ...makePersianDotFamily('beh', [[180, 390]]),
+  ...makePersianDotFamily('peh', [[162, 390], [198, 390], [180, 414]]),
+  ...makePersianDotFamily('teh', [[162, 130], [198, 130]]),
+  ...makePersianDotFamily('theh', [[150, 135], [180, 115], [210, 135]])
+});
