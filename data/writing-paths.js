@@ -107,7 +107,7 @@ Object.assign(writingPaths, {
   // middle, and a right-joining middle/ending form.
   'persian-alef-initial': letter(['M 145 130 V 95 H 245 V 70', 'M 195 155 V 420']),
   'persian-alef-isolated': letter(['M 195 105 V 420']),
-  'persian-alef-final': letter(['M 300 105 V 80 H 145 V 130', 'M 195 155 V 420']),
+  'persian-alef-final': letter(['M 300 365 H 195 V 105']),
   ...makePersianDotFamily('beh', [[180, 390]]),
   ...makePersianDotFamily('peh', [[162, 390], [198, 390], [180, 414]]),
   ...makePersianDotFamily('teh', [[162, 130], [198, 130]]),
