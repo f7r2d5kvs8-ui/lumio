@@ -67,10 +67,10 @@ Object.assign(writingPaths, {
 // child-writing templates deliberately use circles, straight joins, and right
 // angles rather than typographic calligraphy.
 Object.assign(writingPaths, {
-  // م — isolated ending: a round loop followed by the vertical ending stroke.
+  // م — isolated ending: loop, short horizontal bridge, then vertical ending stroke.
   'persian-meem-isolated': letter([
     'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
-    'M 118 270 V 405'
+    'M 118 270 H 78 V 405'
   ]),
   // مـ — beginning: a perfect circle with a straight left-facing joining tail.
   'persian-meem-initial': letter([
@@ -83,10 +83,10 @@ Object.assign(writingPaths, {
     'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
     'M 118 270 H 35'
   ]),
-  // ـم — connected ending: a straight right join plus the vertical ending stroke.
+  // ـم — connected ending: right join, loop, horizontal bridge, and vertical ending.
   'persian-meem-final': letter([
     'M 325 270 H 262',
     'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
-    'M 118 270 V 405'
+    'M 118 270 H 78 V 405'
   ])
 });
