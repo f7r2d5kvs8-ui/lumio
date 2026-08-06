@@ -234,28 +234,31 @@ Object.assign(writingPaths, {
   'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
 });
 
-// Persian paths always start on the right and travel to the left. Joining tails
-// therefore extend left for the following letter, matching Persian writing flow.
+// Persian paths always start on the right and travel to the left. These first
+// child-writing templates deliberately use circles, straight joins, and right
+// angles rather than typographic calligraphy.
 Object.assign(writingPaths, {
-  // م — isolated ending, with no connection to a preceding letter.
+  // م — isolated ending: a round loop followed by the vertical ending stroke.
   'persian-meem-isolated': letter([
-    'M 290 300 C 255 195 165 185 130 250 C 97 315 150 380 217 360 C 262 347 285 322 290 300'
+    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
+    'M 118 270 V 405'
   ]),
-  // مـ — beginning: the tail joins the next letter on the left.
+  // مـ — beginning: a perfect circle with a straight left-facing joining tail.
   'persian-meem-initial': letter([
-    'M 290 300 C 255 195 165 185 130 250 C 97 315 150 380 217 360 C 262 347 285 322 290 300',
-    'M 130 250 C 90 238 58 245 30 260'
+    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
+    'M 118 270 H 35'
   ]),
-  // ـمـ — middle: connected to the previous letter on the right and next on the left.
+  // ـمـ — middle: straight joins on both sides of the circular loop.
   'persian-meem-medial': letter([
-    'M 325 270 C 288 252 260 247 235 252',
-    'M 235 252 C 205 190 122 190 96 248 C 71 307 121 365 185 350 C 218 343 236 316 235 252',
-    'M 96 248 C 71 245 49 252 30 270'
+    'M 325 270 H 262',
+    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
+    'M 118 270 H 35'
   ]),
-  // ـم — connected ending: joined from the preceding letter on the right.
+  // ـم — connected ending: a straight right join plus the vertical ending stroke.
   'persian-meem-final': letter([
-    'M 325 270 C 288 252 260 247 235 252',
-    'M 235 252 C 205 190 122 190 96 248 C 71 307 121 365 185 350 C 218 343 236 316 235 252'
+    'M 325 270 H 262',
+    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
+    'M 118 270 V 405'
   ])
 });
 
@@ -356,7 +359,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.19';
+const RELEASE = '0.6.20';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
