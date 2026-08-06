@@ -118,9 +118,18 @@ export const languagePackages = {
     },
     games: [
       { id: 'word-builder', title: 'واژه‌ساز', description: 'گوش کن، حروف را انتخاب کن و واژه بساز.', icon: '🧩', status: 'ready' },
-      { id: 'letter-trail', title: 'مسیر حرف', description: 'تمرین نوشتن حروف فارسی به‌زودی می‌آید.', icon: '✍️', status: 'comingSoon' }
+      { id: 'letter-trail', title: 'مسیر حرف', description: 'صدای حرف را بشنو و شکل‌های آن را دنبال کن.', icon: '✍️', status: 'ready' }
     ],
-    writing: [],
+    writing: [
+      {
+        id: 'letter-meem', letter: 'م', lowercase: 'ابتدا · میان · پایان', phoneme: 'م', title: 'حرف م',
+        forms: [
+          { id: 'persian-meem-initial', label: 'شکل آغاز', pathId: 'persian-meem-initial' },
+          { id: 'persian-meem-medial', label: 'شکل میانی', pathId: 'persian-meem-medial' },
+          { id: 'persian-meem-final', label: 'شکل پایانی', pathId: 'persian-meem-final' }
+        ]
+      }
+    ],
     curriculum: [
       { id: 'sounds-1', title: 'صداهای نخست', icon: '🔤', skill: 'letter', words: persianLessonWords(0, 10) },
       { id: 'sounds-2', title: 'ترکیب صداها', icon: '🎵', skill: 'build', words: persianLessonWords(10, 20) },

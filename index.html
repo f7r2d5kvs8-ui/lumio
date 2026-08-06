@@ -145,9 +145,18 @@ const languagePackages = {
     },
     games: [
       { id: 'word-builder', title: 'واژه‌ساز', description: 'گوش کن، حروف را انتخاب کن و واژه بساز.', icon: '🧩', status: 'ready' },
-      { id: 'letter-trail', title: 'مسیر حرف', description: 'تمرین نوشتن حروف فارسی به‌زودی می‌آید.', icon: '✍️', status: 'comingSoon' }
+      { id: 'letter-trail', title: 'مسیر حرف', description: 'صدای حرف را بشنو و شکل‌های آن را دنبال کن.', icon: '✍️', status: 'ready' }
     ],
-    writing: [],
+    writing: [
+      {
+        id: 'letter-meem', letter: 'م', lowercase: 'ابتدا · میان · پایان', phoneme: 'م', title: 'حرف م',
+        forms: [
+          { id: 'persian-meem-initial', label: 'شکل آغاز', pathId: 'persian-meem-initial' },
+          { id: 'persian-meem-medial', label: 'شکل میانی', pathId: 'persian-meem-medial' },
+          { id: 'persian-meem-final', label: 'شکل پایانی', pathId: 'persian-meem-final' }
+        ]
+      }
+    ],
     curriculum: [
       { id: 'sounds-1', title: 'صداهای نخست', icon: '🔤', skill: 'letter', words: persianLessonWords(0, 10) },
       { id: 'sounds-2', title: 'ترکیب صداها', icon: '🎵', skill: 'build', words: persianLessonWords(10, 20) },
@@ -222,6 +231,23 @@ Object.assign(writingPaths, {
   'lowercase-x': letter(['M 95 250 L 270 420', 'M 270 250 L 95 420']),
   'lowercase-y': letter(['M 85 245 L 180 420 L 275 245', 'M 275 245 L 165 485']),
   'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
+});
+
+// Persian letter forms are separate ordered paths, ready for every joining letter.
+Object.assign(writingPaths, {
+  'persian-meem-initial': letter([
+    'M 70 300 C 105 195 195 185 230 250 C 263 315 210 380 143 360 C 98 347 75 322 70 300',
+    'M 230 250 C 270 238 302 245 330 260'
+  ]),
+  'persian-meem-medial': letter([
+    'M 35 270 C 72 252 100 247 125 252',
+    'M 125 252 C 155 190 238 190 264 248 C 289 307 239 365 175 350 C 142 343 124 316 125 252',
+    'M 264 248 C 289 245 311 252 330 270'
+  ]),
+  'persian-meem-final': letter([
+    'M 35 270 C 72 252 100 247 125 252',
+    'M 125 252 C 155 190 238 190 264 248 C 289 307 239 365 175 350 C 142 343 124 316 125 252'
+  ])
 });
 
 const KEY = 'lumio-profile-v1';
@@ -321,7 +347,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.15';
+const RELEASE = '0.6.16';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -430,8 +456,8 @@ function startTracing(drillId, formIndex = 0) {
 
 function renderTracing() {
   if (tracingSession.namePractice) { renderNameTracing(); return; }
-  const { drill, path } = tracingSession;
-  root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← Letters</button><span class="count">${drill.title}</span></div><section class="tracing-card"><div class="eyebrow">Letterspoor</div><h1>Volg de letter ${drill.letter}</h1><p>Luister naar de klank. Houd de cirkel vast en volg het grijze spoor.</p><div class="trace-stage"><svg id="trace-svg" viewBox="${path.viewBox}" role="img" aria-label="Volg de hoofdletter ${drill.letter}">${path.strokes.map((stroke, index) => `<path class="trace-shadow" d="${stroke}"/><path class="trace-progress" data-trace-progress="${index}" d="${stroke}"/>`).join('')}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="Sleep de cirkel over de letter ${drill.letter}"/></svg></div><p id="trace-feedback" class="feedback">Luister en begin bij de paarse cirkel.</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 Luister</button><button class="button primary" data-action="retry-trace" disabled>Opnieuw</button></div></section></main>${adBanner()}`;
+  const { drill, path, form } = tracingSession; const t = copy();
+  root.innerHTML = `${header()}<main class="screen tracing-screen"><div class="game-head"><button class="back" data-action="letters">← ${t.letters}</button><span class="count">${drill.title}</span></div><section class="tracing-card"><div class="eyebrow">${t.letterTrail}</div><h1>${t.followLetter} ${drill.letter}</h1><p>${t.traceIntro}</p><div class="trace-stage"><svg id="trace-svg" viewBox="${path.viewBox}" role="img" aria-label="${t.followLetter} ${drill.letter}: ${form.label}">${path.strokes.map((stroke, index) => `<path class="trace-shadow" d="${stroke}"/><path class="trace-progress" data-trace-progress="${index}" d="${stroke}"/>`).join('')}<circle id="trace-start" class="trace-marker start" r="13"/><circle id="trace-end" class="trace-marker end" r="13"/><circle id="trace-dot" class="trace-dot" r="17" tabindex="0" role="button" aria-label="${t.followLetter} ${drill.letter}"/></svg></div><p id="trace-feedback" class="feedback">${t.startPurple}</p><div class="controls"><button class="button soft" data-action="listen-trace">🔊 ${t.listen}</button><button class="button primary" data-action="retry-trace" disabled>${t.retry}</button></div></section></main>${adBanner()}`;
   bindHeader();
   root.querySelector('[data-action="letters"]').addEventListener('click', () => { tracingSession = null; view = 'letters'; render(); });
   root.querySelector('[data-action="listen-trace"]').addEventListener('click', () => speak(drill.phoneme));
@@ -462,7 +488,7 @@ function setupTracing() {
   };
   activateStroke();
   const nearestPoint = event => { const bounds = svg.getBoundingClientRect(); const x = (event.clientX - bounds.left) * svg.viewBox.baseVal.width / bounds.width; const y = (event.clientY - bounds.top) * svg.viewBox.baseVal.height / bounds.height; let nearest = 0; let distance = Infinity; tracingSession.samples.forEach((point, index) => { const candidate = (point.x - x) ** 2 + (point.y - y) ** 2; if (candidate < distance) { distance = candidate; nearest = index; } }); return nearest; };
-  const update = index => { const maximumStep = 12; if (index > tracingSession.furthest + maximumStep) return; const progress = progresses[tracingSession.strokeIndex]; if (index > tracingSession.furthest) tracingSession.acceptedMoves = (tracingSession.acceptedMoves || 0) + 1; tracingSession.furthest = Math.max(tracingSession.furthest, index); place(dot, tracingSession.samples[index]); progress.style.strokeDashoffset = String(tracingSession.length * (1 - tracingSession.furthest / (tracingSession.samples.length - 1))); if (!tracingSession.completed && tracingSession.acceptedMoves >= 14 && tracingSession.furthest >= tracingSession.samples.length - 8) { if (tracingSession.strokeIndex < shadows.length - 1) { tracingSession.strokeIndex += 1; root.querySelector('#trace-feedback').textContent = 'Goed zo! Volg nu de volgende lijn.'; activateStroke(); } else finishTracing(); } };
+  const update = index => { const maximumStep = 12; if (index > tracingSession.furthest + maximumStep) return; const progress = progresses[tracingSession.strokeIndex]; if (index > tracingSession.furthest) tracingSession.acceptedMoves = (tracingSession.acceptedMoves || 0) + 1; tracingSession.furthest = Math.max(tracingSession.furthest, index); place(dot, tracingSession.samples[index]); progress.style.strokeDashoffset = String(tracingSession.length * (1 - tracingSession.furthest / (tracingSession.samples.length - 1))); if (!tracingSession.completed && tracingSession.acceptedMoves >= 14 && tracingSession.furthest >= tracingSession.samples.length - 8) { if (tracingSession.strokeIndex < shadows.length - 1) { tracingSession.strokeIndex += 1; root.querySelector('#trace-feedback').textContent = copy().nextLine; activateStroke(); } else finishTracing(); } };
   const startDrag = event => { event.preventDefault(); tracingSession.dragging = true; svg.setPointerCapture?.(event.pointerId); if (tracingSession.length < 20 && !tracingSession.completed) { const last = tracingSession.samples.length - 1; tracingSession.furthest = last - 12; tracingSession.acceptedMoves = 14; update(last); } };
   const move = event => { if (tracingSession.dragging) update(nearestPoint(event)); };
   const stop = () => { tracingSession.dragging = false; };
@@ -472,7 +498,8 @@ function setupTracing() {
 async function finishTracing() {
   if (tracingSession.namePractice) return finishNameTracing();
   tracingSession.completed = true;
-  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); await persistTracingProgress(tracingSession.form.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = tracingSession.formIndex === 0 ? `Goed gedaan! Nu de kleine ${tracingSession.drill.lowercase}.` : `Goed gedaan! Je hebt de ${tracingSession.drill.letter} en ${tracingSession.drill.lowercase} geoefend. ⭐`; const retry = root.querySelector('[data-action="retry-trace"]'); retry.disabled = tracingSession.formIndex === 0; retry.textContent = 'Opnieuw'; speak(ui().great); setTimeout(() => { if (tracingSession?.completed && tracingSession.formIndex === 0) startTracing(tracingSession.drill.id, 1); else if (tracingSession?.completed) { tracingSession = null; view = 'letters'; render(); } }, 900);
+  const nextIndex = tracingSession.formIndex + 1; const hasNext = nextIndex < tracingSession.drill.forms.length;
+  const language = pack(); const progress = languageProgress(profile, language.metadata.id); const tracingCompleted = [...new Set([...(progress.tracingCompleted || []), tracingSession.form.id])]; updateLanguageProgress(profile, language.metadata.id, { tracingCompleted }); rewardPractice(profile); if (!hasNext) await persistTracingProgress(tracingSession.drill.id); const feedback = root.querySelector('#trace-feedback'); feedback.className = 'feedback success celebrate'; feedback.textContent = hasNext ? `${ui().great} ${tracingSession.drill.forms[nextIndex].label}.` : `${ui().great} ⭐`; const retry = root.querySelector('[data-action="retry-trace"]'); retry.disabled = hasNext; retry.textContent = copy().retry; speak(ui().great); setTimeout(() => { if (!tracingSession?.completed) return; if (hasNext) startTracing(tracingSession.drill.id, nextIndex); else { tracingSession = null; view = 'letters'; render(); } }, 900);
 }
 
 function finishNameTracing() {
@@ -574,6 +601,7 @@ function continueToSelectedGame() { view = profile.selectedGame === 'letter-trai
 function renderNativeName() { const language = pack(); const t = nativeNameCopy[profile.appLanguage || 'nl']; const existing = escape(profile.localizedNames?.[language.metadata.id] || ''); root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card" dir="${language.writingRules.direction}"><button class="back" data-action="back-games">← ${t.back}</button><div class="eyebrow">Lumio</div><div class="name-orb">✏️</div><h1>${t.title}</h1><p>${t.intro}</p><form id="localized-name-form" class="auth-form"><label>${t.label}<input id="localized-name" type="text" dir="${language.writingRules.direction}" maxlength="24" required placeholder="${t.placeholder}" value="${existing}"></label><button class="button primary">${t.continue}</button></form></section></main>`; root.querySelector('[data-action="back-games"]').onclick = () => { view = 'games'; render(); }; root.querySelector('#localized-name-form').onsubmit = event => { event.preventDefault(); const name = root.querySelector('#localized-name').value.trim().replace(/\s+/g, ' '); if (!name) return; profile.localizedNames = { ...(profile.localizedNames || {}), [language.metadata.id]: name }; saveProfile(profile); continueToSelectedGame(); }; }
 function renderGames() { const language = pack(); const text = ui(); const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>${t.chooseGame}</h1><p>${t.gameIntro}</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled' : ''}><span class="game-choice-icon">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="languages"]').onclick = () => { view = 'languages'; render(); }; root.querySelectorAll('[data-game]').forEach(button => button.onclick = () => { profile.selectedGame = button.dataset.game; saveProfile(profile); if (needsLocalizedName(language) && !profile.localizedNames?.[language.metadata.id]) { view = 'native-name'; render(); return; } continueToSelectedGame(); }); bindHeader(); }
 function render() { if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+
 root.addEventListener('click', event => { const languageButton = event.target.closest('[data-app-language]'); if (languageButton) document.documentElement.dir = languageButton.dataset.appLanguage === 'fa' ? 'rtl' : 'ltr'; if (!event.target.closest('.parent [data-action="home"]')) return; event.preventDefault(); event.stopImmediatePropagation(); view = 'games'; render(); }, true);
 
 boot();

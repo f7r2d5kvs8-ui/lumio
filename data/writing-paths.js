@@ -62,3 +62,20 @@ Object.assign(writingPaths, {
   'lowercase-y': letter(['M 85 245 L 180 420 L 275 245', 'M 275 245 L 165 485']),
   'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
 });
+
+// Persian letter forms are separate ordered paths, ready for every joining letter.
+Object.assign(writingPaths, {
+  'persian-meem-initial': letter([
+    'M 70 300 C 105 195 195 185 230 250 C 263 315 210 380 143 360 C 98 347 75 322 70 300',
+    'M 230 250 C 270 238 302 245 330 260'
+  ]),
+  'persian-meem-medial': letter([
+    'M 35 270 C 72 252 100 247 125 252',
+    'M 125 252 C 155 190 238 190 264 248 C 289 307 239 365 175 350 C 142 343 124 316 125 252',
+    'M 264 248 C 289 245 311 252 330 270'
+  ]),
+  'persian-meem-final': letter([
+    'M 35 270 C 72 252 100 247 125 252',
+    'M 125 252 C 155 190 238 190 264 248 C 289 307 239 365 175 350 C 142 343 124 316 125 252'
+  ])
+});
