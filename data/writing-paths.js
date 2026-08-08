@@ -64,49 +64,241 @@ Object.assign(writingPaths, {
 });
 
 // Persian paths always start on the right and travel to the left. These first
-// child-writing templates deliberately use circles, straight joins, and right
-// angles rather than typographic calligraphy.
+// child-writing templates deliberately use simple strokes rather than
+// typographic calligraphy.
+const persianMeemLoop = 'M 285 245 C 315 275 290 315 250 305 C 210 295 220 245 255 238 C 268 235 278 238 285 245 Z';
 Object.assign(writingPaths, {
-  // م — isolated ending: loop, short horizontal bridge, then vertical ending stroke.
-  'persian-meem-isolated': letter([
-    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
-    'M 118 270 H 78 V 405'
+  // مـ — the small hanging loop followed by its left-facing connection.
+  'persian-meem-begin-middle': letter([
+    persianMeemLoop,
+    'M 255 245 H 75'
   ]),
-  // مـ — beginning: a perfect circle with a straight left-facing joining tail.
-  'persian-meem-initial': letter([
-    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
-    'M 118 270 H 35'
-  ]),
-  // ـمـ — middle: straight joins on both sides of the circular loop.
-  'persian-meem-medial': letter([
-    'M 325 270 H 262',
-    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
-    'M 118 270 H 35'
-  ]),
-  // ـم — connected ending: right join, loop, horizontal bridge, and vertical ending.
-  'persian-meem-final': letter([
-    'M 325 270 H 262',
-    'M 262 270 A 72 72 0 1 1 118 270 A 72 72 0 1 1 262 270',
-    'M 118 270 H 78 V 405'
+  // ـم — the same loop, then a horizontal bridge and long downward ending.
+  'persian-meem-end': letter([
+    persianMeemLoop,
+    'M 255 245 H 105 V 410'
   ])
 });
 
 // The ب، پ، ت، ث family follows the child's squared two-form reference:
 // a beginning/middle form with joining tails and a separate ending form.
-const persianDot = (x, y) => `M ${x + 9} ${y} A 9 9 0 1 1 ${x - 9} ${y} A 9 9 0 1 1 ${x + 9} ${y}`;
+// A dot is rendered as a short stroked mark. The tracing engine treats this
+// as a tap-sized step, so children only need to tap the dot instead of trace
+// a tiny circle.
+const persianDot = (x, y) => `M ${x} ${y} H ${x + 1}`;
 const persianBehShapes = {
-  'begin-middle': ['M 325 245 H 275 V 325 H 105 V 245 H 35'],
+  // Beginning/middle is only the right half of the ending shape. It has no
+  // extra starting tail: children begin at the top of the vertical stroke.
+  'begin-middle': ['M 275 245 V 325 H 190'],
   end: ['M 275 245 V 325 H 105 V 245']
 };
-const makePersianDotFamily = (name, dots) => Object.fromEntries(Object.entries(persianBehShapes).map(([form, strokes]) => [`persian-${name}-${form}`, letter([...strokes, ...dots.map(([x, y]) => persianDot(x, y))]) ]));
+const makePersianDotFamily = (name, dotsByForm) => Object.fromEntries(Object.entries(persianBehShapes).map(([form, strokes]) => [
+  `persian-${name}-${form}`,
+  letter([...strokes, ...dotsByForm[form].map(([x, y]) => persianDot(x, y))])
+]));
+
+// The ج، چ، ح، خ family shares one child-writing skeleton. The short upper
+// diagonal and longer lower diagonal meet at the right edge. Beginning/middle
+// forms use a straight horizontal baseline; ending forms use an open semicircle.
+const persianJeemShapes = {
+  'begin-middle': [
+    'M 215 220 L 238 185 L 295 275',
+    'M 295 275 H 70'
+  ],
+  end: [
+    'M 215 220 L 238 185 L 295 275',
+    'M 295 275 C 175 275 150 430 295 430'
+  ]
+};
+const makePersianJeemFamily = (name, dotsByForm) => Object.fromEntries(Object.entries(persianJeemShapes).map(([form, strokes]) => [
+  `persian-${name}-${form}`,
+  letter([...strokes, ...dotsByForm[form].map(([x, y]) => persianDot(x, y))])
+]));
+
+// د، ذ use two straight angled strokes. ر، ز، ژ use one simple descending
+// curve. These non-joining letters each have one child-writing form.
+const persianDalShape = ['M 150 165 L 245 245 L 150 325'];
+const persianRehShape = ['M 245 175 C 245 260 210 320 145 345'];
+
+// س، ش: three child-friendly teeth. The beginning/middle form finishes with
+// a horizontal connection; the ending form opens into a large lower bowl.
+const persianSeenShapes = {
+  'begin-middle': [
+    'M 315 270 H 65',
+    'M 315 220 V 270',
+    'M 255 220 V 270',
+    'M 195 220 V 270'
+  ],
+  end: [
+    'M 315 270 H 195 C 195 420 55 420 55 270',
+    'M 315 220 V 270',
+    'M 255 220 V 270',
+    'M 195 220 V 270'
+  ]
+};
+
+// ص، ض: the small upper semicircle is closed by its horizontal baseline and
+// has a separate tooth on its left. The ending form leaves a short space
+// between this closed bowl and the large lower bowl.
+const persianSadShapes = {
+  'begin-middle': [
+    'M 315 270 H 65',
+    'M 315 270 C 315 190 235 190 225 270',
+    'M 180 220 V 270'
+  ],
+  end: [
+    'M 315 270 H 145 C 145 420 45 420 45 270',
+    'M 315 270 C 315 190 235 190 225 270',
+    'M 145 220 V 270'
+  ]
+};
+
+// ع، غ: a small upper curve is shared by both forms. Beginning/middle uses
+// a straight left-facing tail; ending continues into a large open lower bowl.
+const persianAinShapes = {
+  'begin-middle': [
+    'M 285 180 C 220 180 220 270 285 270',
+    'M 285 270 H 75'
+  ],
+  end: [
+    'M 285 180 C 220 180 220 270 285 270',
+    'M 285 270 C 145 270 135 430 285 430'
+  ]
+};
+
+// ف، ق share a small closed upper loop. Their beginning/middle form has a
+// straight left tail; ف ends with a raised tip and ق with a large lower bowl.
+const persianFehLoop = 'M 295 270 C 295 205 225 205 225 270 H 295';
+const persianFehBeginning = [persianFehLoop, 'M 225 270 H 75'];
+const persianFehEnding = [persianFehLoop, 'M 225 270 H 75 C 55 270 45 250 45 220'];
+const persianQafEnding = [persianFehLoop, 'M 295 270 C 295 420 65 420 65 270'];
+
+// ک، گ: diagonal upper stroke, straight vertical, and a short or long base.
+// گ adds its small parallel upper mark as a separate final fragment.
+const persianKafShapes = {
+  'begin-middle': ['M 300 120 L 210 210 V 330 H 145'],
+  end: ['M 300 120 L 210 210 V 330 H 80 C 60 330 50 310 50 280']
+};
+const persianGafMark = 'M 235 135 L 275 95';
+
+const makeTwoFormFamily = (name, shapes, dotsByForm) => Object.fromEntries(Object.entries(shapes).map(([form, strokes]) => [
+  `persian-${name}-${form}`,
+  letter([...strokes, ...dotsByForm[form].map(([x, y]) => persianDot(x, y))])
+]));
 Object.assign(writingPaths, {
   // ا forms based on the child-writing reference: beginning hook, isolated
   // middle, and a right-joining middle/ending form.
-  'persian-alef-initial': letter(['M 145 130 V 95 H 245 V 70', 'M 195 155 V 420']),
+  'persian-alef-initial': letter(['M 245 70 V 95 H 145 V 130', 'M 195 155 V 420']),
   'persian-alef-isolated': letter(['M 195 105 V 420']),
-  'persian-alef-final': letter(['M 300 365 H 195 V 105']),
-  ...makePersianDotFamily('beh', [[180, 390]]),
-  ...makePersianDotFamily('peh', [[162, 390], [198, 390], [180, 414]]),
-  ...makePersianDotFamily('teh', [[162, 130], [198, 130]]),
-  ...makePersianDotFamily('theh', [[150, 135], [180, 115], [210, 135]])
+  // Beginning/middle dots sit directly below or above the centre of their
+  // shorter horizontal stroke. Ending dots retain their verified positions.
+  ...makePersianDotFamily('beh', {
+    'begin-middle': [[232, 390]], end: [[180, 390]]
+  }),
+  ...makePersianDotFamily('peh', {
+    'begin-middle': [[214, 390], [250, 390], [232, 414]],
+    end: [[162, 390], [198, 390], [180, 414]]
+  }),
+  ...makePersianDotFamily('teh', {
+    'begin-middle': [[214, 130], [250, 130]], end: [[162, 130], [198, 130]]
+  }),
+  ...makePersianDotFamily('theh', {
+    'begin-middle': [[202, 135], [232, 115], [262, 135]],
+    end: [[150, 135], [180, 115], [210, 135]]
+  }),
+  ...makePersianJeemFamily('jeem', {
+    'begin-middle': [[270, 335]], end: [[270, 345]]
+  }),
+  ...makePersianJeemFamily('cheh', {
+    'begin-middle': [[252, 335], [288, 335], [270, 365]],
+    end: [[252, 335], [288, 335], [270, 365]]
+  }),
+  ...makePersianJeemFamily('hah', {
+    'begin-middle': [], end: []
+  }),
+  ...makePersianJeemFamily('khah', {
+    'begin-middle': [[240, 125]], end: [[240, 125]]
+  }),
+  'persian-dal': letter(persianDalShape),
+  'persian-zal': letter([...persianDalShape, persianDot(150, 95)]),
+  'persian-reh': letter(persianRehShape),
+  'persian-zain': letter([...persianRehShape, persianDot(245, 105)]),
+  'persian-jeh': letter([
+    ...persianRehShape,
+    persianDot(227, 105), persianDot(263, 105), persianDot(245, 75)
+  ]),
+  ...makeTwoFormFamily('seen', persianSeenShapes, {
+    'begin-middle': [], end: []
+  }),
+  ...makeTwoFormFamily('sheen', persianSeenShapes, {
+    'begin-middle': [[227, 155], [263, 155], [245, 125]],
+    end: [[227, 155], [263, 155], [245, 125]]
+  }),
+  ...makeTwoFormFamily('sad', persianSadShapes, {
+    'begin-middle': [], end: []
+  }),
+  ...makeTwoFormFamily('zad', persianSadShapes, {
+    'begin-middle': [[245, 125]], end: [[245, 125]]
+  }),
+  'persian-tah': letter([
+    'M 295 300 C 295 215 205 215 195 300 H 295',
+    'M 195 300 H 65',
+    'M 195 90 V 300'
+  ]),
+  'persian-zah': letter([
+    'M 295 300 C 295 215 205 215 195 300 H 295',
+    'M 195 300 H 65',
+    'M 195 90 V 300',
+    persianDot(250, 155)
+  ]),
+  ...makeTwoFormFamily('ain', persianAinShapes, {
+    'begin-middle': [], end: []
+  }),
+  ...makeTwoFormFamily('ghain', persianAinShapes, {
+    'begin-middle': [[250, 115]], end: [[250, 115]]
+  }),
+  'persian-feh-begin-middle': letter([...persianFehBeginning, persianDot(260, 140)]),
+  'persian-feh-end': letter([...persianFehEnding, persianDot(260, 140)]),
+  'persian-qaf-begin-middle': letter([
+    ...persianFehBeginning, persianDot(242, 140), persianDot(278, 140)
+  ]),
+  'persian-qaf-end': letter([
+    ...persianQafEnding, persianDot(242, 140), persianDot(278, 140)
+  ]),
+  'persian-kaf-begin-middle': letter(persianKafShapes['begin-middle']),
+  'persian-kaf-end': letter(persianKafShapes.end),
+  'persian-gaf-begin-middle': letter([...persianKafShapes['begin-middle'], persianGafMark]),
+  'persian-gaf-end': letter([...persianKafShapes.end, persianGafMark]),
+  'persian-lam-begin-middle': letter(['M 245 100 V 330 H 145']),
+  'persian-lam-end': letter(['M 245 100 V 315 C 245 420 85 420 85 315']),
+  'persian-noon-begin-middle': letter([
+    'M 275 140 V 300 H 125',
+    persianDot(200, 85)
+  ]),
+  'persian-noon-end': letter([
+    'M 275 270 C 275 420 75 420 75 270',
+    persianDot(175, 220)
+  ]),
+  'persian-waw': letter([
+    'M 265 185 C 295 215 270 270 225 255 C 190 243 195 195 230 180 C 245 175 258 178 265 185 Z',
+    'M 270 220 C 275 290 235 350 175 380'
+  ]),
+  'persian-heh-initial': letter([
+    'M 205 145 L 305 245 H 215 Q 195 245 190 225 C 205 205 235 175 250 190 C 260 200 278 218 275 232 C 272 245 240 250 215 245 H 65'
+  ]),
+  'persian-heh-medial': letter([
+    'M 315 250 H 225 L 180 350 L 135 250 H 45'
+  ]),
+  'persian-heh-final': letter([
+    'M 220 180 C 155 160 150 245 220 245 Z',
+    'M 220 180 V 300 H 300'
+  ]),
+  'persian-yeh-begin-middle': letter([
+    'M 285 120 V 250 H 135',
+    persianDot(205, 305),
+    persianDot(255, 305)
+  ]),
+  'persian-yeh-final': letter([
+    'M 280 155 C 235 160 215 205 250 235 C 290 270 270 335 220 370 C 165 405 80 390 65 320 C 58 280 75 245 100 220'
+  ])
 });

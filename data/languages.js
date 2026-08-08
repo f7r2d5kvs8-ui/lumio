@@ -122,48 +122,220 @@ export const languagePackages = {
     ],
     writing: [
       {
-        id: 'letter-meem', letter: 'م', lowercase: 'ابتدا · میان · پایانِ جدا · پایانِ چسبیده', phoneme: 'م', title: 'حرف م',
+        id: 'letter-alef', letter: 'ا', shortTitle: 'الف', lowercase: 'آ · ا', phoneme: 'ا', title: 'حروف آ و ا',
         forms: [
-          { id: 'persian-meem-initial', label: 'شکل آغاز', pathId: 'persian-meem-initial' },
-          { id: 'persian-meem-medial', label: 'شکل میانی', pathId: 'persian-meem-medial' },
-          { id: 'persian-meem-isolated', label: 'شکل پایانیِ جدا', pathId: 'persian-meem-isolated' },
-          { id: 'persian-meem-final', label: 'شکل پایانیِ چسبیده', pathId: 'persian-meem-final' }
+          { id: 'persian-alef-initial', label: 'آ با کلاه', glyph: 'آ', phoneme: 'آ', pathId: 'persian-alef-initial' },
+          { id: 'persian-alef-isolated', label: 'ا بدون کلاه', glyph: 'ا', phoneme: 'ا', pathId: 'persian-alef-isolated' }
         ]
       },
       {
-        id: 'letter-alef', letter: 'ا', lowercase: 'آغاز · میانیِ جدا · میانی/پایانیِ چسبیده', phoneme: 'ا', title: 'حرف ا',
-        forms: [
-          { id: 'persian-alef-initial', label: 'شکل آغاز', pathId: 'persian-alef-initial' },
-          { id: 'persian-alef-isolated', label: 'شکل میانیِ جدا', pathId: 'persian-alef-isolated' },
-          { id: 'persian-alef-final', label: 'شکل میانی/پایانیِ چسبیده', pathId: 'persian-alef-final' }
-        ]
-      },
-      {
-        id: 'letter-beh', letter: 'ب', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ب', title: 'حرف ب',
+        id: 'letter-beh', letter: 'ب', shortTitle: 'ب', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ب', title: 'حرف ب',
         forms: [
           { id: 'persian-beh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-beh-begin-middle' },
           { id: 'persian-beh-end', label: 'شکل پایانی', pathId: 'persian-beh-end' }
         ]
       },
       {
-        id: 'letter-peh', letter: 'پ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'پ', title: 'حرف پ',
+        id: 'letter-peh', letter: 'پ', shortTitle: 'پ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'پ', title: 'حرف پ',
         forms: [
           { id: 'persian-peh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-peh-begin-middle' },
           { id: 'persian-peh-end', label: 'شکل پایانی', pathId: 'persian-peh-end' }
         ]
       },
       {
-        id: 'letter-teh', letter: 'ت', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ت', title: 'حرف ت',
+        id: 'letter-teh', letter: 'ت', shortTitle: 'ت', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ت', title: 'حرف ت',
         forms: [
           { id: 'persian-teh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-teh-begin-middle' },
           { id: 'persian-teh-end', label: 'شکل پایانی', pathId: 'persian-teh-end' }
         ]
       },
       {
-        id: 'letter-theh', letter: 'ث', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ث', title: 'حرف ث',
+        id: 'letter-theh', letter: 'ث', shortTitle: 'ث', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ث', title: 'حرف ث',
         forms: [
           { id: 'persian-theh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-theh-begin-middle' },
           { id: 'persian-theh-end', label: 'شکل پایانی', pathId: 'persian-theh-end' }
+        ]
+      },
+      {
+        id: 'letter-jeem', letter: 'ج', shortTitle: 'ج', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ج', title: 'حرف ج',
+        forms: [
+          { id: 'persian-jeem-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-jeem-begin-middle' },
+          { id: 'persian-jeem-end', label: 'شکل پایانی', pathId: 'persian-jeem-end' }
+        ]
+      },
+      {
+        id: 'letter-cheh', letter: 'چ', shortTitle: 'چ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'چ', title: 'حرف چ',
+        forms: [
+          { id: 'persian-cheh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-cheh-begin-middle' },
+          { id: 'persian-cheh-end', label: 'شکل پایانی', pathId: 'persian-cheh-end' }
+        ]
+      },
+      {
+        id: 'letter-hah', letter: 'ح', shortTitle: 'ح', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ح', title: 'حرف ح',
+        forms: [
+          { id: 'persian-hah-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-hah-begin-middle' },
+          { id: 'persian-hah-end', label: 'شکل پایانی', pathId: 'persian-hah-end' }
+        ]
+      },
+      {
+        id: 'letter-khah', letter: 'خ', shortTitle: 'خ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'خ', title: 'حرف خ',
+        forms: [
+          { id: 'persian-khah-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-khah-begin-middle' },
+          { id: 'persian-khah-end', label: 'شکل پایانی', pathId: 'persian-khah-end' }
+        ]
+      },
+      {
+        id: 'letter-dal', letter: 'د', shortTitle: 'د', lowercase: '', phoneme: 'د', title: 'حرف د',
+        forms: [
+          { id: 'persian-dal', label: 'شکل حرف', pathId: 'persian-dal' }
+        ]
+      },
+      {
+        id: 'letter-zal', letter: 'ذ', shortTitle: 'ذ', lowercase: '', phoneme: 'ذ', title: 'حرف ذ',
+        forms: [
+          { id: 'persian-zal', label: 'شکل حرف', pathId: 'persian-zal' }
+        ]
+      },
+      {
+        id: 'letter-reh', letter: 'ر', shortTitle: 'ر', lowercase: '', phoneme: 'ر', title: 'حرف ر',
+        forms: [
+          { id: 'persian-reh', label: 'شکل حرف', pathId: 'persian-reh' }
+        ]
+      },
+      {
+        id: 'letter-zain', letter: 'ز', shortTitle: 'ز', lowercase: '', phoneme: 'ز', title: 'حرف ز',
+        forms: [
+          { id: 'persian-zain', label: 'شکل حرف', pathId: 'persian-zain' }
+        ]
+      },
+      {
+        id: 'letter-jeh', letter: 'ژ', shortTitle: 'ژ', lowercase: '', phoneme: 'ژ', title: 'حرف ژ',
+        forms: [
+          { id: 'persian-jeh', label: 'شکل حرف', pathId: 'persian-jeh' }
+        ]
+      },
+      {
+        id: 'letter-seen', letter: 'س', shortTitle: 'س', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'س', title: 'حرف س',
+        forms: [
+          { id: 'persian-seen-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-seen-begin-middle' },
+          { id: 'persian-seen-end', label: 'شکل پایانی', pathId: 'persian-seen-end' }
+        ]
+      },
+      {
+        id: 'letter-sheen', letter: 'ش', shortTitle: 'ش', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ش', title: 'حرف ش',
+        forms: [
+          { id: 'persian-sheen-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-sheen-begin-middle' },
+          { id: 'persian-sheen-end', label: 'شکل پایانی', pathId: 'persian-sheen-end' }
+        ]
+      },
+      {
+        id: 'letter-sad', letter: 'ص', shortTitle: 'ص', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ص', title: 'حرف ص',
+        forms: [
+          { id: 'persian-sad-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-sad-begin-middle' },
+          { id: 'persian-sad-end', label: 'شکل پایانی', pathId: 'persian-sad-end' }
+        ]
+      },
+      {
+        id: 'letter-zad', letter: 'ض', shortTitle: 'ض', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ض', title: 'حرف ض',
+        forms: [
+          { id: 'persian-zad-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-zad-begin-middle' },
+          { id: 'persian-zad-end', label: 'شکل پایانی', pathId: 'persian-zad-end' }
+        ]
+      },
+      {
+        id: 'letter-tah', letter: 'ط', shortTitle: 'ط', lowercase: '', phoneme: 'ط', title: 'حرف ط',
+        forms: [
+          { id: 'persian-tah', label: 'شکل حرف', pathId: 'persian-tah' }
+        ]
+      },
+      {
+        id: 'letter-zah', letter: 'ظ', shortTitle: 'ظ', lowercase: '', phoneme: 'ظ', title: 'حرف ظ',
+        forms: [
+          { id: 'persian-zah', label: 'شکل حرف', pathId: 'persian-zah' }
+        ]
+      },
+      {
+        id: 'letter-ain', letter: 'ع', shortTitle: 'ع', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ع', title: 'حرف ع',
+        forms: [
+          { id: 'persian-ain-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-ain-begin-middle' },
+          { id: 'persian-ain-end', label: 'شکل پایانی', pathId: 'persian-ain-end' }
+        ]
+      },
+      {
+        id: 'letter-ghain', letter: 'غ', shortTitle: 'غ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'غ', title: 'حرف غ',
+        forms: [
+          { id: 'persian-ghain-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-ghain-begin-middle' },
+          { id: 'persian-ghain-end', label: 'شکل پایانی', pathId: 'persian-ghain-end' }
+        ]
+      },
+      {
+        id: 'letter-feh', letter: 'ف', shortTitle: 'ف', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ف', title: 'حرف ف',
+        forms: [
+          { id: 'persian-feh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-feh-begin-middle' },
+          { id: 'persian-feh-end', label: 'شکل پایانی', pathId: 'persian-feh-end' }
+        ]
+      },
+      {
+        id: 'letter-qaf', letter: 'ق', shortTitle: 'ق', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ق', title: 'حرف ق',
+        forms: [
+          { id: 'persian-qaf-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-qaf-begin-middle' },
+          { id: 'persian-qaf-end', label: 'شکل پایانی', pathId: 'persian-qaf-end' }
+        ]
+      },
+      {
+        id: 'letter-kaf', letter: 'ک', shortTitle: 'ک', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ک', title: 'حرف ک',
+        forms: [
+          { id: 'persian-kaf-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-kaf-begin-middle' },
+          { id: 'persian-kaf-end', label: 'شکل پایانی', pathId: 'persian-kaf-end' }
+        ]
+      },
+      {
+        id: 'letter-gaf', letter: 'گ', shortTitle: 'گ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'گ', title: 'حرف گ',
+        forms: [
+          { id: 'persian-gaf-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-gaf-begin-middle' },
+          { id: 'persian-gaf-end', label: 'شکل پایانی', pathId: 'persian-gaf-end' }
+        ]
+      },
+      {
+        id: 'letter-lam', letter: 'ل', shortTitle: 'ل', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ل', title: 'حرف ل',
+        forms: [
+          { id: 'persian-lam-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-lam-begin-middle' },
+          { id: 'persian-lam-end', label: 'شکل پایانی', pathId: 'persian-lam-end' }
+        ]
+      },
+      {
+        id: 'letter-meem', letter: 'م', shortTitle: 'م', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'م', title: 'حرف م',
+        forms: [
+          { id: 'persian-meem-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-meem-begin-middle' },
+          { id: 'persian-meem-end', label: 'شکل پایانی', pathId: 'persian-meem-end' }
+        ]
+      },
+      {
+        id: 'letter-noon', letter: 'ن', shortTitle: 'ن', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ن', title: 'حرف ن',
+        forms: [
+          { id: 'persian-noon-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-noon-begin-middle' },
+          { id: 'persian-noon-end', label: 'شکل پایانی', pathId: 'persian-noon-end' }
+        ]
+      },
+      {
+        id: 'letter-waw', letter: 'و', shortTitle: 'و', lowercase: '', phoneme: 'و', title: 'حرف و',
+        forms: [
+          { id: 'persian-waw', label: 'شکل حرف', pathId: 'persian-waw' }
+        ]
+      },
+      {
+        id: 'letter-heh', letter: 'ه', shortTitle: 'ه', lowercase: 'آغاز · میانی · پایانی', phoneme: 'ه', title: 'حرف ه',
+        forms: [
+          { id: 'persian-heh-initial', label: 'شکل آغاز', pathId: 'persian-heh-initial' },
+          { id: 'persian-heh-medial', label: 'شکل میانی', pathId: 'persian-heh-medial' },
+          { id: 'persian-heh-final', label: 'شکل پایانی', pathId: 'persian-heh-final' }
+        ]
+      },
+      {
+        id: 'letter-yeh', letter: 'ی', shortTitle: 'ی', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ی', title: 'حرف ی',
+        forms: [
+          { id: 'persian-yeh-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-yeh-begin-middle' },
+          { id: 'persian-yeh-final', label: 'شکل پایانی', pathId: 'persian-yeh-final' }
         ]
       }
     ],
