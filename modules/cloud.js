@@ -15,6 +15,12 @@ export async function currentSession() {
 
 export async function signUp(email, password) { return lumioSupabase ? lumioSupabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } }) : { data: { session: null, user: null }, error: offlineError() }; }
 export async function signIn(email, password) { return lumioSupabase ? lumioSupabase.auth.signInWithPassword({ email, password }) : { data: { session: null, user: null }, error: offlineError() }; }
+export async function signInWithGoogle() {
+  if (!lumioSupabase) return { data: null, error: offlineError() };
+  if (!/^https?:$/.test(window.location.protocol)) return { data: null, error: new Error('Google sign-in is available in the online version of Lumio.') };
+  const redirectTo = `${window.location.origin}${window.location.pathname}`;
+  return lumioSupabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+}
 export async function signOut() { return lumioSupabase ? lumioSupabase.auth.signOut() : { error: null }; }
 
 export async function readProgress(userId) {

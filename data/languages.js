@@ -255,17 +255,21 @@ export const languagePackages = {
         ]
       },
       {
-        id: 'letter-ain', letter: 'ع', shortTitle: 'ع', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'ع', title: 'حرف ع',
+        id: 'letter-ain', letter: 'ع', shortTitle: 'ع', lowercase: 'آغاز · میانی · پایانی چسبیده · پایانی جدا', phoneme: 'ع', title: 'حرف ع',
         forms: [
-          { id: 'persian-ain-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-ain-begin-middle' },
-          { id: 'persian-ain-end', label: 'شکل پایانی', pathId: 'persian-ain-end' }
+          { id: 'persian-ain-begin-middle', label: 'شکل آغاز', pathId: 'persian-ain-begin-middle' },
+          { id: 'persian-ain-medial', label: 'شکل میانی', pathId: 'persian-ain-medial' },
+          { id: 'persian-ain-connected-end', label: 'شکل پایانی چسبیده', pathId: 'persian-ain-connected-end' },
+          { id: 'persian-ain-end', label: 'شکل پایانی جدا', pathId: 'persian-ain-end' }
         ]
       },
       {
-        id: 'letter-ghain', letter: 'غ', shortTitle: 'غ', lowercase: 'آغاز یا میانی · پایانی', phoneme: 'غ', title: 'حرف غ',
+        id: 'letter-ghain', letter: 'غ', shortTitle: 'غ', lowercase: 'آغاز · میانی · پایانی چسبیده · پایانی جدا', phoneme: 'غ', title: 'حرف غ',
         forms: [
-          { id: 'persian-ghain-begin-middle', label: 'شکل آغاز یا میانی', pathId: 'persian-ghain-begin-middle' },
-          { id: 'persian-ghain-end', label: 'شکل پایانی', pathId: 'persian-ghain-end' }
+          { id: 'persian-ghain-begin-middle', label: 'شکل آغاز', pathId: 'persian-ghain-begin-middle' },
+          { id: 'persian-ghain-medial', label: 'شکل میانی', pathId: 'persian-ghain-medial' },
+          { id: 'persian-ghain-connected-end', label: 'شکل پایانی چسبیده', pathId: 'persian-ghain-connected-end' },
+          { id: 'persian-ghain-end', label: 'شکل پایانی جدا', pathId: 'persian-ghain-end' }
         ]
       },
       {

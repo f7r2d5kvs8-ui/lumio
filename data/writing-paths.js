@@ -63,6 +63,70 @@ Object.assign(writingPaths, {
   'lowercase-z': letter(['M 90 250 H 275 L 90 420 H 275'])
 });
 
+// Connection anchors for composing whole Persian words. `incoming` is the
+// red point where a letter accepts a connection from the letter on its right;
+// `outgoing` is the green point where it can continue to the next letter on
+// its left. Word composition aligns these anchors exactly and leaves a gap
+// whenever the preceding Persian letter is non-joining.
+const incoming = (x, y) => ({ incoming: { x, y } });
+const joining = (incomingX, incomingY, outgoingX, outgoingY) => ({
+  incoming: { x: incomingX, y: incomingY },
+  outgoing: { x: outgoingX, y: outgoingY }
+});
+export const writingConnections = {
+  'persian-alef-initial': incoming(195, 300),
+  'persian-alef-isolated': incoming(195, 300),
+  ...Object.fromEntries(['beh', 'peh', 'teh', 'theh'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(275, 325, 175, 325)],
+    [`persian-${name}-end`, incoming(275, 325)]
+  ])),
+  ...Object.fromEntries(['jeem', 'cheh', 'hah', 'khah'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(295, 275, 70, 275)],
+    [`persian-${name}-end`, incoming(295, 275)]
+  ])),
+  'persian-dal': incoming(245, 245),
+  'persian-zal': incoming(245, 245),
+  'persian-reh': incoming(245, 175),
+  'persian-zain': incoming(245, 175),
+  'persian-jeh': incoming(245, 175),
+  ...Object.fromEntries(['seen', 'sheen'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(315, 270, 65, 270)],
+    [`persian-${name}-end`, incoming(315, 270)]
+  ])),
+  ...Object.fromEntries(['sad', 'zad'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(315, 270, 65, 270)],
+    [`persian-${name}-end`, incoming(315, 270)]
+  ])),
+  'persian-tah': joining(295, 300, 65, 300),
+  'persian-zah': joining(295, 300, 65, 300),
+  ...Object.fromEntries(['ain', 'ghain'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(285, 270, 75, 270)],
+    [`persian-${name}-medial`, joining(315, 270, 75, 270)],
+    [`persian-${name}-connected-end`, incoming(315, 270)],
+    [`persian-${name}-end`, incoming(285, 270)]
+  ])),
+  ...Object.fromEntries(['feh', 'qaf'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(295, 270, 75, 270)],
+    [`persian-${name}-end`, incoming(295, 270)]
+  ])),
+  ...Object.fromEntries(['kaf', 'gaf'].flatMap(name => [
+    [`persian-${name}-begin-middle`, joining(210, 330, 145, 330)],
+    [`persian-${name}-end`, incoming(210, 330)]
+  ])),
+  'persian-lam-begin-middle': joining(245, 330, 145, 330),
+  'persian-lam-end': incoming(245, 315),
+  'persian-meem-begin-middle': joining(285, 245, 75, 245),
+  'persian-meem-end': incoming(285, 245),
+  'persian-noon-begin-middle': joining(275, 300, 125, 300),
+  'persian-noon-end': incoming(275, 270),
+  'persian-waw': incoming(270, 220),
+  'persian-heh-initial': joining(305, 245, 65, 245),
+  'persian-heh-medial': joining(315, 250, 45, 250),
+  'persian-heh-final': incoming(300, 300),
+  'persian-yeh-begin-middle': joining(285, 250, 135, 250),
+  'persian-yeh-final': incoming(280, 155)
+};
+
 // Persian paths always start on the right and travel to the left. These first
 // child-writing templates deliberately use simple strokes rather than
 // typographic calligraphy.
@@ -86,11 +150,19 @@ Object.assign(writingPaths, {
 // as a tap-sized step, so children only need to tap the dot instead of trace
 // a tiny circle.
 const persianDot = (x, y) => `M ${x} ${y} H ${x + 1}`;
+// A tooth is always one child-writing grid unit high. Keep this shared value
+// separate from tall bars/handles (for example ط، ظ، ل and ک).
+const persianToothHeight = 80;
+const persianBehRight = 275;
+const persianBehBeginningLength = 100;
+const persianBehEndingLength = persianBehBeginningLength * 2;
+const persianBehBeginningLeft = persianBehRight - persianBehBeginningLength;
+const persianBehEndingLeft = persianBehRight - persianBehEndingLength;
 const persianBehShapes = {
   // Beginning/middle is only the right half of the ending shape. It has no
   // extra starting tail: children begin at the top of the vertical stroke.
-  'begin-middle': ['M 275 245 V 325 H 190'],
-  end: ['M 275 245 V 325 H 105 V 245']
+  'begin-middle': [`M ${persianBehRight} ${325 - persianToothHeight} V 325 H ${persianBehBeginningLeft}`],
+  end: [`M ${persianBehRight} ${325 - persianToothHeight} V 325 H ${persianBehEndingLeft} V ${325 - persianToothHeight}`]
 };
 const makePersianDotFamily = (name, dotsByForm) => Object.fromEntries(Object.entries(persianBehShapes).map(([form, strokes]) => [
   `persian-${name}-${form}`,
@@ -125,15 +197,15 @@ const persianRehShape = ['M 245 175 C 245 260 210 320 145 345'];
 const persianSeenShapes = {
   'begin-middle': [
     'M 315 270 H 65',
-    'M 315 220 V 270',
-    'M 255 220 V 270',
-    'M 195 220 V 270'
+    `M 315 ${270 - persianToothHeight} V 270`,
+    `M 255 ${270 - persianToothHeight} V 270`,
+    `M 195 ${270 - persianToothHeight} V 270`
   ],
   end: [
     'M 315 270 H 195 C 195 420 55 420 55 270',
-    'M 315 220 V 270',
-    'M 255 220 V 270',
-    'M 195 220 V 270'
+    `M 315 ${270 - persianToothHeight} V 270`,
+    `M 255 ${270 - persianToothHeight} V 270`,
+    `M 195 ${270 - persianToothHeight} V 270`
   ]
 };
 
@@ -144,21 +216,30 @@ const persianSadShapes = {
   'begin-middle': [
     'M 315 270 H 65',
     'M 315 270 C 315 190 235 190 225 270',
-    'M 180 220 V 270'
+    `M 180 ${270 - persianToothHeight} V 270`
   ],
   end: [
     'M 315 270 H 145 C 145 420 45 420 45 270',
     'M 315 270 C 315 190 235 190 225 270',
-    'M 145 220 V 270'
+    `M 145 ${270 - persianToothHeight} V 270`
   ]
 };
 
-// ع، غ: a small upper curve is shared by both forms. Beginning/middle uses
-// a straight left-facing tail; ending continues into a large open lower bowl.
+// ع، غ have four contextual forms. The medial and connected-ending forms use
+// the closed triangular body from the handwriting reference.
 const persianAinShapes = {
   'begin-middle': [
     'M 285 180 C 220 180 220 270 285 270',
     'M 285 270 H 75'
+  ],
+  medial: [
+    'M 315 270 H 75',
+    'M 285 190 H 185 L 235 270 Z'
+  ],
+  'connected-end': [
+    'M 315 270 H 235',
+    'M 285 190 H 185 L 235 270 Z',
+    'M 235 270 C 105 270 105 430 285 430'
   ],
   end: [
     'M 285 180 C 220 180 220 270 285 270',
@@ -188,23 +269,23 @@ const makeTwoFormFamily = (name, shapes, dotsByForm) => Object.fromEntries(Objec
 Object.assign(writingPaths, {
   // ا forms based on the child-writing reference: beginning hook, isolated
   // middle, and a right-joining middle/ending form.
-  'persian-alef-initial': letter(['M 245 70 V 95 H 145 V 130', 'M 195 155 V 420']),
-  'persian-alef-isolated': letter(['M 195 105 V 420']),
+  'persian-alef-initial': letter(['M 245 90 V 115 H 145 V 150', 'M 195 165 V 300']),
+  'persian-alef-isolated': letter(['M 195 90 V 300']),
   // Beginning/middle dots sit directly below or above the centre of their
   // shorter horizontal stroke. Ending dots retain their verified positions.
   ...makePersianDotFamily('beh', {
-    'begin-middle': [[232, 390]], end: [[180, 390]]
+    'begin-middle': [[225, 390]], end: [[175, 390]]
   }),
   ...makePersianDotFamily('peh', {
-    'begin-middle': [[214, 390], [250, 390], [232, 414]],
-    end: [[162, 390], [198, 390], [180, 414]]
+    'begin-middle': [[207, 390], [243, 390], [225, 414]],
+    end: [[157, 390], [193, 390], [175, 414]]
   }),
   ...makePersianDotFamily('teh', {
-    'begin-middle': [[214, 130], [250, 130]], end: [[162, 130], [198, 130]]
+    'begin-middle': [[207, 130], [243, 130]], end: [[157, 130], [193, 130]]
   }),
   ...makePersianDotFamily('theh', {
-    'begin-middle': [[202, 135], [232, 115], [262, 135]],
-    end: [[150, 135], [180, 115], [210, 135]]
+    'begin-middle': [[195, 135], [225, 115], [255, 135]],
+    end: [[145, 135], [175, 115], [205, 135]]
   }),
   ...makePersianJeemFamily('jeem', {
     'begin-middle': [[270, 335]], end: [[270, 345]]
@@ -252,10 +333,11 @@ Object.assign(writingPaths, {
     persianDot(250, 155)
   ]),
   ...makeTwoFormFamily('ain', persianAinShapes, {
-    'begin-middle': [], end: []
+    'begin-middle': [], medial: [], 'connected-end': [], end: []
   }),
   ...makeTwoFormFamily('ghain', persianAinShapes, {
-    'begin-middle': [[250, 115]], end: [[250, 115]]
+    'begin-middle': [[250, 115]], medial: [[235, 125]],
+    'connected-end': [[235, 125]], end: [[250, 115]]
   }),
   'persian-feh-begin-middle': letter([...persianFehBeginning, persianDot(260, 140)]),
   'persian-feh-end': letter([...persianFehEnding, persianDot(260, 140)]),
@@ -272,7 +354,7 @@ Object.assign(writingPaths, {
   'persian-lam-begin-middle': letter(['M 245 100 V 330 H 145']),
   'persian-lam-end': letter(['M 245 100 V 315 C 245 420 85 420 85 315']),
   'persian-noon-begin-middle': letter([
-    'M 275 140 V 300 H 125',
+    `M 275 ${300 - persianToothHeight} V 300 H 125`,
     persianDot(200, 85)
   ]),
   'persian-noon-end': letter([
@@ -294,7 +376,7 @@ Object.assign(writingPaths, {
     'M 220 180 V 300 H 300'
   ]),
   'persian-yeh-begin-middle': letter([
-    'M 285 120 V 250 H 135',
+    `M 285 ${250 - persianToothHeight} V 250 H 135`,
     persianDot(205, 305),
     persianDot(255, 305)
   ]),

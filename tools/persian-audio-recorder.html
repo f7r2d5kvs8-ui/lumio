@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>استودیوی صدای فارسی لومیو</title>
+  <style>
+    :root{font-family:Tahoma,"Segoe UI",sans-serif;color:#21325b;background:#f3f2ff}
+    *{box-sizing:border-box}body{margin:0;padding:24px}.studio{max-width:920px;margin:auto}
+    .card{background:#fff;border-radius:28px;padding:28px;box-shadow:0 18px 50px #4d45a31d;margin-bottom:18px}
+    h1{margin:0 0 8px;font-size:clamp(1.7rem,5vw,2.7rem)}p{line-height:1.7;color:#657293}
+    .toolbar,.controls,.nav{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    button{border:0;border-radius:16px;padding:13px 18px;font:inherit;font-weight:800;cursor:pointer;background:#ebe8ff;color:#5948c8}
+    button.primary{background:#6e59df;color:#fff}button.record{background:#ff6e78;color:#fff}button.save{background:#20ad8b;color:#fff}
+    button:disabled{opacity:.4;cursor:not-allowed}.status{font-weight:800;color:#17846e}.prompt{text-align:center;padding:28px 10px}
+    .prompt small{display:block;color:#7d86a2}.prompt strong{display:block;font-size:clamp(4rem,15vw,8rem);line-height:1.3;color:#30266f}
+    .filename{direction:ltr;display:inline-block;background:#f4f5fa;border-radius:10px;padding:7px 10px;font-family:Consolas,monospace;font-size:.83rem}
+    .meter{height:10px;background:#edf0f7;border-radius:99px;overflow:hidden;margin:18px 0}.meter span{display:block;height:100%;width:0;background:#ff6e78;transition:width .08s}
+    .recording .meter span{animation:pulse 1.1s infinite alternate}@keyframes pulse{to{width:100%}}
+    .progress{font-weight:800}.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-top:18px;max-height:260px;overflow:auto}
+    .item{padding:9px 5px;text-align:center;border-radius:12px;background:#f5f4ff;cursor:pointer}.item.done{background:#dff7ef;color:#08775e}.item.current{outline:3px solid #806bed}
+    .tip{background:#fff8d8;border-radius:14px;padding:12px 15px;color:#655619}.ltr{direction:ltr;text-align:left}@media(max-width:560px){body{padding:12px}.card{padding:19px}.controls button{flex:1}}
+  </style>
+</head>
+<body>
+<main class="studio">
+  <section class="card">
+    <h1>🎙️ استودیوی صدای فارسی لومیو</h1>
+    <p>هر مورد را جداگانه ضبط کن. برنامه نام فایل را خودش می‌سازد و پس از ذخیره به مورد بعدی می‌رود.</p>
+    <div class="toolbar">
+      <button class="primary" id="choose-folder">📁 انتخاب پوشهٔ ذخیره</button>
+      <span class="status" id="folder-status">هنوز پوشه‌ای انتخاب نشده</span>
+    </div>
+    <p class="tip">پوشهٔ پیشنهادی: <span class="ltr">assets/audio/fa</span>. پیش و پس از گفتن، حدود نیم ثانیه سکوت کن و فقط همان حرف یا واژه را بگو. کلید فاصله ضبط را شروع/متوقف می‌کند و Enter ذخیره کرده و به بعدی می‌رود.</p>
+  </section>
+
+  <section class="card" id="recording-card">
+    <div class="progress" id="progress"></div>
+    <div class="prompt"><small id="group"></small><strong id="text"></strong><span class="filename" id="filename"></span></div>
+    <div class="meter"><span></span></div>
+    <div class="controls">
+      <button class="record" id="record">● شروع ضبط</button>
+      <button id="stop" disabled>■ پایان ضبط</button>
+      <button id="play" disabled>▶ شنیدن</button>
+      <button class="save" id="save" disabled>✓ ذخیره و بعدی</button>
+    </div>
+    <p id="message" aria-live="polite"></p>
+    <div class="nav"><button id="previous">→ قبلی</button><button id="skip">بعدی ←</button><button id="reset">پاک کردن علامت‌های انجام‌شده</button></div>
+    <div class="list" id="list"></div>
+  </section>
+</main>
+
+<script type="module">
+import { persianAudio } from '../data/audio-fa.js';
+
+const letters = new Set([..."اآبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی"]);
+const phrases = new Set(['فارسی','آفرین!']);
+const items = Object.entries(persianAudio).map(([text,path]) => ({
+  text,
+  filename:path.split('/').pop(),
+  group:phrases.has(text) ? 'عبارت برنامه' : (letters.has(text) ? 'صدای حرف' : 'واژه')
+}));
+let index = Math.min(Number(localStorage.getItem('lumio-fa-recorder-index') || 0), items.length - 1);
+let done = new Set(JSON.parse(localStorage.getItem('lumio-fa-recorder-done') || '[]'));
+let directoryHandle = null;
+let audioContext, stream, source, processor, chunks = [], recordingBlob = null, recordingUrl = null;
+
+const $ = id => document.getElementById(id);
+const persist = () => { localStorage.setItem('lumio-fa-recorder-index', index); localStorage.setItem('lumio-fa-recorder-done', JSON.stringify([...done])); };
+function render(){
+  const item=items[index]; $('progress').textContent=`${index+1} از ${items.length} — ${done.size} ضبط ذخیره شده`;
+  $('group').textContent=item.group; $('text').textContent=item.text; $('filename').textContent=item.filename;
+  $('play').disabled=!recordingBlob; $('save').disabled=!recordingBlob; $('previous').disabled=index===0; $('skip').disabled=index===items.length-1;
+  $('list').innerHTML=items.map((entry,i)=>`<button class="item ${done.has(entry.filename)?'done':''} ${i===index?'current':''}" data-index="${i}" title="${entry.filename}">${entry.text}</button>`).join('');
+  document.querySelectorAll('[data-index]').forEach(button=>button.onclick=()=>select(Number(button.dataset.index)));
+}
+function select(next){ stopIfNeeded(); index=next; recordingBlob=null; if(recordingUrl) URL.revokeObjectURL(recordingUrl); recordingUrl=null; $('message').textContent=''; persist(); render(); }
+function merge(parts){ const length=parts.reduce((sum,p)=>sum+p.length,0), result=new Float32Array(length); let offset=0; for(const part of parts){result.set(part,offset);offset+=part.length} return result; }
+function wavBlob(samples,rate){
+  const buffer=new ArrayBuffer(44+samples.length*2), view=new DataView(buffer); const write=(o,s)=>[...s].forEach((c,i)=>view.setUint8(o+i,c.charCodeAt(0)));
+  write(0,'RIFF'); view.setUint32(4,36+samples.length*2,true); write(8,'WAVE'); write(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true); view.setUint32(24,rate,true); view.setUint32(28,rate*2,true); view.setUint16(32,2,true); view.setUint16(34,16,true); write(36,'data'); view.setUint32(40,samples.length*2,true);
+  let o=44; for(const sample of samples){const s=Math.max(-1,Math.min(1,sample));view.setInt16(o,s<0?s*32768:s*32767,true);o+=2} return new Blob([view],{type:'audio/wav'});
+}
+async function startRecording(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    audioContext=new AudioContext(); source=audioContext.createMediaStreamSource(stream); processor=audioContext.createScriptProcessor(4096,1,1); chunks=[];
+    processor.onaudioprocess=e=>chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); source.connect(processor); processor.connect(audioContext.destination);
+    $('record').disabled=true; $('stop').disabled=false; $('play').disabled=true; $('save').disabled=true; $('recording-card').classList.add('recording'); $('message').textContent='در حال ضبط…';
+  }catch(error){$('message').textContent='دسترسی به میکروفون ممکن نشد. صفحه را با Chrome یا Edge و آدرس localhost باز کن.';}
+}
+function stopIfNeeded(){ if(!$('stop').disabled) stopRecording(); }
+function stopRecording(){
+  if(!processor)return; processor.disconnect(); source.disconnect(); stream.getTracks().forEach(track=>track.stop());
+  recordingBlob=wavBlob(merge(chunks),audioContext.sampleRate); audioContext.close(); processor=source=stream=audioContext=null;
+  if(recordingUrl)URL.revokeObjectURL(recordingUrl); recordingUrl=URL.createObjectURL(recordingBlob);
+  $('record').disabled=false; $('stop').disabled=true; $('recording-card').classList.remove('recording'); $('message').textContent='ضبط آماده است. آن را گوش کن و سپس ذخیره کن.'; render();
+}
+async function save(){
+  if(!recordingBlob)return; const item=items[index];
+  try{
+    if(directoryHandle){const handle=await directoryHandle.getFileHandle(item.filename,{create:true});const writable=await handle.createWritable();await writable.write(recordingBlob);await writable.close();}
+    else {const a=document.createElement('a');a.href=recordingUrl;a.download=item.filename;a.click();}
+    done.add(item.filename); persist(); $('message').textContent=`${item.text} ذخیره شد.`; if(index<items.length-1)setTimeout(()=>select(index+1),350);else render();
+  }catch(error){$('message').textContent='ذخیره انجام نشد. دوباره پوشه را انتخاب کن.';}
+}
+$('choose-folder').onclick=async()=>{
+  if(!window.showDirectoryPicker){$('folder-status').textContent='ذخیره در پوشهٔ Downloads انجام می‌شود.';return;}
+  try{directoryHandle=await showDirectoryPicker({mode:'readwrite'});$('folder-status').textContent=`پوشهٔ انتخاب‌شده: ${directoryHandle.name}`;
+    for await(const name of directoryHandle.keys())if(items.some(item=>item.filename===name))done.add(name);persist();render();
+  }catch(error){$('folder-status').textContent='انتخاب پوشه لغو شد.';}
+};
+$('record').onclick=startRecording; $('stop').onclick=stopRecording; $('play').onclick=()=>new Audio(recordingUrl).play(); $('save').onclick=save;
+$('previous').onclick=()=>select(index-1); $('skip').onclick=()=>select(index+1); $('reset').onclick=()=>{if(confirm('علامت‌های انجام‌شده پاک شوند؟')){done.clear();persist();render();}};
+document.addEventListener('keydown', event=>{
+  if(event.repeat)return;
+  if(event.code==='Space'){event.preventDefault();$('stop').disabled?startRecording():stopRecording();}
+  if(event.code==='Enter'&&recordingBlob){event.preventDefault();save();}
+});
+render();
+</script>
+</body>
+</html>
