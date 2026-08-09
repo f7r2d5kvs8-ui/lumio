@@ -9,7 +9,7 @@ const freshProfile = () => ({
   selectedGame: null,
   homeLanguage: 'nl',
   learningLanguage: 'nl',
-  templateId: 'default',
+  templateId: 'forest',
   progress: {},
   rewards: { stars: 0, streak: 0, lastPractice: null },
   preferences: { reducedMotion: false, adsEnabled: true }
@@ -21,6 +21,8 @@ export function loadProfile() {
     if (profile.selectedLanguage === 'nl-BE') profile.selectedLanguage = 'nl';
     if (profile.learningLanguage === 'nl-BE') profile.learningLanguage = 'nl';
     if (profile.homeLanguage === 'nl-BE') profile.homeLanguage = 'nl';
+    // Forest Friends is Lumio's new starting world. The original style remains selectable.
+    if (!profile.templateId || profile.templateId === 'default') profile.templateId = 'forest';
     if (profile.progress?.['nl-BE']) {
       profile.progress.nl = profile.progress.nl || profile.progress['nl-BE'];
       delete profile.progress['nl-BE'];

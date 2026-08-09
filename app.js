@@ -14,7 +14,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.81';
+const RELEASE = '0.6.82';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -36,7 +36,7 @@ const templates = [
   { id:'cosmic', name:'Cosmic dreams', description:'Reach for the stars and discover new worlds.', image:'./assets/backgrounds/family-05-cosmic-dreams/cosmic-sky.jpg' }
 ];
 const applyTemplate = () => {
-  const selected = templates.find(template => template.id === profile.templateId) || templates[0];
+  const selected = templates.find(template => template.id === profile.templateId) || templates.find(template => template.id === 'forest');
   profile.templateId = selected.id;
   document.documentElement.dataset.template = selected.id;
   document.documentElement.style.setProperty('--template-bg', selected.image ? `url("${selected.image}")` : 'none');
@@ -448,7 +448,7 @@ root.addEventListener('click', event => { const languageButton = event.target.cl
 boot();
 
 function renderTemplates() {
-  const selected = profile.templateId || 'default';
+  const selected = profile.templateId || 'forest';
   root.innerHTML = `${header()}<main class="screen template-screen"><section class="hero"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">Lumio style</div><h1>Choose your world</h1><p>Pick a colourful world for every Lumio screen. You can change it anytime.</p><div class="template-grid">${templates.map(template => `<button class="template-card ${template.id === selected ? 'selected' : ''}" data-template-id="${template.id}">${template.image ? `<img src="${template.image}" alt="">` : '<span class="template-original">✨</span>'}<span class="template-card-body"><strong>${template.name}</strong><small>${template.description}</small></span>${template.id === selected ? '<b class="template-check">✓</b>' : ''}</button>`).join('')}</div></section></main>${adBanner()}`;
   root.querySelector('[data-action="home"]').onclick = () => { view = 'home'; render(); };
   root.querySelectorAll('[data-template-id]').forEach(button => button.onclick = () => { profile.templateId = button.dataset.templateId; saveProfile(profile); applyTemplate(); render(); });
