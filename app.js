@@ -14,7 +14,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.82';
+const RELEASE = '0.6.83';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -27,6 +27,11 @@ const appCopy = {
 };
 appCopy.fa = { welcome:'خوش آمدی!', beginJourney:'ماجراجویی یادگیری خودت را شروع کن.', playGuest:'بازی به‌عنوان مهمان', beginNow:'همین حالا تمرین را شروع کن', createAccount:'ساخت حساب', saveProgress:'پیشرفت خودت را ذخیره کن', haveAccount:'حساب داری؟', logIn:'ورود', welcomeBack:'خوش برگشتی', continueJourney:'سفر یادگیری‌ات را ادامه بده.', saveHero:'پیشرفت کودک را برای بعد ذخیره کن.', email:'ایمیل', password:'رمز عبور', login:'ورود', signup:'ساخت حساب', checkEmail:'ایمیل خود را بررسی و حسابت را تأیید کن. سپس وارد شو.', childName:'نام تو چیست؟', changeName:'تغییر نام', childNameHelp:'از نام تو برای ساخت یک تمرین نوشتن ویژه استفاده می‌کنیم.', firstName:'نام کوچک تو', exampleName:'مثلاً: علی', continue:'ادامه', child:'کودک', changeChildName:'تغییر نام کودک', parents:'برای والدین', signOut:'خروج', chooseGame:'یک بازی انتخاب کن', gameIntro:'انتخاب کن امروز چطور تمرین کنی.', games:'بازی‌ها', chooseLetter:'یک حرف انتخاب کن', bothCases:'هر بار حرف بزرگ و کوچک را تمرین کن.', lettersPractised:'حرف تمرین شده', myName:'نوشتن نام من', readyAgain:'تمام شد — دوباره تمرین کن', practise:'تمرین', letters:'حروف', letterTrail:'مسیر حرف', followLetter:'حرف را دنبال کن', traceIntro:'به صدا گوش کن. دایره را نگه دار و مسیر خاکستری را دنبال کن.', startPurple:'گوش کن و از دایره بنفش شروع کن.', listen:'گوش کن', retry:'دوباره', write:'بنویس', nameTrail:'مسیر حرف · نام تو', nameIntro:'هر نام از چند حرف ساخته شده است. از راست به چپ آن‌ها را دنبال کن.', nameStart:'از دایره بنفش شروع کن و نام کاملت را دنبال کن.', nextLine:'آفرین! حالا خط بعدی را دنبال کن.', lowercaseNext:'آفرین! حالا حرف کوچک', letterDone:'آفرین! این حروف را تمرین کردی:', nameDone:'آفرین {name}! تو نام کاملت را نوشتی.', wordBuilders:'واژه‌ساز', chooseLevel:'یک سطح انتخاب کن' };
 const copy = () => appCopy[profile.appLanguage || 'nl'];
+const childNamePrompts = {
+  nl: 'Vul je naam in of vraag je ouders om je te helpen.',
+  en: 'Enter your name or ask your parents to help you.',
+  fa: 'نامت را بنویس یا از پدر و مادرت کمک بخواه.'
+};
 const templates = [
   { id:'default', name:'Lumio original', description:'The calm original Lumio look.', image:null },
   { id:'playground', name:'Pastel playground', description:'A bright world of play and friendship.', image:'./assets/backgrounds/family-01/background-01.jpg' },
@@ -394,6 +399,7 @@ function renderChildName() {
     return `<label class="localized-name-field" dir="${language.writingRules.direction}"><span>${languageFlags(language.metadata)} ${language.metadata.nativeName}</span><input data-localized-name="${language.metadata.id}" type="text" dir="${language.writingRules.direction}" maxlength="24" required value="${value}" placeholder="${nativeNameCopy[profile.appLanguage || 'nl']?.placeholder || ''}"></label>`;
   }).join('');
   root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card"><div class="eyebrow">Lumio</div><div class="name-orb">✏️</div><h1>${editing ? t.changeName : t.childName}</h1><p>${t.childNameHelp}</p><form id="child-name-form" class="auth-form"><label>${editing ? managerText.profile : t.firstName}<small>${editing ? managerText.profileHelp : ''}</small><input id="child-name" type="text" autocomplete="given-name" maxlength="24" required placeholder="${t.exampleName}" value="${existing}" dir="ltr"></label><p class="auth-message name-error" id="name-error"></p>${localizedFields ? `<div class="localized-name-heading"><strong>${managerText.languageNames}</strong><small>${managerText.languageHelp}</small></div>${localizedFields}` : ''}<button class="button primary">${editing ? managerText.save : t.continue}</button></form></section></main>`;
+  if (!editing) speak(childNamePrompts[profile.appLanguage || 'nl']);
   root.querySelector('#child-name-form').onsubmit = event => {
     event.preventDefault();
     const name = root.querySelector('#child-name').value.trim().replace(/\s+/g, ' '); if (!name) return;
