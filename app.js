@@ -14,7 +14,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.78';
+const RELEASE = '0.6.80';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -40,9 +40,9 @@ const applyTemplate = () => {
   profile.templateId = selected.id;
   document.documentElement.dataset.template = selected.id;
   document.documentElement.style.setProperty('--template-bg', selected.image ? `url("${selected.image}")` : 'none');
-  document.body.style.backgroundImage = selected.image ? `url("${selected.image}"), linear-gradient(145deg,#eaf6ff,#fbf2ff 60%,#fff8df)` : 'linear-gradient(145deg,#eaf6ff,#fbf2ff 60%,#fff8df)';
-  document.body.style.backgroundSize = selected.image ? 'cover, auto' : 'auto';
-  document.body.style.backgroundPosition = 'center';
+  document.body.style.backgroundImage = selected.image ? `linear-gradient(rgba(255,253,250,.76),rgba(247,244,255,.76)), url("${selected.image}")` : 'linear-gradient(145deg,#eaf6ff,#fbf2ff 60%,#fff8df)';
+  document.body.style.backgroundSize = selected.image ? 'cover, cover' : 'auto';
+  document.body.style.backgroundPosition = 'center, center';
   document.body.style.backgroundAttachment = 'fixed';
 };
 const languageFlags = language => `<span class="flag-set" aria-label="${escape(language.name)}">${(language.flagCodes || []).map(code => `<span class="country-flag flag-${code}" aria-hidden="true"></span>`).join('')}</span>`;
