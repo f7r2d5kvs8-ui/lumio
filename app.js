@@ -14,7 +14,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.76';
+const RELEASE = '0.6.78';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -27,6 +27,24 @@ const appCopy = {
 };
 appCopy.fa = { welcome:'خوش آمدی!', beginJourney:'ماجراجویی یادگیری خودت را شروع کن.', playGuest:'بازی به‌عنوان مهمان', beginNow:'همین حالا تمرین را شروع کن', createAccount:'ساخت حساب', saveProgress:'پیشرفت خودت را ذخیره کن', haveAccount:'حساب داری؟', logIn:'ورود', welcomeBack:'خوش برگشتی', continueJourney:'سفر یادگیری‌ات را ادامه بده.', saveHero:'پیشرفت کودک را برای بعد ذخیره کن.', email:'ایمیل', password:'رمز عبور', login:'ورود', signup:'ساخت حساب', checkEmail:'ایمیل خود را بررسی و حسابت را تأیید کن. سپس وارد شو.', childName:'نام تو چیست؟', changeName:'تغییر نام', childNameHelp:'از نام تو برای ساخت یک تمرین نوشتن ویژه استفاده می‌کنیم.', firstName:'نام کوچک تو', exampleName:'مثلاً: علی', continue:'ادامه', child:'کودک', changeChildName:'تغییر نام کودک', parents:'برای والدین', signOut:'خروج', chooseGame:'یک بازی انتخاب کن', gameIntro:'انتخاب کن امروز چطور تمرین کنی.', games:'بازی‌ها', chooseLetter:'یک حرف انتخاب کن', bothCases:'هر بار حرف بزرگ و کوچک را تمرین کن.', lettersPractised:'حرف تمرین شده', myName:'نوشتن نام من', readyAgain:'تمام شد — دوباره تمرین کن', practise:'تمرین', letters:'حروف', letterTrail:'مسیر حرف', followLetter:'حرف را دنبال کن', traceIntro:'به صدا گوش کن. دایره را نگه دار و مسیر خاکستری را دنبال کن.', startPurple:'گوش کن و از دایره بنفش شروع کن.', listen:'گوش کن', retry:'دوباره', write:'بنویس', nameTrail:'مسیر حرف · نام تو', nameIntro:'هر نام از چند حرف ساخته شده است. از راست به چپ آن‌ها را دنبال کن.', nameStart:'از دایره بنفش شروع کن و نام کاملت را دنبال کن.', nextLine:'آفرین! حالا خط بعدی را دنبال کن.', lowercaseNext:'آفرین! حالا حرف کوچک', letterDone:'آفرین! این حروف را تمرین کردی:', nameDone:'آفرین {name}! تو نام کاملت را نوشتی.', wordBuilders:'واژه‌ساز', chooseLevel:'یک سطح انتخاب کن' };
 const copy = () => appCopy[profile.appLanguage || 'nl'];
+const templates = [
+  { id:'default', name:'Lumio original', description:'The calm original Lumio look.', image:null },
+  { id:'playground', name:'Pastel playground', description:'A bright world of play and friendship.', image:'./assets/backgrounds/family-01/background-01.jpg' },
+  { id:'forest', name:'Forest friends', description:'Explore, learn and grow in the woodland.', image:'./assets/backgrounds/family-02-forest-friends/forest-school.jpg' },
+  { id:'ocean', name:'Ocean world', description:'Dive into a colourful underwater classroom.', image:'./assets/backgrounds/family-03-ocean-world/underwater-classroom.jpg' },
+  { id:'meadow', name:'Sunny meadow', description:'Follow a gentle path through the countryside.', image:'./assets/backgrounds/family-04-sunny-skies/riverside-balloon.jpg' },
+  { id:'cosmic', name:'Cosmic dreams', description:'Reach for the stars and discover new worlds.', image:'./assets/backgrounds/family-05-cosmic-dreams/cosmic-sky.jpg' }
+];
+const applyTemplate = () => {
+  const selected = templates.find(template => template.id === profile.templateId) || templates[0];
+  profile.templateId = selected.id;
+  document.documentElement.dataset.template = selected.id;
+  document.documentElement.style.setProperty('--template-bg', selected.image ? `url("${selected.image}")` : 'none');
+  document.body.style.backgroundImage = selected.image ? `url("${selected.image}"), linear-gradient(145deg,#eaf6ff,#fbf2ff 60%,#fff8df)` : 'linear-gradient(145deg,#eaf6ff,#fbf2ff 60%,#fff8df)';
+  document.body.style.backgroundSize = selected.image ? 'cover, auto' : 'auto';
+  document.body.style.backgroundPosition = 'center';
+  document.body.style.backgroundAttachment = 'fixed';
+};
 const languageFlags = language => `<span class="flag-set" aria-label="${escape(language.name)}">${(language.flagCodes || []).map(code => `<span class="country-flag flag-${code}" aria-hidden="true"></span>`).join('')}</span>`;
 const games = () => pack()?.games || [];
 const mascotAssets = {
@@ -393,7 +411,7 @@ function renderChildName() {
   };
 }
 
-function header() { const t = copy(); return `<header class="topbar"><button class="brand" data-action="languages" aria-label="Lumio">Lu<span>mio</span></button><div class="stat-row"><button class="chip child-account" data-action="child-name" aria-label="${t.changeChildName}">👤 <span>${escape(profile.childName || t.child)}</span></button><button class="chip" data-action="parent" aria-label="${t.parents}">👨‍👩‍👧</button><span class="chip">🔥 ${profile.rewards.streak || 0}</span><span class="chip">⭐ ${profile.rewards.stars || 0}</span></div></header>`; }
+function header() { const t = copy(); return `<header class="topbar"><button class="brand" data-action="languages" aria-label="Lumio">Lu<span>mio</span></button><div class="stat-row"><button class="chip child-account" data-action="child-name" aria-label="${t.changeChildName}">👤 <span>${escape(profile.childName || t.child)}</span></button><button class="chip" data-action="templates" aria-label="Choose world style">🎨</button><button class="chip" data-action="parent" aria-label="${t.parents}">👨‍👩‍👧</button><span class="chip">🔥 ${profile.rewards.streak || 0}</span><span class="chip">⭐ ${profile.rewards.stars || 0}</span></div></header>`; }
 
 function renderGames() { const language = pack(); const text = ui(); const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>${t.chooseGame}</h1><p>${t.gameIntro}</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled' : ''}><span class="game-choice-icon">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="languages"]').onclick = () => { view = 'languages'; render(); }; root.querySelectorAll('[data-game]').forEach(button => button.onclick = () => { profile.selectedGame = button.dataset.game; saveProfile(profile); view = button.dataset.game === 'letter-trail' ? 'letters' : 'home'; render(); }); bindHeader(); }
 
@@ -428,3 +446,15 @@ function render() { if (view === 'app-language') renderAppLanguage(); else if (v
 root.addEventListener('click', event => { const languageButton = event.target.closest('[data-app-language]'); if (languageButton) document.documentElement.dir = languageButton.dataset.appLanguage === 'fa' ? 'rtl' : 'ltr'; if (!event.target.closest('.parent [data-action="home"]')) return; event.preventDefault(); event.stopImmediatePropagation(); view = 'games'; render(); }, true);
 
 boot();
+
+function renderTemplates() {
+  const selected = profile.templateId || 'default';
+  root.innerHTML = `${header()}<main class="screen template-screen"><section class="hero"><button class="back" data-action="home">← ${ui().back}</button><div class="eyebrow">Lumio style</div><h1>Choose your world</h1><p>Pick a colourful world for every Lumio screen. You can change it anytime.</p><div class="template-grid">${templates.map(template => `<button class="template-card ${template.id === selected ? 'selected' : ''}" data-template-id="${template.id}">${template.image ? `<img src="${template.image}" alt="">` : '<span class="template-original">✨</span>'}<span class="template-card-body"><strong>${template.name}</strong><small>${template.description}</small></span>${template.id === selected ? '<b class="template-check">✓</b>' : ''}</button>`).join('')}</div></section></main>${adBanner()}`;
+  root.querySelector('[data-action="home"]').onclick = () => { view = 'home'; render(); };
+  root.querySelectorAll('[data-template-id]').forEach(button => button.onclick = () => { profile.templateId = button.dataset.templateId; saveProfile(profile); applyTemplate(); render(); });
+  bindHeader();
+}
+
+function render() { applyTemplate(); if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'templates') renderTemplates(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); decorateWithMascot(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+
+document.addEventListener('click', event => { const button = event.target.closest('[data-action="templates"]'); if (button) { view = 'templates'; render(); } });

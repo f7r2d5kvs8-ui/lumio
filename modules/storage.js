@@ -9,6 +9,7 @@ const freshProfile = () => ({
   selectedGame: null,
   homeLanguage: 'nl',
   learningLanguage: 'nl',
+  templateId: 'default',
   progress: {},
   rewards: { stars: 0, streak: 0, lastPractice: null },
   preferences: { reducedMotion: false, adsEnabled: true }
