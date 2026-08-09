@@ -14,7 +14,7 @@ let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.80';
+const RELEASE = '0.6.81';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -355,7 +355,7 @@ function renderGame() {
   speak(item.word);
 }
 
-function selectLetter(button, item) { if (session.solved || button.classList.contains('selected') || session.picks.length >= item.word.length) return; const expected = item.word[session.picks.length]; if (button.dataset.letter !== expected) { button.classList.add('wrong'); speak(button.dataset.letter); setTimeout(() => button.classList.remove('wrong'), 650); return; } button.classList.add('selected', 'correct'); session.picks.push(button.dataset.letter); session.pickButtons.push(button); updateAnswer(item); }
+function selectLetter(button, item) { if (session.solved || button.classList.contains('selected') || session.picks.length >= item.word.length) return; speak(button.dataset.letter); const expected = item.word[session.picks.length]; if (button.dataset.letter !== expected) { button.classList.add('wrong'); setTimeout(() => button.classList.remove('wrong'), 650); return; } button.classList.add('selected', 'correct'); session.picks.push(button.dataset.letter); session.pickButtons.push(button); updateAnswer(item); }
 function updateAnswer(item) { const joining = pack().writingRules?.joining; const selected = joining ? session.picks.map((letter, index) => optionGlyph(pack(), item.word, index, letter)).join('') : session.picks.join(' '); const answer = root.querySelector('#answer'); answer.dir = joining ? 'rtl' : 'ltr'; answer.textContent = selected + (selected ? ' ' : '') + '_ '.repeat(item.word.length - session.picks.length); root.querySelector('[data-action="undo"]').disabled = !session.picks.length; root.querySelector('[data-action="check"]').disabled = session.picks.length !== item.word.length; }
 function undoPick() { const button = session.pickButtons.pop(); if (button) button.classList.remove('selected'); session.picks.pop(); const item = pack().curriculum[session.lessonIndex].words[session.wordIndex]; updateAnswer(item); }
 function useHint(item, button) { if (session.hintUsed) return; const target = [...root.querySelectorAll('[data-letter]')].find(node => node.dataset.letter === item.word[session.picks.length] && !node.classList.contains('selected')); if (target) target.classList.add('hinted'); session.hintUsed = true; button.disabled = true; root.querySelector('#feedback').textContent = `${ui().listenPrompt} ${item.word[session.picks.length]}`; speak(item.word[session.picks.length]); }
