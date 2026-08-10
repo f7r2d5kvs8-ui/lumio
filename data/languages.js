@@ -102,10 +102,10 @@ const persianLevelTitles = [
 export const languageCatalog = [
   { id: 'nl', name: 'Nederlands', nativeName: 'Nederlands', flag: '🇳🇱 🇧🇪', flagCodes: ['nl', 'be'], locale: 'nl-NL', status: 'ready' },
   { id: 'en', name: 'Engels', nativeName: 'English', flag: '🇬🇧', flagCodes: ['gb'], icon: '🦊', locale: 'en-GB', status: 'ready' },
+  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', flagCodes: ['ir'], icon: '🪷', locale: 'fa-IR', status: 'ready' },
   { id: 'de', name: 'Duits', nativeName: 'Deutsch', flag: '🇩🇪', flagCodes: ['de'], icon: '🐻', locale: 'de-DE', status: 'comingSoon' },
   { id: 'fr', name: 'Frans', nativeName: 'Français', flag: '🇫🇷', flagCodes: ['fr'], icon: '🦋', locale: 'fr-FR', status: 'comingSoon' },
   { id: 'es', name: 'Spaans', nativeName: 'Español', flag: '🇪🇸', flagCodes: ['es'], icon: '🌞', locale: 'es-ES', status: 'comingSoon' },
-  { id: 'fa', name: 'Perzisch', nativeName: 'فارسی', flag: '🇮🇷', flagCodes: ['ir'], icon: '🪷', locale: 'fa-IR', status: 'ready' },
   { id: 'ar', name: 'Arabisch', nativeName: 'العربية', flag: '🇸🇦', flagCodes: ['sa'], icon: '🌙', locale: 'ar', status: 'comingSoon' }
 ];
 
@@ -160,7 +160,7 @@ export const languagePackages = {
     curriculum: buildWordCurriculum(englishLessonWords, englishLevelTitles)
   },
   fa: {
-    metadata: languageCatalog[5],
+    metadata: languageCatalog[2],
     alphabet: ['ا','آ','ب','پ','ت','ث','ج','چ','ح','خ','د','ذ','ر','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ه','ی'],
     phonics: { ا:'ا', آ:'آ', ب:'ب', پ:'پ', ت:'ت', ج:'ج', چ:'چ', د:'د', ر:'ر', س:'س', ش:'ش', ک:'ک', گ:'گ', ل:'ل', م:'م', ن:'ن', و:'و', ه:'ه', ی:'ی' },
     writingRules: { direction: 'rtl', joining: true, case: 'single-form', script: 'arabic' },
