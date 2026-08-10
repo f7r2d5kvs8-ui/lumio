@@ -13,8 +13,9 @@ let languageTarget = 'learning';
 let authMode = 'choice';
 let cloudUser = null;
 let tracingSession = null;
+let numberHouseSession = null;
 const TRACE_LEVEL_OFFSET = 100;
-const RELEASE = '0.6.83';
+const RELEASE = '0.6.85';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -51,7 +52,10 @@ const applyTemplate = () => {
   document.body.style.backgroundAttachment = 'fixed';
 };
 const languageFlags = language => `<span class="flag-set" aria-label="${escape(language.name)}">${(language.flagCodes || []).map(code => `<span class="country-flag flag-${code}" aria-hidden="true"></span>`).join('')}</span>`;
-const games = () => pack()?.games || [];
+const games = () => [
+  ...(pack()?.games || []),
+  { id: 'number-houses', title: 'Number Houses', description: 'Find the two numbers that make a number.', icon: '🏠', status: 'ready' }
+];
 const mascotAssets = {
   welcome: './assets/mascot/lumio-welcome.webp',
   learning: './assets/mascot/lumio-learning.webp',
@@ -422,7 +426,7 @@ function header() { const t = copy(); return `<header class="topbar"><button cla
 function renderGames() { const language = pack(); const text = ui(); const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>${t.chooseGame}</h1><p>${t.gameIntro}</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled' : ''}><span class="game-choice-icon">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="languages"]').onclick = () => { view = 'languages'; render(); }; root.querySelectorAll('[data-game]').forEach(button => button.onclick = () => { profile.selectedGame = button.dataset.game; saveProfile(profile); view = button.dataset.game === 'letter-trail' ? 'letters' : 'home'; render(); }); bindHeader(); }
 
 function renderLetters() { const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.tracingCompleted || []; const lessonDone = drill => drill.forms.every(form => completed.includes(form.id)); const doneCount = language.writing.filter(lessonDone).length; const t = copy(); const practiceName = nameForLanguage(language); root.innerHTML = `${header()}<main class="screen"><section class="hero letter-picker"><button class="back game-picker-back" data-action="games">← ${t.games}</button><div class="eyebrow">${t.letterTrail}</div><h1>${t.chooseLetter}</h1><p>${t.bothCases}</p><div class="trace-total"><span>${doneCount} / ${language.writing.length} ${t.lettersPractised}</span><div class="progress"><span style="width:${doneCount / language.writing.length * 100}%"></span></div></div><div class="letter-picker-grid">${language.writing.map(drill => `<button class="letter-choice ${lessonDone(drill) ? 'done' : ''}" data-trace-letter="${drill.id}" aria-label="${t.practise} ${drill.shortTitle || drill.letter} ${t.letters}"><strong>${drill.shortTitle || drill.letter}</strong>${lessonDone(drill) ? '<span>✓</span>' : ''}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="games"]').onclick = () => { view = 'games'; render(); }; root.querySelectorAll('[data-trace-letter]').forEach(button => button.onclick = () => startTracing(button.dataset.traceLetter)); if (practiceName) { root.querySelector('.letter-picker-grid').insertAdjacentHTML('afterend', `<button class="name-letter-choice ${progress.namePracticeCompleted ? 'done' : ''}" data-action="my-name"><span>✍️</span><span><strong>${t.myName}</strong><small>${progress.namePracticeCompleted ? t.readyAgain : `${t.practise} ${escape(practiceName)}`}</small></span><b>${progress.namePracticeCompleted ? '✓' : '→'}</b></button>`); root.querySelector('[data-action="my-name"]').onclick = startNameTracing; } bindHeader(); }
-async function boot() { if (!profile.appLanguage) { view = 'app-language'; render(); return; } try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame === 'letter-trail' ? 'letters' : profile.selectedGame ? 'home' : 'games') : 'languages') : 'child-name'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
+async function boot() { if (!profile.appLanguage) { view = 'app-language'; render(); return; } try { const sessionState = await currentSession(); cloudUser = sessionState?.user || null; if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; await syncCloudProgress(); await syncTracingProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name'; } else { profile.account = null; saveProfile(profile); view = 'auth'; } } catch (error) { console.warn('Cloud session unavailable; offline mode remains available.', error); } if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); render(); }
 function renderHome() { const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.completed.length; const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="home-grid"><div class="welcome"><div class="eyebrow" style="color:#e9e5ff">${language.metadata.flag} ${language.metadata.nativeName}</div><h1>${ui().hello}</h1><p>${ui().dailyIntro}</p><button class="daily" data-action="daily">▶ ${ui().daily}</button></div><aside class="reward"><div class="eyebrow">${ui().growth}</div><div class="stars">${'⭐'.repeat(Math.min(3, Math.max(1, profile.rewards.stars || 1)))}</div><strong>${completed} / ${language.curriculum.length} ${ui().worlds}</strong><div class="progress"><span style="width:${completed / language.curriculum.length * 100}%"></span></div></aside></section><div class="level-heading"><button class="back" data-action="games">← ${t.games}</button><div><div class="eyebrow">${t.wordBuilders}</div><h2>${t.chooseLevel}</h2></div></div><section class="lesson-list" aria-label="${ui().worlds}">${language.curriculum.map((lesson, index) => { const locked = index > completed; return `<button class="lesson" data-lesson="${index}" ${locked ? 'disabled' : ''}><span class="lesson-icon">${locked ? '🔒' : lesson.icon}</span><span><strong>${lesson.title}</strong><small>${lesson.skill === 'letter' ? ui().sounds : ui().building}</small></span><span class="lesson-progress">${progress.completed.includes(index) ? '✓' : `${Math.min(10, progress.activeLesson === index ? progress.wordIndex || 0 : 0)}/10`}</span></button>`; }).join('')}</section></main>${adBanner()}`; root.querySelector('[data-action="daily"]').onclick = () => startLesson(progress.activeLesson || 0); root.querySelector('[data-action="games"]').onclick = () => { view = 'games'; render(); }; root.querySelectorAll('[data-lesson]').forEach(button => button.onclick = () => startLesson(Number(button.dataset.lesson))); bindHeader(); }
 
 function bindHeader() { root.querySelector('[data-action="languages"]')?.addEventListener('click', () => { view = 'languages'; render(); }); root.querySelector('[data-action="child-name"]')?.addEventListener('click', () => { view = 'child-name'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { view = 'parent'; render(); }); if (cloudUser) { const stats = root.querySelector('.stat-row'); if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip signout'; button.dataset.action = 'signout'; button.textContent = copy().signOut; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', async () => { await signOut(); cloudUser = null; profile.account = null; saveProfile(profile); authMode = 'choice'; view = 'auth'; render(); }); } }
@@ -444,7 +448,51 @@ const nativeNameCopy = {
 };
 const needsLocalizedName = language => language.writingRules?.script && language.writingRules.script !== 'latin';
 const nameForLanguage = language => profile.localizedNames?.[language.metadata.id] || profile.childName;
-function continueToSelectedGame() { view = profile.selectedGame === 'letter-trail' ? 'letters' : 'home'; render(); }
+function selectedGameView() {
+  if (profile.selectedGame === 'letter-trail') return 'letters';
+  if (profile.selectedGame === 'number-houses') return 'number-houses';
+  return 'home';
+}
+function continueToSelectedGame() { view = selectedGameView(); render(); }
+
+function startNumberHouses() {
+  numberHouseSession = { round: 0, totalRounds: 10, stars: 0 };
+  nextNumberHouse();
+}
+
+function nextNumberHouse() {
+  const total = 1 + Math.floor(Math.random() * 5);
+  const known = Math.floor(Math.random() * (total + 1));
+  numberHouseSession.house = { total, known, answer: total - known, missingSide: Math.random() < .5 ? 'left' : 'right', answered: false };
+  view = 'number-houses';
+  render();
+}
+
+function renderNumberHouses() {
+  const t = copy();
+  const { round, totalRounds, stars, house } = numberHouseSession || {};
+  if (!house) { startNumberHouses(); return; }
+  const choices = shuffle(Array.from(new Set([house.answer, ...Array.from({ length: 6 }, () => Math.floor(Math.random() * 6))]))).slice(0, 5);
+  if (!choices.includes(house.answer)) choices[0] = house.answer;
+  const left = house.missingSide === 'left' ? '?' : house.known;
+  const right = house.missingSide === 'right' ? '?' : house.known;
+  root.innerHTML = `${header()}<main class="screen number-houses-screen"><div class="game-head"><button class="back" data-action="games">Back to games</button><div class="progress"><span style="width:${round / totalRounds * 100}%"></span></div><span class="count">${round + 1}/${totalRounds}</span></div><section class="number-house-card"><div class="eyebrow">Lumio maths</div><h1>Number Houses</h1><p class="number-house-prompt">Which two numbers make <strong>${house.total}</strong>?</p><div class="number-house" aria-label="A number house for ${house.total}"><div class="roof-number">${house.total}</div><svg class="house-branches" viewBox="0 0 300 110" aria-hidden="true"><line x1="150" y1="8" x2="55" y2="103"/><line x1="150" y1="8" x2="245" y2="103"/></svg><div class="house-rooms"><div class="house-room ${house.missingSide === 'left' ? 'missing' : ''}" id="house-left">${left}</div><div class="house-room ${house.missingSide === 'right' ? 'missing' : ''}" id="house-right">${right}</div></div></div><p class="feedback" id="number-house-feedback">Choose the missing number.</p><div class="number-choices">${choices.map(number => `<button class="number-choice" data-number-choice="${number}">${number}</button>`).join('')}</div><div class="number-stars" aria-label="${stars} stars">${'⭐'.repeat(stars)}</div></section></main>${adBanner()}`;
+  bindHeader();
+  root.querySelector('[data-action="games"]').onclick = () => { numberHouseSession = null; view = 'games'; render(); };
+  root.querySelectorAll('[data-number-choice]').forEach(button => button.onclick = () => {
+    if (numberHouseSession.house.answered) return;
+    const choice = Number(button.dataset.numberChoice);
+    const feedback = root.querySelector('#number-house-feedback');
+    if (choice !== numberHouseSession.house.answer) { button.classList.add('wrong'); feedback.textContent = 'Try again — look at the number on the roof.'; return; }
+    numberHouseSession.house.answered = true;
+    button.classList.add('correct');
+    root.querySelector(numberHouseSession.house.missingSide === 'left' ? '#house-left' : '#house-right').textContent = choice;
+    feedback.textContent = `Great job! ${numberHouseSession.house.known} and ${choice} make ${numberHouseSession.house.total}.`;
+    numberHouseSession.stars += 1;
+    showMascotCelebration();
+    setTimeout(() => { numberHouseSession.round += 1; if (numberHouseSession.round >= numberHouseSession.totalRounds) { numberHouseSession = null; view = 'games'; render(); } else nextNumberHouse(); }, 1150);
+  });
+}
 function renderNativeName() { const language = pack(); const t = nativeNameCopy[profile.appLanguage || 'nl']; const previousName = profile.localizedNames?.[language.metadata.id] || ''; const existing = escape(previousName); root.innerHTML = `<main class="screen account-screen"><section class="hero child-name-card" dir="${language.writingRules.direction}"><button class="back" data-action="back-games">← ${t.back}</button><div class="eyebrow">Lumio</div><div class="name-orb">✏️</div><h1>${t.title}</h1><p>${t.intro}</p><form id="localized-name-form" class="auth-form"><label>${t.label}<input id="localized-name" type="text" dir="${language.writingRules.direction}" maxlength="24" required placeholder="${t.placeholder}" value="${existing}"></label><button class="button primary">${t.continue}</button></form></section></main>`; root.querySelector('[data-action="back-games"]').onclick = () => { view = 'games'; render(); }; root.querySelector('#localized-name-form').onsubmit = event => { event.preventDefault(); const name = root.querySelector('#localized-name').value.trim().replace(/\s+/g, ' '); if (!name) return; profile.localizedNames = { ...(profile.localizedNames || {}), [language.metadata.id]: name }; if (name !== previousName) updateLanguageProgress(profile, language.metadata.id, { namePracticeCompleted: false }); saveProfile(profile); continueToSelectedGame(); }; }
 function renderGames() { const language = pack(); const text = ui(); const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="languages">← ${text.back}</button><div class="eyebrow">${language.metadata.nativeName}</div><h1>${t.chooseGame}</h1><p>${t.gameIntro}</p><div class="game-grid">${games().map(game => `<button class="game-choice ${game.status !== 'ready' ? 'coming-soon' : ''}" data-game="${game.id}" ${game.status !== 'ready' ? 'disabled' : ''}><span class="game-choice-icon">${game.icon}</span><span><strong>${game.title}</strong><small>${game.description}</small></span>${game.status !== 'ready' ? `<em>${text.comingSoon}</em>` : '<span class="game-choice-arrow">→</span>'}</button>`).join('')}</div></section></main>${adBanner()}`; root.querySelector('[data-action="languages"]').onclick = () => { view = 'languages'; render(); }; root.querySelectorAll('[data-game]').forEach(button => button.onclick = () => { profile.selectedGame = button.dataset.game; saveProfile(profile); if (needsLocalizedName(language) && !profile.localizedNames?.[language.metadata.id]) { view = 'native-name'; render(); return; } continueToSelectedGame(); }); bindHeader(); }
 function render() { if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); decorateWithMascot(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
@@ -461,6 +509,16 @@ function renderTemplates() {
   bindHeader();
 }
 
-function render() { applyTemplate(); if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'templates') renderTemplates(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); decorateWithMascot(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+function render() { applyTemplate(); if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'templates') renderTemplates(); else if (view === 'number-houses') renderNumberHouses(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); decorateWithMascot(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
 
 document.addEventListener('click', event => { const button = event.target.closest('[data-action="templates"]'); if (button) { view = 'templates'; render(); } });
+
+document.addEventListener('click', event => {
+  const gameButton = event.target.closest('[data-game="number-houses"]');
+  if (!gameButton) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  profile.selectedGame = 'number-houses';
+  saveProfile(profile);
+  startNumberHouses();
+}, true);
