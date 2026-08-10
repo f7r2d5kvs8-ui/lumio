@@ -6,6 +6,22 @@ const dutchWords = [
   ['maan', '🌙'], ['noot', '🥜'], ['paard', '🐴'], ['roos', '🌹'], ['schaap', '🐑'], ['spel', '🎲'], ['ster', '⭐'], ['stoel', '🪑'], ['tent', '⛺'], ['uil', '🦉'],
   ['vacht', '🐕'], ['vlag', '🚩'], ['wolk', '☁️'], ['worm', '🪱'], ['zaag', '🪚'], ['zeep', '🧼'], ['bloem', '🌸'], ['brood', '🍞'], ['kikker', '🐸'], ['regen', '🌧️']
 ];
+dutchWords.push(
+  ['hond','🐶'],['konijn','🐰'],['leeuw','🦁'],['tijger','🐯'],['olifant','🐘'],['beer','🐻'],['vos','🦊'],['zebra','🦓'],['giraffe','🦒'],['schildpad','🐢'],
+  ['dolfijn','🐬'],['haai','🦈'],['walvis','🐋'],['krab','🦀'],['slak','🐌'],['spin','🕷️'],['mier','🐜'],['vlinder','🦋'],['pinguïn','🐧'],['papegaai','🦜'],
+  ['appel','🍎'],['banaan','🍌'],['peer','🍐'],['druif','🍇'],['kers','🍒'],['aardbei','🍓'],['wortel','🥕'],['tomaat','🍅'],['melk','🥛'],['koek','🍪'],
+  ['tafel','🪑'],['deur','🚪'],['raam','🪟'],['lamp','💡'],['bank','🛋️'],['kast','🗄️'],['deken','🛏️'],['kussen','🛏️'],['bord','🍽️'],['beker','🥤'],
+  ['boek','📘'],['schrift','📓'],['gum','🧽'],['liniaal','📏'],['schaar','✂️'],['lijm','🧴'],['school','🏫'],['juf','👩‍🏫'],['som','➕'],['letter','🔤'],
+  ['hoofd','🙂'],['oog','👁️'],['oor','👂'],['neus','👃'],['mond','👄'],['arm','💪'],['been','🦵'],['jas','🧥'],['broek','👖'],['schoen','👟'],
+  ['auto','🚗'],['trein','🚆'],['fiets','🚲'],['boot','⛵'],['vliegtuig','✈️'],['raket','🚀'],['tractor','🚜'],['step','🛴'],['schip','🚢'],['taxi','🚕'],
+  ['rivier','🏞️'],['zee','🌊'],['berg','⛰️'],['bos','🌲'],['strand','🏖️'],['sneeuw','❄️'],['storm','⛈️'],['mist','🌫️'],['ijs','🧊'],['vuur','🔥'],
+  ['lopen','🚶'],['springen','🤸'],['lachen','😄'],['zingen','🎤'],['dansen','💃'],['lezen','📖'],['koken','👩‍🍳'],['slapen','😴'],['wassen','🧼'],['tekenen','🎨'],
+  ['dokter','🧑‍⚕️'],['bakker','🥖'],['boer','🧑‍🌾'],['agent','👮'],['kok','🧑‍🍳'],['piloot','🧑‍✈️'],['brandweer','🚒'],['koning','🤴'],['clown','🤡'],['kapper','💇'],
+  ['park','🏞️'],['winkel','🏪'],['markt','🛒'],['brug','🌉'],['straat','🛣️'],['dorp','🏘️'],['stad','🏙️'],['tuin','🌻'],['boerderij','🚜'],['kasteel','🏰'],
+  ['hamer','🔨'],['spijker','🔩'],['touw','🪢'],['sleutel','🔑'],['borstel','🪥'],['emmer','🪣'],['ladder','🪜'],['camera','📷'],['telefoon','☎️'],['cadeau','🎁'],
+  ['blij','😄'],['boos','😠'],['bang','😨'],['moe','🥱'],['trots','😊'],['lief','🥰'],['snel','⚡'],['langzaam','🐢'],['groot','🐘'],['klein','🐜'],
+  ['ochtend','🌅'],['avond','🌇'],['nacht','🌙'],['vandaag','📅'],['morgen','🌄'],['feest','🎉'],['muziek','🎵'],['droom','💭'],['verhaal','📖'],['schat','💎']
+);
 
 function words(start, end) { return dutchWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
 
@@ -17,6 +33,22 @@ const englishWords = [
   ['school','🏫'],['friend','🧑‍🤝‍🧑'],['orange','🍊'],['winter','❄️'],['summer','🏖️'],['rocket','🚀'],['butterfly','🦋'],['rainbow','🌈'],['sandwich','🥪'],['elephant','🐘'],
   ['dinosaur','🦕'],['birthday','🎂'],['playground','🛝'],['computer','💻'],['umbrella','☂️'],['adventure','🗺️'],['treasure','💎'],['princess','👑'],['unicorn','🦄'],['wonderful','✨']
 ];
+englishWords.push(
+  ['mouse','🐭'],['cow','🐄'],['sheep','🐑'],['horse','🐴'],['goat','🐐'],['lion','🦁'],['bear','🐻'],['fox','🦊'],['zebra','🦓'],['giraffe','🦒'],
+  ['dolphin','🐬'],['shark','🦈'],['whale','🐋'],['crab','🦀'],['snail','🐌'],['spider','🕷️'],['ant','🐜'],['bee','🐝'],['penguin','🐧'],['parrot','🦜'],
+  ['pear','🍐'],['grapes','🍇'],['cherry','🍒'],['strawberry','🍓'],['carrot','🥕'],['tomato','🍅'],['bread','🍞'],['cheese','🧀'],['rice','🍚'],['egg','🥚'],
+  ['table','🪑'],['door','🚪'],['lamp','💡'],['sofa','🛋️'],['closet','🗄️'],['blanket','🛏️'],['pillow','🛏️'],['plate','🍽️'],['bottle','🍼'],['fork','🍴'],
+  ['notebook','📓'],['eraser','🧽'],['ruler','📏'],['scissors','✂️'],['glue','🧴'],['teacher','🧑‍🏫'],['lesson','🏫'],['number','🔢'],['letter','🔤'],['crayon','🖍️'],
+  ['head','🙂'],['eye','👁️'],['ear','👂'],['nose','👃'],['mouth','👄'],['arm','💪'],['leg','🦵'],['coat','🧥'],['shirt','👕'],['shoe','👟'],
+  ['car','🚗'],['plane','✈️'],['bicycle','🚲'],['tractor','🚜'],['scooter','🛴'],['ship','🚢'],['taxi','🚕'],['van','🚐'],['truck','🚚'],['wheel','🛞'],
+  ['river','🏞️'],['sea','🌊'],['mountain','⛰️'],['forest','🌲'],['beach','🏖️'],['snow','❄️'],['rain','🌧️'],['wind','💨'],['storm','⛈️'],['fire','🔥'],
+  ['walk','🚶'],['jump','🤸'],['laugh','😄'],['sing','🎤'],['dance','💃'],['read','📖'],['cook','🧑‍🍳'],['sleep','😴'],['wash','🧼'],['draw','🎨'],
+  ['doctor','🧑‍⚕️'],['baker','🥖'],['farmer','🧑‍🌾'],['police','👮'],['pilot','🧑‍✈️'],['firefighter','🚒'],['king','🤴'],['queen','👸'],['clown','🤡'],['barber','💇'],
+  ['park','🏞️'],['shop','🏪'],['market','🛒'],['bridge','🌉'],['street','🛣️'],['village','🏘️'],['city','🏙️'],['farm','🚜'],['castle','🏰'],['library','📚'],
+  ['hammer','🔨'],['nail','🔩'],['rope','🪢'],['key','🔑'],['brush','🪥'],['bucket','🪣'],['ladder','🪜'],['camera','📷'],['phone','☎️'],['gift','🎁'],
+  ['happy','😄'],['sad','😢'],['angry','😠'],['scared','😨'],['tired','🥱'],['proud','😊'],['kind','🥰'],['fast','⚡'],['slow','🐢'],['quiet','🤫'],
+  ['morning','🌅'],['evening','🌇'],['night','🌙'],['today','📅'],['tomorrow','🌄'],['party','🎉'],['song','🎵'],['dream','💭'],['story','📖'],['magic','✨']
+);
 function englishLessonWords(start, end) { return englishWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
 
 const persianWords = [
@@ -27,7 +59,45 @@ const persianWords = [
   ['هواپیما', '✈️'], ['بستنی', '🍦'], ['شیر', '🥛'], ['پرتقال', '🍊'], ['موز', '🍌'], ['کیک', '🍰'], ['دریا', '🌊'], ['کوه', '⛰️'], ['زمستان', '❄️'], ['تابستان', '☀️'],
   ['ماجراجویی', '🗺️'], ['کامپیوتر', '💻'], ['تلفن', '☎️'], ['هدیه', '🎁'], ['تولد', '🎂'], ['دیناسور', '🦕'], ['ربات', '🤖'], ['شاهزاده', '👑'], ['گنج', '💎'], ['شاد', '✨']
 ];
+persianWords.push(
+  ['خرگوش','🐰'],['گاو','🐄'],['گوسفند','🐑'],['اسب','🐴'],['بز','🐐'],['خرس','🐻'],['روباه','🦊'],['گورخر','🦓'],['زرافه','🦒'],['فیل','🐘'],
+  ['دلفین','🐬'],['کوسه','🦈'],['نهنگ','🐋'],['خرچنگ','🦀'],['حلزون','🐌'],['عنکبوت','🕷️'],['مورچه','🐜'],['زنبور','🐝'],['پنگوئن','🐧'],['طوطی','🦜'],
+  ['گلابی','🍐'],['انگور','🍇'],['گیلاس','🍒'],['توت','🍓'],['هویج','🥕'],['گوجه','🍅'],['برنج','🍚'],['پنیر','🧀'],['کلوچه','🍪'],['هندوانه','🍉'],
+  ['میز','🪑'],['صندلی','🪑'],['چراغ','💡'],['مبل','🛋️'],['کمد','🗄️'],['پتو','🛏️'],['بالش','🛏️'],['بشقاب','🍽️'],['لیوان','🥤'],['چنگال','🍴'],
+  ['دفتر','📓'],['پاکن','🧽'],['خطکش','📏'],['قیچی','✂️'],['چسب','🧴'],['آموزگار','🧑‍🏫'],['درس','🏫'],['عدد','🔢'],['حرف','🔤'],['مدادرنگی','🖍️'],
+  ['سر','🙂'],['چشم','👁️'],['گوش','👂'],['بینی','👃'],['دهان','👄'],['بازو','💪'],['زانو','🦵'],['کت','🧥'],['شلوار','👖'],['جوراب','🧦'],
+  ['خودرو','🚗'],['کشتی','🚢'],['قایق','⛵'],['کامیون','🚚'],['تاکسی','🚕'],['ون','🚐'],['تراکتور','🚜'],['اسکوتر','🛴'],['مترو','🚇'],['بالگرد','🚁'],
+  ['رودخانه','🏞️'],['جنگل','🌲'],['ساحل','🏖️'],['برف','❄️'],['باد','💨'],['طوفان','⛈️'],['آتش','🔥'],['جزیره','🏝️'],['دشت','🌾'],['آبشار','🌊'],
+  ['رفتن','🚶'],['پریدن','🤸'],['خندیدن','😄'],['خواندن','📖'],['رقصیدن','💃'],['نوشتن','✍️'],['پختن','🧑‍🍳'],['خوابیدن','😴'],['شستن','🧼'],['کشیدن','🎨'],
+  ['پزشک','🧑‍⚕️'],['نانوا','🥖'],['کشاورز','🧑‍🌾'],['پلیس','👮'],['خلبان','🧑‍✈️'],['آتشنشان','🚒'],['پادشاه','🤴'],['ملکه','👸'],['دلقک','🤡'],['آرایشگر','💇'],
+  ['پارک','🏞️'],['فروشگاه','🏪'],['بازار','🛒'],['پل','🌉'],['خیابان','🛣️'],['روستا','🏘️'],['شهر','🏙️'],['مزرعه','🚜'],['قلعه','🏰'],['کتابخانه','📚'],
+  ['چکش','🔨'],['میخ','🔩'],['طناب','🪢'],['کلید','🔑'],['برس','🪥'],['سطل','🪣'],['نردبان','🪜'],['دوربین','📷'],['ساعت','⌚'],['چتر','☂️'],
+  ['خوشحال','😄'],['ناراحت','😢'],['عصبانی','😠'],['ترسیده','😨'],['خسته','🥱'],['سربلند','😊'],['مهربان','🥰'],['سریع','⚡'],['آرام','🐢'],['ساکت','🤫'],
+  ['صبح','🌅'],['عصر','🌇'],['شب','🌙'],['امروز','📅'],['فردا','🌄'],['جشن','🎉'],['آواز','🎵'],['خواب','💭'],['داستان','📖'],['جادو','✨']
+);
 function persianLessonWords(start, end) { return persianWords.slice(start, end).map(([word, emoji]) => ({ word, emoji })); }
+
+const lessonIcons = ['🔤', '🎵', '🧩', '🚲', '🌈', '🏆', '🐾', '🌊', '🍎', '🏠', '🏫', '👕', '🚗', '🌲', '🎨', '🧑‍⚕️', '🏙️', '🧰', '😊', '📖'];
+const buildWordCurriculum = (getWords, titles) => titles.map((title, index) => ({
+  id: `level-${index + 1}`,
+  title,
+  icon: lessonIcons[index],
+  skill: index === 0 ? 'letter' : 'build',
+  words: getWords(index * 10, index * 10 + 10)
+}));
+
+const dutchLevelTitles = [
+  'Eerste klanken', 'Klanken mengen', 'Korte woorden', 'Meer woorden', 'Lange klanken', 'Leesheld', 'Dieren', 'Dieren overal', 'Lekker eten', 'Thuis',
+  'Op school', 'Mijn lichaam', 'Onderweg', 'Buitenwereld', 'Wat we doen', 'Mensen om ons heen', 'Plaatsen', 'Handige spullen', 'Gevoelens', 'Mijn dag'
+];
+const englishLevelTitles = [
+  'First sounds', 'Blend sounds', 'Short words', 'More words', 'Longer words', 'Reading hero', 'Animals', 'Animals everywhere', 'Tasty food', 'At home',
+  'At school', 'My body', 'On the move', 'The natural world', 'Things we do', 'People around us', 'Places', 'Useful things', 'Feelings', 'My day'
+];
+const persianLevelTitles = [
+  'صداهای نخست', 'ترکیب صداها', 'واژه‌های کوتاه', 'واژه‌های بیشتر', 'واژه‌های بلندتر', 'قهرمان خواندن', 'جانوران', 'جانوران گوناگون', 'خوراکی‌های خوشمزه', 'در خانه',
+  'در مدرسه', 'بدن من', 'در راه', 'دنیای طبیعت', 'کارهای ما', 'آدم‌های پیرامون ما', 'جاها', 'وسایل کاربردی', 'احساس‌ها', 'روز من'
+];
 
 export const languageCatalog = [
   { id: 'nl', name: 'Nederlands', nativeName: 'Nederlands', flag: '🇳🇱 🇧🇪', flagCodes: ['nl', 'be'], locale: 'nl-NL', status: 'ready' },
@@ -64,14 +134,7 @@ export const languagePackages = {
       { id: `capital-${letter.toLowerCase()}`, label: 'hoofdletter', pathId: `capital-${letter.toLowerCase()}` },
       { id: `lowercase-${letter.toLowerCase()}`, label: 'kleine letter', pathId: `lowercase-${letter.toLowerCase()}` }
     ], title: `De letter ${letter}` })),
-    curriculum: [
-      { id: 'sounds-1', title: 'Eerste klanken', icon: '🔤', skill: 'letter', words: words(0, 10) },
-      { id: 'sounds-2', title: 'Klanken mengen', icon: '🎵', skill: 'build', words: words(10, 20) },
-      { id: 'words-1', title: 'Korte woorden', icon: '🧩', skill: 'build', words: words(20, 30) },
-      { id: 'words-2', title: 'Meer woorden', icon: '🚲', skill: 'build', words: words(30, 40) },
-      { id: 'words-3', title: 'Lange klanken', icon: '🌈', skill: 'build', words: words(40, 50) },
-      { id: 'words-4', title: 'Leesheld', icon: '🏆', skill: 'build', words: words(50, 60) }
-    ]
+    curriculum: buildWordCurriculum(words, dutchLevelTitles)
   },
   en: {
     metadata: languageCatalog[1],
@@ -94,14 +157,7 @@ export const languagePackages = {
       { id: `capital-${letter.toLowerCase()}`, label: 'uppercase letter', pathId: `capital-${letter.toLowerCase()}` },
       { id: `lowercase-${letter.toLowerCase()}`, label: 'lowercase letter', pathId: `lowercase-${letter.toLowerCase()}` }
     ], title: `The letter ${letter}` })),
-    curriculum: [
-      { id: 'sounds-1', title: 'First sounds', icon: '🔤', skill: 'letter', words: englishLessonWords(0, 10) },
-      { id: 'sounds-2', title: 'Blend sounds', icon: '🎵', skill: 'build', words: englishLessonWords(10, 20) },
-      { id: 'words-1', title: 'Short words', icon: '🧩', skill: 'build', words: englishLessonWords(20, 30) },
-      { id: 'words-2', title: 'More words', icon: '🚲', skill: 'build', words: englishLessonWords(30, 40) },
-      { id: 'words-3', title: 'Longer words', icon: '🌈', skill: 'build', words: englishLessonWords(40, 50) },
-      { id: 'words-4', title: 'Reading hero', icon: '🏆', skill: 'build', words: englishLessonWords(50, 60) }
-    ]
+    curriculum: buildWordCurriculum(englishLessonWords, englishLevelTitles)
   },
   fa: {
     metadata: languageCatalog[5],
@@ -343,13 +399,6 @@ export const languagePackages = {
         ]
       }
     ],
-    curriculum: [
-      { id: 'sounds-1', title: 'صداهای نخست', icon: '🔤', skill: 'letter', words: persianLessonWords(0, 10) },
-      { id: 'sounds-2', title: 'ترکیب صداها', icon: '🎵', skill: 'build', words: persianLessonWords(10, 20) },
-      { id: 'words-1', title: 'واژه‌های کوتاه', icon: '🧩', skill: 'build', words: persianLessonWords(20, 30) },
-      { id: 'words-2', title: 'واژه‌های بیشتر', icon: '🚲', skill: 'build', words: persianLessonWords(30, 40) },
-      { id: 'words-3', title: 'واژه‌های بلندتر', icon: '🌈', skill: 'build', words: persianLessonWords(40, 50) },
-      { id: 'words-4', title: 'قهرمان خواندن', icon: '🏆', skill: 'build', words: persianLessonWords(50, 60) }
-    ]
+    curriculum: buildWordCurriculum(persianLessonWords, persianLevelTitles)
   }
 };

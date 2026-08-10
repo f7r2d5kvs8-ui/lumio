@@ -17,7 +17,7 @@ let numberHouseSession = null;
 let returnView = null;
 const TRACE_LEVEL_OFFSET = 100;
 const MATH_LEVEL_OFFSET = 1000;
-const RELEASE = '0.7.2';
+const RELEASE = '0.7.3';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
