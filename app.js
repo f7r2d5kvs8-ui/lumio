@@ -17,7 +17,7 @@ let numberHouseSession = null;
 let returnView = null;
 const TRACE_LEVEL_OFFSET = 100;
 const MATH_LEVEL_OFFSET = 1000;
-const RELEASE = '0.7.1';
+const RELEASE = '0.7.2';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const shuffle = values => [...values].sort(() => Math.random() - .5);
@@ -36,9 +36,9 @@ const setDocumentLanguage = languageId => {
   document.documentElement.dir = language.id === 'fa' ? 'rtl' : 'ltr';
 };
 setDocumentLanguage(profile.appLanguage || 'nl');
-Object.assign(appCopy.nl.math, { listen:'Luister', guideTotal:'Welke twee getallen maken samen {total}?', guideMissing:'Welk getal ontbreekt zodat het samen {total} wordt?', lostTitle:'Even opnieuw kijken', lostMessage:'Dat is lastig, maar Lumio weet dat jij het kunt. Probeer deze oefening opnieuw of kies een ander niveau.', restartLevel:'Probeer dit niveau opnieuw', chooseAnotherLevel:'Kies een ander niveau' });
-Object.assign(appCopy.en.math, { listen:'Listen', guideTotal:'Which two numbers make {total}?', guideMissing:'Which number is missing to make {total}?', lostTitle:'Let’s look again', lostMessage:'This one is tricky, but Lumio knows you can do it. Try this level again or choose another level.', restartLevel:'Try this level again', chooseAnotherLevel:'Choose another level' });
-Object.assign(appCopy.fa.math, { listen:'گوش کن', guideTotal:'کدام دو عدد می‌شوند {total}؟', guideMissing:'چه عددی کم است تا بشود {total}؟', lostTitle:'دوباره نگاه کنیم', lostMessage:'این سؤال سخت است، اما لومیو می‌داند که تو می‌توانی. این سطح را دوباره امتحان کن یا یک سطح دیگر انتخاب کن.', restartLevel:'این سطح را دوباره امتحان کن', chooseAnotherLevel:'یک سطح دیگر انتخاب کن' });
+Object.assign(appCopy.nl.math, { listen:'Luister', guideTotal:'Welke twee getallen maken samen {total}?', guideMissing:'Welk getal ontbreekt zodat het samen {total} wordt?', lostTitle:'Even opnieuw kijken', lostMessage:'Dat is lastig, maar Lumio weet dat jij het kunt. Probeer deze oefening opnieuw of kies een ander niveau.', restartLevel:'Probeer dit niveau opnieuw', chooseAnotherLevel:'Kies een ander niveau', locked:'Voltooi eerst alle vorige niveaus' });
+Object.assign(appCopy.en.math, { listen:'Listen', guideTotal:'Which two numbers make {total}?', guideMissing:'Which number is missing to make {total}?', lostTitle:'Let’s look again', lostMessage:'This one is tricky, but Lumio knows you can do it. Try this level again or choose another level.', restartLevel:'Try this level again', chooseAnotherLevel:'Choose another level', locked:'Finish all previous levels first' });
+Object.assign(appCopy.fa.math, { listen:'گوش کن', guideTotal:'کدام دو عدد می‌شوند {total}؟', guideMissing:'چه عددی کم است تا بشود {total}؟', lostTitle:'دوباره نگاه کنیم', lostMessage:'این سؤال سخت است، اما لومیو می‌داند که تو می‌توانی. این سطح را دوباره امتحان کن یا یک سطح دیگر انتخاب کن.', restartLevel:'این سطح را دوباره امتحان کن', chooseAnotherLevel:'یک سطح دیگر انتخاب کن', locked:'اول همهٔ سطح‌های قبلی را تمام کن' });
 const mathCopy = () => copy().math;
 const navigationCopy = {
   nl: { back:'Terug', backToLogin:'Terug naar aanmelden', home:'Naar spellen', appLanguage:'App-taal', practiceLanguage:'Oefentaal', chooseStyle:'Kies jouw wereld', styleIntro:'Kies een kleurrijke wereld voor elk Lumio-scherm. Je kunt dit altijd veranderen.', style:'Wereldstijl' },
@@ -513,10 +513,11 @@ const numberHouseLevels = () => {
 const getMathProgress = () => profile.mathProgress || { levels: {}, active: null };
 const saveMathProgress = change => { profile.mathProgress = { ...getMathProgress(), ...change }; saveProfile(profile); };
 const mathLevelProgress = levelId => getMathProgress().levels?.[levelId] || { round: 0, stars: 0, complete: false };
+const isMathLevelUnlocked = levelId => numberHouseLevels().filter(level => level.id < levelId).every(level => mathLevelProgress(level.id).complete);
 
 function renderNumberHouseLevels() {
   const math = mathCopy();
-  root.innerHTML = `${header()}<main class="screen number-house-levels-screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="games">← ${math.backGames}</button><div class="eyebrow">${math.eyebrow}</div><h1>${copy().chooseLevel}</h1><p>${math.levelIntro}</p><div class="number-level-grid">${numberHouseLevels().map(level => { const progress = mathLevelProgress(level.id); return `<button class="number-level-choice ${progress.complete ? 'done' : ''}" data-number-level="${level.id}"><span>${level.icon}</span><strong>${level.label}</strong><small>${level.description}<br>${progress.round}/10 ${math.progress} ${progress.complete ? '✓' : ''}</small><b>→</b></button>`; }).join('')}</div></section></main>${adBanner()}`;
+  root.innerHTML = `${header()}<main class="screen number-house-levels-screen"><section class="hero game-picker"><button class="back game-picker-back" data-action="games">← ${math.backGames}</button><div class="eyebrow">${math.eyebrow}</div><h1>${copy().chooseLevel}</h1><p>${math.levelIntro}</p><div class="number-level-grid">${numberHouseLevels().map(level => { const progress = mathLevelProgress(level.id); const locked = !isMathLevelUnlocked(level.id); return `<button class="number-level-choice ${progress.complete ? 'done' : ''} ${locked ? 'locked' : ''}" data-number-level="${level.id}" ${locked ? 'disabled aria-disabled="true"' : ''}><span>${locked ? '🔒' : level.icon}</span><strong>${level.label}</strong><small>${level.description}<br>${locked ? math.locked : `${progress.round}/10 ${math.progress} ${progress.complete ? '✓' : ''}`}</small><b>${locked ? '' : '→'}</b></button>`; }).join('')}</div></section></main>${adBanner()}`;
   bindHeader();
   root.querySelector('[data-action="games"]').onclick = () => { view = 'games'; render(); };
   root.querySelectorAll('[data-number-level]').forEach(button => button.onclick = () => startNumberHouses(Number(button.dataset.numberLevel)));
@@ -525,6 +526,7 @@ function renderNumberHouseLevels() {
 function startNumberHouses(levelId = 1) {
   const levels = numberHouseLevels();
   const level = levels.find(item => item.id === levelId) || levels[0];
+  if (!isMathLevelUnlocked(level.id)) { view = 'number-house-levels'; render(); return; }
   const active = getMathProgress().active;
   if (active?.level?.id === level.id && active.round < active.totalRounds && active.house) { numberHouseSession = active; view = 'number-houses'; render(); return; }
   numberHouseSession = { round: 0, totalRounds: 10, stars: 0, level };
