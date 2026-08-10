@@ -4,7 +4,7 @@ Lumio is a dependency-free progressive web app (PWA) designed as the first liter
 
 ## Publish
 
-Upload the contents of this folder to Netlify Drop. The site works without a build step and is installable from modern mobile browsers. To publish to Google Play later, wrap this PWA with Trusted Web Activity (Bubblewrap) or migrate the presentation layer to Flutter while retaining the language packages and curriculum data.
+GitHub repository `f7r2d5kvs8-ui/lumio` is the source of truth. Publish changes through a branch and pull request, then merge them into `main`. The site works without a build step and is installable from modern mobile browsers. To publish to Google Play later, wrap this PWA with Trusted Web Activity (Bubblewrap) or migrate the presentation layer to Flutter while retaining the language packages and curriculum data.
 
 ## Architecture
 

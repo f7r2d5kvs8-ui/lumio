@@ -4,9 +4,9 @@ Lumio is a child-friendly literacy platform. The current release focuses on Dutc
 
 ## Live services
 
-- Website: https://lumiolearning.netlify.app/
+- Source and releases: https://github.com/f7r2d5kvs8-ui/lumio
 - Authentication and progress: Supabase project `qmtzmlpgsvtietkqgwnb`
-- Deployment: Netlify manual deploy, pending a future GitHub connection
+- Deployment: publish from GitHub; `main` is the production source branch
 
 ## Source layout
 
@@ -30,10 +30,10 @@ Lumio is a child-friendly literacy platform. The current release focuses on Dutc
 ## Recommended next steps
 
 1. Test sign-in and progress recovery on two devices with one account.
-2. Connect the folder to a private GitHub repository and connect Netlify to that repository.
+2. Configure or verify the GitHub Pages/hosting workflow for automatic deployment from `main`.
 3. Test the flow with children and parents, then refine the confusing moments.
 4. Expand Dutch curriculum quality before adding other languages or subjects.
 
 ## Updating the standalone app
 
-After editing modular source files, run `build-standalone.ps1`. Upload the resulting `index.html` and supporting files to Netlify, or use the generated deployment ZIP.
+After editing modular source files, run `build-standalone.ps1`, commit the modular source and rebuilt `index.html`, and publish through a GitHub pull request.
