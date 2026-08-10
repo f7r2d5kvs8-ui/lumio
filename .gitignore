@@ -1,4 +1,4 @@
-# Local packaging files are generated for manual Netlify uploads.
+# Local packaging files are optional release artifacts and are not committed.
 *.zip
 
 # Operating-system files
