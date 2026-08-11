@@ -12,7 +12,7 @@ const freshProfile = () => ({
   templateId: 'forest',
   progress: {},
   rewards: { stars: 0, streak: 0, lastPractice: null },
-  preferences: { reducedMotion: false, adsEnabled: true }
+  preferences: { reducedMotion: false, adsEnabled: true, soundEnabled: true }
 });
 
 export function loadProfile() {

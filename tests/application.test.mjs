@@ -88,7 +88,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.7'/);
+  assert.match(standalone, /const RELEASE = '0\.7\.8'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -116,4 +116,26 @@ test('each name and custom-text letter scrolls its matching glyph into view', as
   assert.match(app, /scrollIntoView\(\{ behavior: 'smooth', block: 'nearest', inline: 'center' \}\)/);
   assert.match(css, /\.name-progress-letter\{[^}]*cursor:pointer/);
   assert.match(css, /\.name-progress-letter:focus-visible/);
+});
+
+test('the persistent sound toggle silences current and future voices on every page', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  const storage = await readFile(resolve(root, 'modules/storage.js'), 'utf8');
+  assert.match(storage, /soundEnabled: true/);
+  assert.match(app, /function stopAllAudio\(\).*audioPlaybackToken \+= 1;.*activeAudio\?\.pause\(\).*speechSynthesis\.cancel\(\)/s);
+  assert.match(app, /function speakWithSystemVoice\(text, locale\) \{\s*if \(!soundEnabled\(\)/);
+  assert.match(app, /function speak\(text, locale = pack\(\)\?\.metadata\.locale\) \{\s*if \(!soundEnabled\(\)\) return;/);
+  assert.match(app, /\$\{soundButton\(false\)\}/);
+  assert.match(app, /if \(!root\.querySelector\('\[data-action="sound-toggle"\]'\)\) root\.insertAdjacentHTML\('beforeend', soundButton\(true\)\)/);
+  assert.match(app, /soundEnabled: !soundEnabled\(\)/);
+});
+
+test('tracing uses a larger invisible grab target that follows the visible handle', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  const css = await readFile(resolve(root, 'games.css'), 'utf8');
+  assert.equal((app.match(/id="trace-hit-area" class="trace-hit-area" r="34"/g) || []).length, 2);
+  assert.match(app, /place\(dot, samples\[0\]\); place\(hitArea, samples\[0\]\)/);
+  assert.match(app, /place\(dot, tracingSession\.samples\[index\]\); place\(hitArea, tracingSession\.samples\[index\]\)/);
+  assert.match(app, /hitArea\.addEventListener\('pointerdown', startDrag\)/);
+  assert.match(css, /\.trace-hit-area\{[^}]*fill:transparent[^}]*pointer-events:all[^}]*touch-action:none/);
 });
