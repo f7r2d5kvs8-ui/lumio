@@ -88,7 +88,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.6'/);
+  assert.match(standalone, /const RELEASE = '0\.7\.7'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -106,4 +106,14 @@ test('long tracing text scrolls everywhere except on the tracing handle', async 
   assert.match(app, /class="trace-scroll-hint"/);
   assert.match(app, /dot\.addEventListener\('pointerdown', startDrag\)/);
   assert.doesNotMatch(app, /svg\.addEventListener\('pointerdown'/);
+});
+
+test('each name and custom-text letter scrolls its matching glyph into view', async () => {
+  const css = await readFile(resolve(root, 'games.css'), 'utf8');
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  assert.match(app, /<button type="button" class="name-progress-letter" data-name-letter="\$\{index\}"/);
+  assert.match(app, /data-name-letter-target="\$\{letterIndex\}"/);
+  assert.match(app, /scrollIntoView\(\{ behavior: 'smooth', block: 'nearest', inline: 'center' \}\)/);
+  assert.match(css, /\.name-progress-letter\{[^}]*cursor:pointer/);
+  assert.match(css, /\.name-progress-letter:focus-visible/);
 });
