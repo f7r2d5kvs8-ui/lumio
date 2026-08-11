@@ -1,5 +1,5 @@
-const CACHE = 'lumio-v104';
-const ASSETS = ['./', './index.html', './styles.css', './games.css', './letters.css', './trace-fix.css', './mascot.css', './app.js', './data/languages.js', './data/audio-fa.js', './data/writing-paths.js', './modules/storage.js', './assets/mascot/lumio-welcome.webp', './assets/mascot/lumio-learning.webp', './assets/mascot/lumio-celebration.webp', './assets/mascot/lumio-try-again.png'];
+const CACHE = 'lumio-v105';
+const ASSETS = ['./', './index.html', './styles.css', './games.css', './letters.css', './trace-fix.css', './mascot.css', './app.js', './data/languages.js', './data/audio-fa.js', './data/writing-paths.js', './modules/storage.js', './modules/input-validation.js', './assets/mascot/lumio-welcome.webp', './assets/mascot/lumio-learning.webp', './assets/mascot/lumio-celebration.webp', './assets/mascot/lumio-try-again.png'];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => Promise.all(ASSETS.map(async asset => {
     const response = await fetch(new Request(asset, { cache: 'reload' }));
