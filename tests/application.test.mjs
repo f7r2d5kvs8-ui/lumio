@@ -88,10 +88,22 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.5'/);
+  assert.match(standalone, /const RELEASE = '0\.7\.6'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
   assert.match(standalone, /id="localized-name-error"/);
   assert.doesNotMatch(standalone, /<script type="module" src="app\.js"><\/script>/);
+});
+
+test('long tracing text scrolls everywhere except on the tracing handle', async () => {
+  const css = await readFile(resolve(root, 'games.css'), 'utf8');
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  assert.match(css, /\.name-stage\{[^}]*touch-action:pan-x pan-y/);
+  assert.match(css, /\.name-stage \.name-svg\{touch-action:pan-x pan-y\}/);
+  assert.match(css, /\.name-stage \.trace-dot\{touch-action:none\}/);
+  assert.match(app, /class="trace-stage name-stage" dir="\$\{nameDirection\}"/);
+  assert.match(app, /class="trace-scroll-hint"/);
+  assert.match(app, /dot\.addEventListener\('pointerdown', startDrag\)/);
+  assert.doesNotMatch(app, /svg\.addEventListener\('pointerdown'/);
 });
