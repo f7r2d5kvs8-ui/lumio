@@ -9,9 +9,10 @@ $languages = [IO.File]::ReadAllText((Join-Path $root 'data\languages.js')) -repl
 $audioFa = [IO.File]::ReadAllText((Join-Path $root 'data\audio-fa.js')) -replace 'export const ', 'const '
 $writingPaths = [IO.File]::ReadAllText((Join-Path $root 'data\writing-paths.js')) -replace 'export const ', 'const '
 $storage = [IO.File]::ReadAllText((Join-Path $root 'modules\storage.js')) -replace 'export function ', 'function '
+$inputValidation = [IO.File]::ReadAllText((Join-Path $root 'modules\input-validation.js')) -replace 'export function ', 'function '
 $cloud = [IO.File]::ReadAllText((Join-Path $root 'modules\cloud.js')) -replace '(?m)^import[^\r\n]*\r?\n', "const createClient = window.supabase?.createClient;`r`n" -replace 'export const ', 'const ' -replace 'export async function ', 'async function '
 $app = [IO.File]::ReadAllText((Join-Path $root 'app.js')) -replace '(?m)^import[^\r\n]*\r?\n', ''
-$script = $languages + "`r`n" + $audioFa + "`r`n" + $writingPaths + "`r`n" + $storage + "`r`n" + $cloud + "`r`n" + $app
+$script = $languages + "`r`n" + $audioFa + "`r`n" + $writingPaths + "`r`n" + $storage + "`r`n" + $inputValidation + "`r`n" + $cloud + "`r`n" + $app
 $mascotFiles = @('lumio-welcome.webp', 'lumio-learning.webp', 'lumio-celebration.webp')
 foreach ($file in $mascotFiles) {
   $path = Join-Path $root "assets\mascot\$file"
