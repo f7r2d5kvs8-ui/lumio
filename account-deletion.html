@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#6759db">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Delete a Lumio account and its associated data.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Delete a Lumio account</title>
+</head>
+<body>
+  <main class="app-shell"><section class="hero delete-card">
+    <div class="eyebrow">Lumio · Parent account</div>
+    <h1>Delete your account and data</h1>
+    <p>Sign in with the adult account used for Lumio. Deletion removes the account, email address, and linked learning progress. It cannot be undone.</p>
+    <form id="login-form" class="auth-form">
+      <label>Email address<input id="email" type="email" autocomplete="email" required></label>
+      <label>Password<input id="password" type="password" autocomplete="current-password" minlength="4" required></label>
+      <button class="button primary">Sign in to continue</button>
+    </form>
+    <div id="delete-controls" hidden>
+      <p id="signed-in-as"></p>
+      <label class="consent-row"><input id="confirm-delete" type="checkbox"><span>I understand that deleting this account and its data is permanent.</span></label>
+      <button id="delete-account" class="danger-link" disabled>Delete account and data</button>
+    </div>
+    <p class="auth-message" id="message" aria-live="polite"></p>
+    <p><a class="policy-link" href="privacy.html">Read the privacy policy</a> · <a class="policy-link" href="./">Back to Lumio</a></p>
+  </section></main>
+  <script>
+    const client = window.supabase.createClient('https://qmtzmlpgsvtietkqgwnb.supabase.co', 'sb_publishable_5gaVlwMu1tNVDqYjp0Fy0Q_vekCjHjT');
+    const loginForm = document.querySelector('#login-form');
+    const controls = document.querySelector('#delete-controls');
+    const message = document.querySelector('#message');
+    const confirmDelete = document.querySelector('#confirm-delete');
+    const deleteButton = document.querySelector('#delete-account');
+
+    async function showSession() {
+      const { data } = await client.auth.getSession();
+      const user = data.session?.user;
+      loginForm.hidden = Boolean(user);
+      controls.hidden = !user;
+      document.querySelector('#signed-in-as').textContent = user ? `Signed in as ${user.email}` : '';
+    }
+
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault(); message.textContent = 'Signing in…';
+      const { error } = await client.auth.signInWithPassword({ email: document.querySelector('#email').value.trim().toLowerCase(), password: document.querySelector('#password').value });
+      if (error) { message.textContent = error.message; return; }
+      message.textContent = ''; await showSession();
+    });
+    confirmDelete.addEventListener('change', () => { deleteButton.disabled = !confirmDelete.checked; });
+    deleteButton.addEventListener('click', async () => {
+      deleteButton.disabled = true; message.textContent = 'Deleting account and data…';
+      const { error } = await client.functions.invoke('delete-account', { method: 'POST', body: {} });
+      if (error) { message.textContent = 'Deletion failed. Please sign in again and retry.'; deleteButton.disabled = false; return; }
+      await client.auth.signOut(); localStorage.removeItem('lumio-profile-v1');
+      controls.hidden = true; message.textContent = 'Your Lumio account and linked data have been deleted.';
+    });
+    showSession();
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <title>Lumio Analytics</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <section id="login-panel" class="login-card">
+      <div class="brand">Lu<span>mio</span></div>
+      <p class="eyebrow">Private analytics</p>
+      <h1>Administrator sign in</h1>
+      <p>Use an authorized Lumio administrator account.</p>
+      <form id="admin-login">
+        <label>Email<input id="email" type="email" autocomplete="username" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit">Sign in</button>
+      </form>
+      <p id="login-message" class="message" aria-live="polite"></p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <header class="dashboard-header">
+        <div><div class="brand">Lu<span>mio</span></div><p>Privacy-safe product analytics</p></div>
+        <div class="header-actions"><span id="updated-at"></span><a href="./" class="secondary view-link">User view</a><button id="refresh" class="secondary">Refresh</button><button id="sign-out" class="secondary">Sign out</button></div>
+      </header>
+      <p id="dashboard-message" class="message" aria-live="polite"></p>
+
+      <section class="hero-metrics" id="hero-metrics"></section>
+      <section class="period-grid" id="periods"></section>
+
+      <div class="dashboard-grid">
+        <article class="panel panel-wide"><div class="panel-heading"><div><p class="eyebrow">Last 30 days</p><h2>Users active over time</h2></div><div class="legend"><span class="active-dot"></span>Active <span class="new-dot"></span>New</div></div><canvas id="trend-chart" height="220" aria-label="Daily active and new users chart"></canvas></article>
+        <article class="panel"><p class="eyebrow">Return behavior</p><h2>Retention</h2><div id="retention" class="retention-list"></div></article>
+        <article class="panel"><p class="eyebrow">Last 30 days</p><h2>Languages</h2><div id="languages" class="bar-list"></div></article>
+        <article class="panel"><p class="eyebrow">Last 30 days</p><h2>Popular lessons & games</h2><div id="activities" class="rank-list"></div></article>
+        <article class="panel"><p class="eyebrow">Last 30 days</p><h2>Platforms</h2><div id="platforms" class="bar-list"></div></article>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
