@@ -1,4 +1,4 @@
-const CACHE = 'lumio-v109';
+const CACHE = 'lumio-v110';
 const ASSETS = ['./', './index.html', './styles.css', './games.css', './letters.css', './trace-fix.css', './mascot.css', './app.js', './data/languages.js', './data/audio-fa.js', './data/writing-paths.js', './modules/storage.js', './modules/input-validation.js', './assets/mascot/lumio-welcome.webp', './assets/mascot/lumio-learning.webp', './assets/mascot/lumio-celebration.webp', './assets/mascot/lumio-try-again.png'];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => Promise.all(ASSETS.map(async asset => {

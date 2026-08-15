@@ -88,7 +88,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.9'/);
+  assert.match(standalone, /const RELEASE = '0\.7\.10'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -153,4 +153,16 @@ test('math screen and voices use the correct operation-specific instruction', as
   assert.match(app, /const retryGuide = mathRetryGuide\(numberHouseSession\.house, level\)/);
   assert.match(app, /feedback\.textContent = mathResultGuide\(numberHouseSession\.house, level\)/);
   assert.doesNotMatch(app, /number-house-prompt">\$\{math\.prompt\}/);
+});
+
+test('Google sign-in is available on the first welcome screen and reuses the existing OAuth flow', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  const cloud = await readFile(resolve(root, 'modules/cloud.js'), 'utf8');
+  assert.match(app, /const googleAuthCopy = \{[\s\S]*nl:[\s\S]*en:[\s\S]*fa:/);
+  assert.equal((app.match(/\$\{googleLoginButton\(googleText\)\}/g) || []).length, 2);
+  assert.match(app, /if \(choosing\) \{[\s\S]*\$\{googleLoginButton\(googleText\)\}[\s\S]*id="auth-message"[\s\S]*bindGoogleLogin\(googleText\)/);
+  assert.match(app, /function bindGoogleLogin\(googleText\)[\s\S]*await signInWithGoogle\(\)/);
+  assert.equal((app.match(/<svg viewBox="0 0 24 24" aria-hidden="true">/g) || []).length, 1);
+  assert.match(cloud, /signInWithOAuth\(\{ provider: 'google', options: \{ redirectTo \} \}\)/);
+  assert.match(cloud, /redirectTo = `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}`/);
 });
