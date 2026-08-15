@@ -18,7 +18,7 @@ let numberHouseSession = null;
 let returnView = null;
 const TRACE_LEVEL_OFFSET = 100;
 const MATH_LEVEL_OFFSET = 1000;
-const RELEASE = '0.7.8';
+const RELEASE = '0.7.9';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const clearInputErrorOnEdit = (input, error) => input?.addEventListener('input', () => { input.removeAttribute('aria-invalid'); if (error) error.textContent = ''; });
@@ -41,9 +41,9 @@ const setDocumentLanguage = languageId => {
   document.documentElement.dir = language.id === 'fa' ? 'rtl' : 'ltr';
 };
 setDocumentLanguage(profile.appLanguage || 'nl');
-Object.assign(appCopy.nl.math, { listen:'Luister', guideTotal:'Welke twee getallen maken samen {total}?', guideMissing:'Welk getal ontbreekt zodat het samen {total} wordt?', lostTitle:'Even opnieuw kijken', lostMessage:'Dat is lastig, maar Lumio weet dat jij het kunt. Probeer deze oefening opnieuw of kies een ander niveau.', restartLevel:'Probeer dit niveau opnieuw', chooseAnotherLevel:'Kies een ander niveau', locked:'Voltooi eerst alle vorige niveaus' });
-Object.assign(appCopy.en.math, { listen:'Listen', guideTotal:'Which two numbers make {total}?', guideMissing:'Which number is missing to make {total}?', lostTitle:'Let’s look again', lostMessage:'This one is tricky, but Lumio knows you can do it. Try this level again or choose another level.', restartLevel:'Try this level again', chooseAnotherLevel:'Choose another level', locked:'Finish all previous levels first' });
-Object.assign(appCopy.fa.math, { listen:'گوش کن', guideTotal:'کدام دو عدد می‌شوند {total}؟', guideMissing:'چه عددی کم است تا بشود {total}؟', lostTitle:'دوباره نگاه کنیم', lostMessage:'این سؤال سخت است، اما لومیو می‌داند که تو می‌توانی. این سطح را دوباره امتحان کن یا یک سطح دیگر انتخاب کن.', restartLevel:'این سطح را دوباره امتحان کن', chooseAnotherLevel:'یک سطح دیگر انتخاب کن', locked:'اول همهٔ سطح‌های قبلی را تمام کن' });
+Object.assign(appCopy.nl.math, { listen:'Luister', guideTotalAddition:'Hoeveel is {left} plus {right}?', guideTotalMultiplication:'Hoeveel is {left} keer {right}?', guideMissingAddition:'Welk getal plus {known} is samen {total}?', guideMissingMultiplication:'Welk getal keer {known} is {total}?', retryTotalAddition:'Probeer opnieuw — tel de twee getallen onderaan bij elkaar op.', retryTotalMultiplication:'Probeer opnieuw — vermenigvuldig de twee getallen onderaan.', retryMissing:'Probeer opnieuw — kijk naar het totaal op het dak.', resultAddition:'Goed gedaan! {left} plus {right} is {total}.', resultMultiplication:'Goed gedaan! {left} keer {right} is {total}.', lostTitle:'Even opnieuw kijken', lostMessage:'Dat is lastig, maar Lumio weet dat jij het kunt. Probeer deze oefening opnieuw of kies een ander niveau.', restartLevel:'Probeer dit niveau opnieuw', chooseAnotherLevel:'Kies een ander niveau', locked:'Voltooi eerst alle vorige niveaus' });
+Object.assign(appCopy.en.math, { listen:'Listen', guideTotalAddition:'What is {left} plus {right}?', guideTotalMultiplication:'What is {left} times {right}?', guideMissingAddition:'What number plus {known} makes {total}?', guideMissingMultiplication:'What number times {known} makes {total}?', retryTotalAddition:'Try again — add the two numbers at the bottom.', retryTotalMultiplication:'Try again — multiply the two numbers at the bottom.', retryMissing:'Try again — look at the total on the roof.', resultAddition:'Great job! {left} plus {right} equals {total}.', resultMultiplication:'Great job! {left} times {right} equals {total}.', lostTitle:'Let’s look again', lostMessage:'This one is tricky, but Lumio knows you can do it. Try this level again or choose another level.', restartLevel:'Try this level again', chooseAnotherLevel:'Choose another level', locked:'Finish all previous levels first' });
+Object.assign(appCopy.fa.math, { listen:'گوش کن', guideTotalAddition:'{left} به‌علاوهٔ {right} چند می‌شود؟', guideTotalMultiplication:'{left} ضربدر {right} چند می‌شود؟', guideMissingAddition:'چه عددی به‌علاوهٔ {known} می‌شود {total}؟', guideMissingMultiplication:'چه عددی ضربدر {known} می‌شود {total}؟', retryTotalAddition:'دوباره تلاش کن — دو عدد پایین را با هم جمع کن.', retryTotalMultiplication:'دوباره تلاش کن — دو عدد پایین را در هم ضرب کن.', retryMissing:'دوباره تلاش کن — به عدد روی سقف نگاه کن.', resultAddition:'آفرین! {left} به‌علاوهٔ {right} می‌شود {total}.', resultMultiplication:'آفرین! {left} ضربدر {right} می‌شود {total}.', lostTitle:'دوباره نگاه کنیم', lostMessage:'این سؤال سخت است، اما لومیو می‌داند که تو می‌توانی. این سطح را دوباره امتحان کن یا یک سطح دیگر انتخاب کن.', restartLevel:'این سطح را دوباره امتحان کن', chooseAnotherLevel:'یک سطح دیگر انتخاب کن', locked:'اول همهٔ سطح‌های قبلی را تمام کن' });
 const mathCopy = () => copy().math;
 const navigationCopy = {
   nl: { back:'Terug', backToLogin:'Terug naar aanmelden', home:'Naar spellen', appLanguage:'App-taal', practiceLanguage:'Oefentaal', chooseStyle:'Kies jouw wereld', styleIntro:'Kies een kleurrijke wereld voor elk Lumio-scherm. Je kunt dit altijd veranderen.', style:'Wereldstijl' },
@@ -581,12 +581,17 @@ function startNumberHouses(levelId = 1) {
 const appLocale = () => languagePackages[profile.appLanguage || 'nl']?.metadata.locale || 'en-US';
 const fillMathText = (text, values) => Object.entries(values).reduce((message, [key, value]) => message.replaceAll(`{${key}}`, value), text);
 function speakMath(text) { speakWithSystemVoice(text, appLocale()); }
-function mathGuide(house) {
+function mathGuide(house, level) {
   const math = mathCopy();
-  return house.missing === 'total'
-    ? fillMathText(math.guideTotal, { total: house.total })
-    : fillMathText(math.guideMissing, { total: house.total });
+  const multiplication = level.type === 'multiplication';
+  const known = house.missing === 'left' ? house.right : house.left;
+  const template = house.missing === 'total'
+    ? math[multiplication ? 'guideTotalMultiplication' : 'guideTotalAddition']
+    : math[multiplication ? 'guideMissingMultiplication' : 'guideMissingAddition'];
+  return fillMathText(template, { left: house.left, right: house.right, known, total: house.total });
 }
+function mathRetryGuide(house, level) { const math = mathCopy(); return house.missing !== 'total' ? math.retryMissing : math[level.type === 'multiplication' ? 'retryTotalMultiplication' : 'retryTotalAddition']; }
+function mathResultGuide(house, level) { const math = mathCopy(); return fillMathText(math[level.type === 'multiplication' ? 'resultMultiplication' : 'resultAddition'], house); }
 function resetMathLevel(levelId) {
   numberHouseSession = null;
   saveMathProgress({ levels: { ...getMathProgress().levels, [levelId]: { round: 0, stars: 0, complete: false } }, active: null });
@@ -632,20 +637,21 @@ function renderNumberHouses() {
   const roof = house.missing === 'total' ? '?' : house.total;
   const left = house.missing === 'left' ? '?' : house.left;
   const right = house.missing === 'right' ? '?' : house.right;
-  root.innerHTML = `${header()}<main class="screen number-houses-screen"><div class="game-head"><button class="back" data-action="math-levels">← ${math.backLevels}</button><div class="progress"><span style="width:${round / totalRounds * 100}%"></span></div><span class="count">${round + 1}/${totalRounds}</span></div><section class="number-house-card"><div class="eyebrow">${level.label} · ${level.description}</div><h1>${math.title}</h1><p class="number-house-prompt">${math.prompt} <strong>${roof}</strong>?</p><div class="number-house" aria-label="${math.title}"><div class="roof-number ${house.missing === 'total' ? 'missing' : ''}" id="house-total">${roof}</div><svg class="house-branches" viewBox="0 0 300 110" aria-hidden="true"><line x1="150" y1="8" x2="55" y2="103"/><line x1="150" y1="8" x2="245" y2="103"/></svg><div class="house-rooms"><div class="house-room ${house.missing === 'left' ? 'missing' : ''}" id="house-left">${left}</div><div class="house-room ${house.missing === 'right' ? 'missing' : ''}" id="house-right">${right}</div></div></div><p class="feedback" id="number-house-feedback">${math.choose}</p><button class="math-listen" type="button" data-action="listen-math" aria-label="${math.listen}">🔊 ${math.listen}</button><div class="number-choices">${choices.map(number => `<button class="number-choice" data-number-choice="${number}">${number}</button>`).join('')}</div><div class="number-stars" aria-label="${stars} stars">${'⭐'.repeat(stars)}</div></section></main>${adBanner()}`;
+  const instruction = mathGuide(house, level);
+  root.innerHTML = `${header()}<main class="screen number-houses-screen"><div class="game-head"><button class="back" data-action="math-levels">← ${math.backLevels}</button><div class="progress"><span style="width:${round / totalRounds * 100}%"></span></div><span class="count">${round + 1}/${totalRounds}</span></div><section class="number-house-card"><div class="eyebrow">${level.label} · ${level.description}</div><h1>${math.title}</h1><p class="number-house-prompt">${escape(instruction)}</p><div class="number-house" aria-label="${math.title}"><div class="roof-number ${house.missing === 'total' ? 'missing' : ''}" id="house-total">${roof}</div><svg class="house-branches" viewBox="0 0 300 110" aria-hidden="true"><line x1="150" y1="8" x2="55" y2="103"/><line x1="150" y1="8" x2="245" y2="103"/></svg><div class="house-rooms"><div class="house-room ${house.missing === 'left' ? 'missing' : ''}" id="house-left">${left}</div><div class="house-room ${house.missing === 'right' ? 'missing' : ''}" id="house-right">${right}</div></div></div><p class="feedback" id="number-house-feedback">${math.choose}</p><button class="math-listen" type="button" data-action="listen-math" aria-label="${math.listen}">🔊 ${math.listen}</button><div class="number-choices">${choices.map(number => `<button class="number-choice" data-number-choice="${number}">${number}</button>`).join('')}</div><div class="number-stars" aria-label="${stars} stars">${'⭐'.repeat(stars)}</div></section></main>${adBanner()}`;
   bindHeader();
   root.querySelector('[data-action="math-levels"]').onclick = () => { numberHouseSession = null; saveMathProgress({ active: null }); view = 'number-house-levels'; render(); };
-  root.querySelector('[data-action="listen-math"]').onclick = () => speakMath(mathGuide(house));
-  setTimeout(() => speakMath(mathGuide(house)), 180);
+  root.querySelector('[data-action="listen-math"]').onclick = () => speakMath(instruction);
+  setTimeout(() => speakMath(instruction), 180);
   root.querySelectorAll('[data-number-choice]').forEach(button => button.onclick = () => {
     if (numberHouseSession.house.answered) return;
     const choice = Number(button.dataset.numberChoice);
     const feedback = root.querySelector('#number-house-feedback');
-    if (choice !== numberHouseSession.house.answer) { numberHouseSession.house.mistakes = (numberHouseSession.house.mistakes || 0) + 1; button.classList.add('wrong'); if (numberHouseSession.house.mistakes >= 3) { numberHouseSession.house.answered = true; feedback.textContent = math.lostTitle; root.querySelectorAll('[data-number-choice]').forEach(item => { item.disabled = true; }); setTimeout(() => showMathSetback(level.id), 550); } else { feedback.textContent = math.tryAgain; speakMath(math.tryAgain); } return; }
+    if (choice !== numberHouseSession.house.answer) { numberHouseSession.house.mistakes = (numberHouseSession.house.mistakes || 0) + 1; button.classList.add('wrong'); if (numberHouseSession.house.mistakes >= 3) { numberHouseSession.house.answered = true; feedback.textContent = math.lostTitle; root.querySelectorAll('[data-number-choice]').forEach(item => { item.disabled = true; }); setTimeout(() => showMathSetback(level.id), 550); } else { const retryGuide = mathRetryGuide(numberHouseSession.house, level); feedback.textContent = retryGuide; speakMath(retryGuide); } return; }
     numberHouseSession.house.answered = true;
     button.classList.add('correct');
     root.querySelector(numberHouseSession.house.missing === 'total' ? '#house-total' : numberHouseSession.house.missing === 'left' ? '#house-left' : '#house-right').textContent = choice;
-    feedback.textContent = math.greatJob.replace('{known}', numberHouseSession.house.left).replace('{answer}', numberHouseSession.house.right).replace('{total}', numberHouseSession.house.total);
+    feedback.textContent = mathResultGuide(numberHouseSession.house, level);
     speakMath(feedback.textContent);
     numberHouseSession.stars += 1;
     showMascotCelebration();

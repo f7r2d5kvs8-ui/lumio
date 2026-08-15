@@ -88,7 +88,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.8'/);
+  assert.match(standalone, /const RELEASE = '0\.7\.9'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -138,4 +138,19 @@ test('tracing uses a larger invisible grab target that follows the visible handl
   assert.match(app, /place\(dot, tracingSession\.samples\[index\]\); place\(hitArea, tracingSession\.samples\[index\]\)/);
   assert.match(app, /hitArea\.addEventListener\('pointerdown', startDrag\)/);
   assert.match(css, /\.trace-hit-area\{[^}]*fill:transparent[^}]*pointer-events:all[^}]*touch-action:none/);
+});
+
+test('math screen and voices use the correct operation-specific instruction', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  for (const key of ['guideTotalAddition', 'guideTotalMultiplication', 'guideMissingAddition', 'guideMissingMultiplication', 'retryTotalAddition', 'retryTotalMultiplication', 'retryMissing', 'resultAddition', 'resultMultiplication']) {
+    assert.equal((app.match(new RegExp(`${key}:`, 'g')) || []).length, 3, key);
+  }
+  assert.match(app, /function mathGuide\(house, level\)[\s\S]*house\.missing === 'total'[\s\S]*guideTotalMultiplication'[\s\S]*guideTotalAddition'[\s\S]*guideMissingMultiplication'[\s\S]*guideMissingAddition'/);
+  assert.match(app, /const instruction = mathGuide\(house, level\)/);
+  assert.match(app, /class="number-house-prompt">\$\{escape\(instruction\)\}/);
+  assert.match(app, /root\.querySelector\('\[data-action="listen-math"\]'\)\.onclick = \(\) => speakMath\(instruction\)/);
+  assert.match(app, /setTimeout\(\(\) => speakMath\(instruction\), 180\)/);
+  assert.match(app, /const retryGuide = mathRetryGuide\(numberHouseSession\.house, level\)/);
+  assert.match(app, /feedback\.textContent = mathResultGuide\(numberHouseSession\.house, level\)/);
+  assert.doesNotMatch(app, /number-house-prompt">\$\{math\.prompt\}/);
 });
