@@ -23,15 +23,28 @@ export async function signInWithGoogle() {
 }
 export async function signOut() { return lumioSupabase ? lumioSupabase.auth.signOut() : { error: null }; }
 
-export async function readProgress(userId) {
+export async function deleteAccount() {
+  if (!lumioSupabase) return { data: null, error: offlineError() };
+  return lumioSupabase.functions.invoke('delete-account', { method: 'POST', body: {} });
+}
+
+export async function readProgress(userId, languageId, activity) {
   if (!lumioSupabase) return [];
-  const { data, error } = await lumioSupabase.from('user_progress').select('level,word_index,completed,updated_at').eq('user_id', userId);
+  const { data, error } = await lumioSupabase
+    .from('user_progress')
+    .select('level,word_index,completed,updated_at')
+    .eq('user_id', userId)
+    .eq('language_id', languageId)
+    .eq('activity', activity);
   if (error) throw error;
   return data || [];
 }
 
-export async function writeProgress(userId, level, wordIndex, completed) {
+export async function writeProgress(userId, languageId, activity, level, wordIndex, completed) {
   if (!lumioSupabase) return;
-  const { error } = await lumioSupabase.from('user_progress').upsert({ user_id: userId, level, word_index: wordIndex, completed, updated_at: new Date().toISOString() }, { onConflict: 'user_id,level' });
+  const { error } = await lumioSupabase.from('user_progress').upsert(
+    { user_id: userId, language_id: languageId, activity, level, word_index: wordIndex, completed, updated_at: new Date().toISOString() },
+    { onConflict: 'user_id,language_id,activity,level' }
+  );
   if (error) throw error;
 }

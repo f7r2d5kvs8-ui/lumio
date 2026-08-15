@@ -1,5 +1,5 @@
-const CACHE = 'lumio-v111';
-const ASSETS = ['./', './index.html', './styles.css', './games.css', './letters.css', './trace-fix.css', './mascot.css', './app.js', './data/languages.js', './data/audio-fa.js', './data/writing-paths.js', './modules/storage.js', './modules/input-validation.js', './assets/mascot/lumio-welcome.webp', './assets/mascot/lumio-learning.webp', './assets/mascot/lumio-celebration.webp', './assets/mascot/lumio-try-again.png'];
+const CACHE = 'lumio-v114';
+const ASSETS = ['./', './index.html', './privacy.html', './account-deletion.html', './styles.css', './games.css', './letters.css', './trace-fix.css', './mascot.css', './app.js', './data/languages.js', './data/audio-fa.js', './data/writing-paths.js', './modules/storage.js', './modules/input-validation.js', './modules/cloud.js', './modules/analytics.js', './assets/mascot/lumio-welcome.webp', './assets/mascot/lumio-learning.webp', './assets/mascot/lumio-celebration.webp', './assets/mascot/lumio-try-again.png'];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => Promise.all(ASSETS.map(async asset => {
     const response = await fetch(new Request(asset, { cache: 'reload' }));
@@ -16,6 +16,7 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   const sameOrigin = url.origin === self.location.origin;
+  if (sameOrigin && /\/admin(?:\.html|\.js|\.css)?$/.test(url.pathname)) return;
   const alwaysFresh = sameOrigin && (event.request.mode === 'navigate' || ['document', 'script', 'style', 'worker'].includes(event.request.destination));
   const networkRequest = alwaysFresh ? new Request(event.request, { cache: 'no-store' }) : event.request;
   event.respondWith(fetch(networkRequest).then(response => {

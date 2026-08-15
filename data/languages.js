@@ -121,7 +121,7 @@ export const languagePackages = {
       hello: 'Hallo, leerheld!', dailyIntro: 'Vandaag oefenen we met luisteren, klanken en woorden.', daily: 'Dagelijkse oefening', growth: 'Jouw groei', worlds: 'werelden',
       sounds: 'Letters en klanken', building: 'Luisteren en woorden bouwen', locked: 'Nog even oefenen', build: 'Bouw het woord', find: 'Zoek de letters van dit woord',
       gameIntro: 'Luister goed en kies de letters.', listenPrompt: 'Luister:', restart: 'Even opnieuw proberen in deze wereld.', parents: 'Voor ouders', parentTitle: 'Rustige groei, stap voor stap',
-      worldsDone: 'werelden af', days: 'dagen op rij', stars: 'sterren verdiend', homeLanguage: 'Thuistaal', adSetting: 'Leeradvertentie tonen', on: 'Aan', savedNote: 'Voortgang wordt veilig op dit apparaat bewaard.', ad: 'Advertentie', adMessage: 'Lumio blijft gratis voor gezinnen'
+      worldsDone: 'werelden af', days: 'dagen op rij', stars: 'sterren verdiend', homeLanguage: 'Thuistaal', savedNote: 'Voortgang wordt veilig op dit apparaat bewaard.'
     },
     games: [
       { id: 'word-builder', title: 'Woordbouwers', description: 'Luister, kies letters en bouw woorden.', icon: '🧩', status: 'ready' },
@@ -147,7 +147,7 @@ export const languagePackages = {
       hello: 'Hello, learning hero!', dailyIntro: 'Today we practise listening, sounds and words.', daily: 'Daily practice', growth: 'Your growth', worlds: 'worlds',
       sounds: 'Letters and sounds', building: 'Listening and building words', locked: 'Keep practising', build: 'Build the word', find: 'Find the letters in this word',
       gameIntro: 'Listen carefully and choose the letters.', listenPrompt: 'Listen:', restart: 'Try this world again.', parents: 'For parents', parentTitle: 'Calm growth, one step at a time',
-      worldsDone: 'worlds finished', days: 'days in a row', stars: 'stars earned', homeLanguage: 'Home language', adSetting: 'Show learning advert', on: 'On', savedNote: 'Progress is safely saved on this device.', ad: 'Advertisement', adMessage: 'Lumio stays free for families'
+      worldsDone: 'worlds finished', days: 'days in a row', stars: 'stars earned', homeLanguage: 'Home language', savedNote: 'Progress is safely saved on this device.'
     },
     games: [
       { id: 'word-builder', title: 'Word Builders', description: 'Listen, choose letters and build words.', icon: '🧩', status: 'ready' },
@@ -170,7 +170,7 @@ export const languagePackages = {
       hello: 'سلام، قهرمان یادگیری!', dailyIntro: 'امروز با صداها و واژه‌ها تمرین می‌کنیم.', daily: 'تمرین روزانه', growth: 'رشد تو', worlds: 'مرحله',
       sounds: 'حروف و صداها', building: 'گوش دادن و ساختن واژه', locked: 'کمی بیشتر تمرین کن', build: 'واژه را بساز', find: 'حروف این واژه را پیدا کن',
       gameIntro: 'با دقت گوش کن و حروف را انتخاب کن.', listenPrompt: 'گوش کن:', restart: 'این مرحله را دوباره تمرین کن.', parents: 'برای والدین', parentTitle: 'رشد آرام، قدم به قدم',
-      worldsDone: 'مرحله تمام شده', days: 'روز پیاپی', stars: 'ستاره گرفته', homeLanguage: 'زبان خانه', adSetting: 'نمایش تبلیغ آموزشی', on: 'روشن', savedNote: 'پیشرفت با امنیت روی این دستگاه ذخیره می‌شود.', ad: 'تبلیغ', adMessage: 'لومیو برای خانواده‌ها رایگان می‌ماند'
+      worldsDone: 'مرحله تمام شده', days: 'روز پیاپی', stars: 'ستاره گرفته', homeLanguage: 'زبان خانه', savedNote: 'پیشرفت با امنیت روی این دستگاه ذخیره می‌شود.'
     },
     games: [
       { id: 'word-builder', title: 'واژه‌ساز', description: 'گوش کن، حروف را انتخاب کن و واژه بساز.', icon: '🧩', status: 'ready' },

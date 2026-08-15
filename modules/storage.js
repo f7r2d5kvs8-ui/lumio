@@ -11,8 +11,9 @@ const freshProfile = () => ({
   learningLanguage: 'nl',
   templateId: 'forest',
   progress: {},
+  mathProgressByLanguage: {},
   rewards: { stars: 0, streak: 0, lastPractice: null },
-  preferences: { reducedMotion: false, adsEnabled: true, soundEnabled: true }
+  preferences: { reducedMotion: false, soundEnabled: true }
 });
 
 export function loadProfile() {
@@ -27,12 +28,20 @@ export function loadProfile() {
       profile.progress.nl = profile.progress.nl || profile.progress['nl-BE'];
       delete profile.progress['nl-BE'];
     }
+    profile.mathProgressByLanguage ||= {};
+    if (profile.mathProgress) {
+      const languageId = profile.learningLanguage || profile.selectedLanguage || 'nl';
+      profile.mathProgressByLanguage[languageId] ||= profile.mathProgress;
+      delete profile.mathProgress;
+    }
     return profile;
   }
   catch { return freshProfile(); }
 }
 
 export function saveProfile(profile) { localStorage.setItem(KEY, JSON.stringify(profile)); }
+
+export function clearProfile() { localStorage.removeItem(KEY); }
 
 export function languageProgress(profile, languageId) {
   return profile.progress[languageId] || { completed: [], tracingCompleted: [], activeLesson: 0, mistakes: 0, dailyCount: 0 };

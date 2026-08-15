@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { languageCatalog, languagePackages } from '../data/languages.js';
+import { persianAudio } from '../data/audio-fa.js';
 import { writingPaths } from '../data/writing-paths.js';
 import { normalizeUserText, validateLatinName, validateLocalizedName, validateTracingText } from '../modules/input-validation.js';
 
@@ -60,6 +61,7 @@ test('every service-worker asset exists and the standalone builder embeds valida
   for (const asset of assets) await assert.doesNotReject(() => readFile(resolve(root, asset.replace(/^\.\//, ''))), asset);
   const builder = await readFile(resolve(root, 'build-standalone.ps1'), 'utf8');
   assert.match(builder, /input-validation\.js/);
+  assert.match(builder, /analytics\.js/);
   const app = await readFile(resolve(root, 'app.js'), 'utf8');
   assert.match(app, /validateLatinName/);
   assert.match(app, /validateLocalizedName/);
@@ -88,7 +90,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.11'/);
+  assert.match(standalone, /const RELEASE = '0\.8\.1'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -155,13 +157,15 @@ test('math screen and voices use the correct operation-specific instruction', as
   assert.doesNotMatch(app, /number-house-prompt">\$\{math\.prompt\}/);
 });
 
-test('Google sign-in is available on the first welcome screen and reuses the existing OAuth flow', async () => {
+test('Google sign-in is available only after entering the adult-managed account flow', async () => {
   const app = await readFile(resolve(root, 'app.js'), 'utf8');
   const cloud = await readFile(resolve(root, 'modules/cloud.js'), 'utf8');
   assert.match(app, /const googleAuthCopy = \{[\s\S]*nl:[\s\S]*en:[\s\S]*fa:/);
-  assert.equal((app.match(/\$\{googleLoginButton\(googleText\)\}/g) || []).length, 2);
-  assert.match(app, /if \(choosing\) \{[\s\S]*\$\{googleLoginButton\(googleText\)\}[\s\S]*id="auth-message"[\s\S]*bindGoogleLogin\(googleText\)/);
-  assert.match(app, /function bindGoogleLogin\(googleText\)[\s\S]*await signInWithGoogle\(\)/);
+  assert.equal((app.match(/\$\{googleLoginButton\(googleText\)\}/g) || []).length, 1);
+  assert.match(app, /function openAdultGate\(target\)/);
+  assert.match(app, /data-action="signup"[\s\S]*openAdultGate\('signup'\)/);
+  assert.match(app, /function bindGoogleLogin\(googleText, requireConsent = false\)[\s\S]*await signInWithGoogle\(\)/);
+  assert.match(app, /bindGoogleLogin\(googleText, true\)/);
   assert.equal((app.match(/<svg viewBox="0 0 24 24" aria-hidden="true">/g) || []).length, 1);
   assert.match(cloud, /signInWithOAuth\(\{ provider: 'google', options: \{ redirectTo \} \}\)/);
   assert.match(cloud, /redirectTo = `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}`/);
@@ -172,7 +176,112 @@ test('the header always offers the correct account action', async () => {
   const css = await readFile(resolve(root, 'games.css'), 'utf8');
   assert.match(app, /if \(cloudUser\)[\s\S]*dataset\.action = 'signout'[\s\S]*button\.textContent = copy\(\)\.signOut/);
   assert.match(app, /else \{[\s\S]*dataset\.action = 'signin'[\s\S]*button\.textContent = copy\(\)\.logIn/);
-  assert.match(app, /\[data-action="signin"\][\s\S]*returnView = view; authMode = 'choice'; view = 'auth'; render\(\)/);
+  assert.match(app, /\[data-action="signin"\][\s\S]*returnView = view; openAdultGate\('login'\)/);
   assert.match(app, /view = returnView \|\| \(profile\.childName/);
   assert.match(css, /\.account-session-action\{white-space:nowrap;cursor:pointer\}/);
+});
+
+test('analytics is privacy-minimized, failure-isolated, and admin-only', async () => {
+  const analytics = await readFile(resolve(root, 'modules/analytics.js'), 'utf8');
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  const migration = await readFile(resolve(root, 'supabase/migrations/20260815153200_add_privacy_safe_analytics.sql'), 'utf8');
+  const admin = await readFile(resolve(root, 'admin.js'), 'utf8');
+  const childShell = await readFile(resolve(root, 'index.template.html'), 'utf8');
+  for (const event of ['first_open', 'session_start', 'language_selected', 'lesson_started', 'lesson_completed', 'game_started', 'game_completed', 'curriculum_progress', 'support_viewed', 'support_clicked']) {
+    assert.match(analytics, new RegExp(`['"]${event}['"]`), event);
+  }
+  assert.match(analytics, /crypto\?\.randomUUID/);
+  assert.match(analytics, /queueMicrotask/);
+  assert.match(analytics, /\.catch\(\(\) => \{\}\)/);
+  assert.doesNotMatch(analytics, /childName|email|birth|location|latitude|longitude|advertising/i);
+  assert.match(app, /trackEvent\('curriculum_progress'/);
+  assert.match(migration, /enable row level security/i);
+  assert.match(migration, /grant insert on table public\.analytics_events to anon, authenticated/i);
+  assert.doesNotMatch(migration, /grant select on table public\.analytics_events to (?:anon|authenticated)/i);
+  assert.match(migration, /auth\.jwt\(\) -> 'app_metadata' ->> 'lumio_admin'/);
+  assert.match(migration, /revoke all on function public\.get_lumio_analytics_dashboard\(\) from public, anon/i);
+  assert.match(admin, /rpc\('get_lumio_analytics_dashboard'/);
+  assert.doesNotMatch(admin, /service[_-]?role|secret[_-]?key/i);
+  assert.doesNotMatch(childShell, /admin\.html/i);
+  assert.match(app, /cloudUser\?\.app_metadata\?\.lumio_admin === true/);
+  assert.match(app, /href="admin\.html"/);
+  const adminHtml = await readFile(resolve(root, 'admin.html'), 'utf8');
+  assert.match(adminHtml, /href="\.\/" class="secondary view-link">User view/);
+});
+
+test('advertising controls are removed and subscription information stays in the parent area', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  const storage = await readFile(resolve(root, 'modules/storage.js'), 'utf8');
+  const languages = await readFile(resolve(root, 'data/languages.js'), 'utf8');
+  assert.doesNotMatch(storage, /adsEnabled/);
+  assert.doesNotMatch(languages, /adSetting|adMessage/);
+  assert.doesNotMatch(app, /id="ads"|preferences\.adsEnabled/);
+  assert.match(app, /subscriptionNote:'Lumio contains no advertising/);
+});
+
+test('publishing privacy, deletion, and Data safety resources are present', async () => {
+  const [app, cloud, privacy, deletion, dataSafety, edgeFunction] = await Promise.all([
+    readFile(resolve(root, 'app.js'), 'utf8'),
+    readFile(resolve(root, 'modules/cloud.js'), 'utf8'),
+    readFile(resolve(root, 'privacy.html'), 'utf8'),
+    readFile(resolve(root, 'account-deletion.html'), 'utf8'),
+    readFile(resolve(root, 'GOOGLE_PLAY_DATA_SAFETY.md'), 'utf8'),
+    readFile(resolve(root, 'supabase/functions/delete-account/index.ts'), 'utf8'),
+  ]);
+  assert.match(app, /view === 'adult-gate'/);
+  assert.match(app, /view === 'delete-account'/);
+  assert.match(app, /href="privacy\.html"/);
+  assert.match(cloud, /functions\.invoke\('delete-account'/);
+  assert.match(privacy, /Retention and deletion/);
+  assert.match(deletion, /Delete your account and data/);
+  assert.match(dataSafety, /Adult email address/);
+  assert.match(edgeFunction, /auth\.admin\.deleteUser\(user\.id, false\)/);
+  assert.doesNotMatch(edgeFunction, /sb_service_role|service_role_/);
+});
+
+test('cloud progress is isolated by user, language, and activity', async () => {
+  const [app, cloud, storage] = await Promise.all([
+    readFile(resolve(root, 'app.js'), 'utf8'),
+    readFile(resolve(root, 'modules/cloud.js'), 'utf8'),
+    readFile(resolve(root, 'modules/storage.js'), 'utf8'),
+  ]);
+  assert.match(cloud, /\.eq\('language_id', languageId\)/);
+  assert.match(cloud, /\.eq\('activity', activity\)/);
+  assert.match(cloud, /onConflict: 'user_id,language_id,activity,level'/);
+  assert.match(app, /word_builders/);
+  assert.match(app, /tracing: 'tracing'/);
+  assert.match(app, /math: 'math'/);
+  assert.doesNotMatch(app, /LEVEL_OFFSET/);
+  assert.match(storage, /mathProgressByLanguage/);
+});
+
+test('database migration enforces account ownership and least privilege', async () => {
+  const [migration, cleanup] = await Promise.all([
+    readFile(resolve(root, 'supabase/migrations/20260815143733_isolate_progress_by_language_and_activity.sql'), 'utf8'),
+    readFile(resolve(root, 'supabase/migrations/20260815144148_remove_legacy_progress_policies.sql'), 'utf8'),
+  ]);
+  assert.match(migration, /primary key \(user_id, language_id, activity, level\)/);
+  assert.match(migration, /enable row level security/);
+  assert.equal((migration.match(/\(select auth\.uid\(\)\) = user_id/g) || []).length, 4);
+  assert.match(migration, /for update[\s\S]*using[\s\S]*with check/);
+  assert.match(migration, /revoke all on table public\.user_progress from anon, authenticated/);
+  assert.match(migration, /grant select, insert, update on table public\.user_progress to authenticated/);
+  assert.equal((cleanup.match(/drop policy if exists/g) || []).length, 3);
+});
+
+test('Persian recorder separates new, replacement, and second-person voice jobs', async () => {
+  const recorder = await readFile(resolve(root, 'tools/persian-audio-recorder.html'), 'utf8');
+  const glossaryWords = [...new Set(persian.curriculum.flatMap(level => level.words.map(entry => entry.word)))];
+  const missingWords = glossaryWords.filter(word => !persianAudio[word]);
+  assert.equal(missingWords.length, 140);
+  assert.match(recorder, /languagePackages\.fa\.curriculum/);
+  assert.match(recorder, /filter\(text => !persianAudio\[text\]\)/);
+  assert.match(recorder, /Object\.entries\(persianAudio\)/);
+  assert.match(recorder, /'new-primary'/);
+  assert.match(recorder, /'replace-primary'/);
+  assert.match(recorder, /'second-voice'/);
+  assert.match(recorder, /assets\/audio\/fa-voice-2/);
+  assert.match(recorder, /lumio-fa-recorder-\$\{name\}:\$\{mode\}/);
+  assert.match(recorder, /directoryHandle=null/);
+  await assert.doesNotReject(() => readFile(resolve(root, 'assets/audio/fa-voice-2/README.md'), 'utf8'));
 });
