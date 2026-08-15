@@ -88,7 +88,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.7\.10'/);
+  assert.match(standalone, /const RELEASE = '0\.7\.11'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -165,4 +165,14 @@ test('Google sign-in is available on the first welcome screen and reuses the exi
   assert.equal((app.match(/<svg viewBox="0 0 24 24" aria-hidden="true">/g) || []).length, 1);
   assert.match(cloud, /signInWithOAuth\(\{ provider: 'google', options: \{ redirectTo \} \}\)/);
   assert.match(cloud, /redirectTo = `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}`/);
+});
+
+test('the header always offers the correct account action', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  const css = await readFile(resolve(root, 'games.css'), 'utf8');
+  assert.match(app, /if \(cloudUser\)[\s\S]*dataset\.action = 'signout'[\s\S]*button\.textContent = copy\(\)\.signOut/);
+  assert.match(app, /else \{[\s\S]*dataset\.action = 'signin'[\s\S]*button\.textContent = copy\(\)\.logIn/);
+  assert.match(app, /\[data-action="signin"\][\s\S]*returnView = view; authMode = 'choice'; view = 'auth'; render\(\)/);
+  assert.match(app, /view = returnView \|\| \(profile\.childName/);
+  assert.match(css, /\.account-session-action\{white-space:nowrap;cursor:pointer\}/);
 });
