@@ -12,7 +12,7 @@
 - [ ] Complete the Families, content-rating, and app-access sections accurately.
 - [ ] Ensure the Android manifest does not request `com.google.android.gms.permission.AD_ID`, location, contacts, camera, microphone, or other permissions Lumio does not need.
 - [ ] Put subscription purchase, restore, cancellation, pricing, and external links only behind the adult gate.
-- [ ] Add a monitored, private support/privacy email to the store listing and privacy policy before publication; the public issue tracker is not suitable for personal-data support.
+- [x] Add a monitored, private support/privacy email to the store listing and privacy policy before publication; the public issue tracker is not suitable for personal-data support.
 
 ## Release verification
 
