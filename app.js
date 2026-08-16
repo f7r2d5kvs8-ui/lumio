@@ -2,7 +2,7 @@ import { languageCatalog, languagePackages } from './data/languages.js';
 import { persianAudio } from './data/audio-fa.js';
 import { writingPaths, writingConnections } from './data/writing-paths.js';
 import { loadProfile, saveProfile, clearProfile, languageProgress, updateLanguageProgress, rewardPractice } from './modules/storage.js';
-import { currentSession, signUp, signIn, signInWithGoogle, signOut, deleteAccount, readProgress, writeProgress } from './modules/cloud.js';
+import { currentSession, signUp, signIn, signInWithGoogle, confirmAdultAccount, signOut, deleteAccount, readProgress, writeProgress } from './modules/cloud.js';
 import { startAnalytics, setAnalyticsUser, setAnalyticsLanguage, trackEvent } from './modules/analytics.js';
 import { validateLatinName, validateLocalizedName, validateTracingText } from './modules/input-validation.js';
 
@@ -15,13 +15,15 @@ let languageTarget = 'learning';
 let authMode = 'choice';
 let cloudUser = null;
 const isAnalyticsAdmin = () => cloudUser?.app_metadata?.lumio_admin === true;
+const hasAdultConfirmation = user => user?.user_metadata?.lumio_adult_confirmed === true;
 let tracingSession = null;
 let numberHouseSession = null;
 let returnView = null;
 let adultGateTarget = null;
 let adultGateQuestion = null;
+let pendingSignUp = null;
 const PROGRESS_ACTIVITY = { words: 'word_builders', tracing: 'tracing', math: 'math' };
-const RELEASE = '0.8.1';
+const RELEASE = '0.8.2';
 
 const escape = value => String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[char]));
 const clearInputErrorOnEdit = (input, error) => input?.addEventListener('input', () => { input.removeAttribute('aria-invalid'); if (error) error.textContent = ''; });
@@ -60,11 +62,17 @@ const childNamePrompts = {
   fa: 'نامت را بنویس یا از پدر و مادرت کمک بخواه.'
 };
 const safetyCopy = {
-  nl: { adultTitle:'Alleen voor ouders en verzorgers', adultIntro:'Los deze korte vraag op om toegang te krijgen tot accounts, abonnementen en ouderinstellingen.', answer:'Antwoord', continue:'Naar oudergedeelte', wrong:'Dat antwoord klopt niet. Probeer opnieuw.', parentAccount:'Account voor ouders', parentAccountHelp:'Een ouder of wettelijke voogd beheert het account en de toestemming voor kindgegevens.', consent:'Ik ben de ouder of wettelijke voogd en ga akkoord met het privacybeleid voor het opslaan van leergegevens.', privacy:'Privacybeleid', deletion:'Account verwijderen', subscription:'Abonnement', subscriptionNote:'Lumio bevat geen advertenties. Betaalde functies worden later aangeboden via een abonnement dat alleen een volwassene kan beheren.', deleteTitle:'Lumio-account verwijderen', deleteIntro:'Hiermee worden het account, e-mailadres en gekoppelde leerprogressie definitief verwijderd. Lokale namen en voortgang op dit apparaat worden ook gewist.', confirmDelete:'Ik begrijp dat dit niet ongedaan kan worden gemaakt.', deleteNow:'Account en gegevens verwijderen', deleting:'Account wordt verwijderd…', deleteFailed:'Verwijderen is niet gelukt. Probeer opnieuw of gebruik de webpagina voor accountverwijdering.', cancel:'Annuleren' },
-  en: { adultTitle:'For parents and guardians only', adultIntro:'Solve this short question to access accounts, subscriptions, and parent settings.', answer:'Answer', continue:'Open parent area', wrong:'That answer is not correct. Try again.', parentAccount:'Parent-managed account', parentAccountHelp:'A parent or legal guardian manages the account and consent for a child’s data.', consent:'I am the parent or legal guardian and agree to the privacy policy for storing learning data.', privacy:'Privacy policy', deletion:'Delete account', subscription:'Subscription', subscriptionNote:'Lumio contains no advertising. Paid features will be offered through a subscription that only an adult can manage.', deleteTitle:'Delete Lumio account', deleteIntro:'This permanently deletes the account, email address, and linked learning progress. Local names and progress on this device will also be erased.', confirmDelete:'I understand that this cannot be undone.', deleteNow:'Delete account and data', deleting:'Deleting account…', deleteFailed:'Deletion failed. Try again or use the web account-deletion page.', cancel:'Cancel' },
-  fa: { adultTitle:'فقط برای والدین و سرپرستان', adultIntro:'برای دسترسی به حساب، اشتراک و تنظیمات والدین به این پرسش کوتاه پاسخ دهید.', answer:'پاسخ', continue:'ورود به بخش والدین', wrong:'پاسخ درست نیست. دوباره تلاش کنید.', parentAccount:'حساب تحت مدیریت والدین', parentAccountHelp:'والد یا سرپرست قانونی حساب و رضایت برای داده‌های کودک را مدیریت می‌کند.', consent:'من والد یا سرپرست قانونی هستم و با سیاست حریم خصوصی برای ذخیرهٔ پیشرفت آموزشی موافقم.', privacy:'سیاست حریم خصوصی', deletion:'حذف حساب', subscription:'اشتراک', subscriptionNote:'لومیو هیچ تبلیغی ندارد. امکانات پولی بعداً از طریق اشتراکی ارائه می‌شود که فقط بزرگسال می‌تواند آن را مدیریت کند.', deleteTitle:'حذف حساب لومیو', deleteIntro:'حساب، ایمیل و پیشرفت آموزشی مرتبط برای همیشه حذف می‌شود. نام‌ها و پیشرفت محلی این دستگاه نیز پاک می‌شود.', confirmDelete:'می‌دانم که این کار قابل بازگشت نیست.', deleteNow:'حذف حساب و داده‌ها', deleting:'در حال حذف حساب…', deleteFailed:'حذف انجام نشد. دوباره تلاش کنید یا از صفحهٔ وب حذف حساب استفاده کنید.', cancel:'انصراف' }
+  nl: { adultTitle:'Voor ouders en verzorgers', adultIntro:'Los deze korte vraag op om de ouderinstellingen te openen.', answer:'Antwoord', continue:'Verder', wrong:'Dat klopt niet. Probeer opnieuw.', parentAccount:'Oudergedeelte', privacy:'Privacybeleid', deletion:'Account verwijderen', subscription:'Abonnement', subscriptionNote:'Lumio heeft geen advertenties. Abonnementen zijn alleen voor volwassenen.', deleteTitle:'Lumio-account verwijderen', deleteIntro:'Dit verwijdert het account en de gekoppelde voortgang definitief. Lokale gegevens op dit apparaat worden ook gewist.', confirmDelete:'Ik begrijp dat dit niet ongedaan kan worden gemaakt.', deleteNow:'Account verwijderen', deleting:'Account wordt verwijderd…', deleteFailed:'Verwijderen is niet gelukt. Probeer opnieuw.', cancel:'Annuleren' },
+  en: { adultTitle:'For parents and guardians', adultIntro:'Solve this short question to open the parent settings.', answer:'Answer', continue:'Continue', wrong:'That is not correct. Try again.', parentAccount:'Parent area', privacy:'Privacy policy', deletion:'Delete account', subscription:'Subscription', subscriptionNote:'Lumio has no ads. Subscriptions are for adults only.', deleteTitle:'Delete Lumio account', deleteIntro:'This permanently deletes the account and linked progress. Local data on this device is also erased.', confirmDelete:'I understand that this cannot be undone.', deleteNow:'Delete account', deleting:'Deleting account…', deleteFailed:'Deletion failed. Please try again.', cancel:'Cancel' },
+  fa: { adultTitle:'برای والدین و سرپرستان', adultIntro:'برای باز کردن تنظیمات والدین به این پرسش کوتاه پاسخ دهید.', answer:'پاسخ', continue:'ادامه', wrong:'درست نیست. دوباره تلاش کنید.', parentAccount:'بخش والدین', privacy:'سیاست حریم خصوصی', deletion:'حذف حساب', subscription:'اشتراک', subscriptionNote:'لومیو تبلیغ ندارد. اشتراک فقط برای بزرگسالان است.', deleteTitle:'حذف حساب لومیو', deleteIntro:'حساب و پیشرفت مرتبط برای همیشه حذف می‌شود. داده‌های محلی این دستگاه نیز پاک می‌شود.', confirmDelete:'می‌دانم که این کار قابل بازگشت نیست.', deleteNow:'حذف حساب', deleting:'در حال حذف حساب…', deleteFailed:'حذف انجام نشد. دوباره تلاش کنید.', cancel:'انصراف' }
 };
 const safety = () => safetyCopy[profile.appLanguage || 'nl'];
+const adultConfirmationCopy = {
+  nl: { eyebrow:'Account', title:'Ben je 18 jaar of ouder?', intro:'Een volwassene beheert het Lumio-account.', yes:'Ja, ga verder', no:'Nee, terug', saving:'Even wachten…', failed:'Bevestigen lukte niet. Probeer opnieuw.' },
+  en: { eyebrow:'Account', title:'Are you 18 or older?', intro:'An adult manages the Lumio account.', yes:'Yes, continue', no:'No, go back', saving:'One moment…', failed:'Could not confirm. Please try again.' },
+  fa: { eyebrow:'حساب', title:'آیا ۱۸ سال یا بیشتر دارید؟', intro:'حساب لومیو را یک بزرگسال مدیریت می‌کند.', yes:'بله، ادامه', no:'نه، بازگشت', saving:'کمی صبر کنید…', failed:'تأیید نشد. دوباره تلاش کنید.' }
+};
+const adultConfirmation = () => adultConfirmationCopy[profile.appLanguage || 'nl'];
 const templates = [
   { id:'default', name:'Lumio original', description:'The calm original Lumio look.', image:null },
   { id:'playground', name:'Pastel playground', description:'A bright world of play and friendship.', image:'./assets/backgrounds/family-01/background-01.jpg' },
@@ -469,24 +477,66 @@ function renderAdultGate() {
   root.querySelector('#adult-gate-form').onsubmit = event => { event.preventDefault(); if (Number(root.querySelector('#adult-answer').value) !== question.left * question.right) { root.querySelector('#adult-gate-message').textContent = t.wrong; return; } completeAdultGate(); };
   root.querySelector('[data-action="gate-back"]').onclick = () => { adultGateTarget = null; view = returnView || (profile.selectedLanguage ? 'games' : 'auth'); render(); };
 }
-function bindGoogleLogin(googleText, requireConsent = false) {
+function bindGoogleLogin(googleText) {
   const button = root.querySelector('[data-action="google-login"]');
   if (!button) return;
-  button.onclick = async () => { const message = root.querySelector('#auth-message'); const consent = root.querySelector('#parent-consent'); if (requireConsent && !consent?.checked) { message.textContent = safety().consent; consent?.focus(); return; } if (!/^https?:$/.test(window.location.protocol)) { message.textContent = googleText.online; return; } message.textContent = `${googleText.button}…`; const result = await signInWithGoogle(); if (result?.error) message.textContent = result.error.message; };
+  button.onclick = async () => { const message = root.querySelector('#auth-message'); if (!/^https?:$/.test(window.location.protocol)) { message.textContent = googleText.online; return; } message.textContent = `${googleText.button}…`; const result = await signInWithGoogle(); if (result?.error) message.textContent = result.error.message; };
+}
+async function finishSignedInExperience() {
+  profile.account = { email: cloudUser?.email || '', provider: 'supabase' };
+  profile.guest = false;
+  saveProfile(profile);
+  await syncCloudProgress();
+  await syncTracingProgress();
+  await syncMathProgress();
+  view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name';
+  render();
+}
+function renderAdultConfirmation() {
+  const text = adultConfirmation();
+  root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><div class="eyebrow">${text.eyebrow}</div><h1>${text.title}</h1><p>${text.intro}</p><div class="adult-confirmation-actions"><button class="button primary" data-action="adult-confirm">${text.yes}</button><button class="button soft" data-action="adult-decline">${text.no}</button></div><p class="auth-message" id="adult-confirmation-message" aria-live="polite"></p><p><a class="policy-link" href="privacy.html" target="_blank" rel="noopener">${safety().privacy}</a></p></section></main>`;
+  root.querySelector('[data-action="adult-confirm"]').onclick = async event => {
+    const button = event.currentTarget;
+    const message = root.querySelector('#adult-confirmation-message');
+    button.disabled = true;
+    message.textContent = text.saving;
+    const result = pendingSignUp
+      ? await signUp(pendingSignUp.email, pendingSignUp.password, true)
+      : await confirmAdultAccount();
+    if (result.error) { message.textContent = result.error.message || text.failed; button.disabled = false; return; }
+    pendingSignUp = null;
+    if (!result.data.session && !cloudUser) { message.textContent = copy().checkEmail; root.querySelector('[data-action="adult-decline"]').textContent = copy().logIn; return; }
+    cloudUser = result.data.user || cloudUser;
+    if (!cloudUser) { message.textContent = text.failed; button.disabled = false; return; }
+    setAnalyticsUser(cloudUser);
+    await finishSignedInExperience();
+  };
+  root.querySelector('[data-action="adult-decline"]').onclick = async () => {
+    if (cloudUser) await signOut();
+    pendingSignUp = null;
+    cloudUser = null;
+    setAnalyticsUser(null);
+    profile.account = null;
+    profile.guest = false;
+    saveProfile(profile);
+    authMode = 'choice';
+    view = 'auth';
+    render();
+  };
 }
 function renderAuth() {
   const t = copy(); const choosing = authMode === 'choice'; const login = authMode === 'login';
   const googleText = googleAuthCopy[profile.appLanguage || 'nl'];
   if (choosing) {
-    root.innerHTML = `<main class="screen account-screen"><section class="hero auth-choice"><div class="eyebrow">Lumio</div><h1>${t.welcome}</h1><p>${t.beginJourney}</p><div class="account-choices"><button class="choice-button guest-choice" data-action="guest"><span class="choice-icon">▶</span><span><strong>${t.playGuest}</strong><small>${t.beginNow}</small></span></button><button class="choice-button account-choice" data-action="signup"><span class="choice-icon">★</span><span><strong>${safety().parentAccount}</strong><small>${safety().parentAccountHelp}</small></span></button></div><button class="login-link" data-action="login">${t.haveAccount} <strong>${t.logIn}</strong></button><p><a class="policy-link" href="privacy.html" target="_blank" rel="noopener">${safety().privacy}</a></p></section></main>`;
-    root.querySelector('[data-action="signup"]').onclick = () => openAdultGate('signup');
-    root.querySelector('[data-action="login"]').onclick = () => openAdultGate('login');
+    root.innerHTML = `<main class="screen account-screen"><section class="hero auth-choice"><div class="eyebrow">Lumio</div><h1>${t.welcome}</h1><p>${t.beginJourney}</p><div class="account-choices"><button class="choice-button guest-choice" data-action="guest"><span class="choice-icon">▶</span><span><strong>${t.playGuest}</strong><small>${t.beginNow}</small></span></button><button class="choice-button account-choice" data-action="signup"><span class="choice-icon">★</span><span><strong>${t.createAccount}</strong><small>${t.saveProgress}</small></span></button></div><button class="login-link" data-action="login">${t.haveAccount} <strong>${t.logIn}</strong></button><p><a class="policy-link" href="privacy.html" target="_blank" rel="noopener">${safety().privacy}</a></p></section></main>`;
+    root.querySelector('[data-action="signup"]').onclick = () => { authMode = 'signup'; render(); };
+    root.querySelector('[data-action="login"]').onclick = () => { authMode = 'login'; render(); };
     root.querySelector('[data-action="guest"]').onclick = () => { cloudUser = null; setAnalyticsUser(null); profile.account = null; profile.guest = true; saveProfile(profile); view = returnView || (profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name'); returnView = null; render(); }; return;
   }
-  root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><button class="back-auth" data-action="back-auth" aria-label="${ui().back}">←</button><div class="eyebrow">${safety().parentAccount}</div><h1>${login ? t.welcomeBack : t.createAccount}</h1><p>${login ? t.continueJourney : safety().parentAccountHelp}</p><form id="auth-form" class="auth-form"><label>${t.email}<input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>${t.password}<input id="auth-password" type="password" minlength="${login ? 4 : 8}" required placeholder="${profile.appLanguage === 'en' ? (login ? 'your password' : 'at least 8 characters') : (login ? 'jouw wachtwoord' : 'minimaal 8 tekens')}"></label><label class="consent-row"><input id="parent-consent" type="checkbox" required><span>${safety().consent} <a class="policy-link" href="privacy.html" target="_blank" rel="noopener">${safety().privacy}</a></span></label><button class="button primary">${login ? t.login : t.signup}</button></form>${googleLoginButton(googleText)}<p class="auth-message" id="auth-message" aria-live="polite"></p><button class="login-link" data-action="auth-mode">${login ? t.createAccount : `${t.haveAccount} ${t.logIn}`}</button></section></main>`;
-  bindGoogleLogin(googleText, true);
-  root.querySelector('#auth-form').onsubmit = async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); message.textContent = login ? `${t.login}…` : `${t.signup}…`; const result = login ? await signIn(email, password) : await signUp(email, password); if (result.error) { message.textContent = result.error.message; return; } if (!result.data.session) { message.textContent = t.checkEmail; return; } cloudUser = result.data.user; setAnalyticsUser(cloudUser); profile.account = { email, provider: 'supabase' }; profile.guest = false; saveProfile(profile); await syncCloudProgress(); await syncTracingProgress(); await syncMathProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name'; render(); };
-  root.querySelector('[data-action="auth-mode"]').onclick = () => openAdultGate(login ? 'signup' : 'login');
+  root.innerHTML = `<main class="screen account-screen"><section class="hero auth-form-card"><button class="back-auth" data-action="back-auth" aria-label="${ui().back}">←</button><div class="eyebrow">Lumio</div><h1>${login ? t.welcomeBack : t.createAccount}</h1><p>${login ? t.continueJourney : t.saveProgress}</p><form id="auth-form" class="auth-form"><label>${t.email}<input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>${t.password}<input id="auth-password" type="password" minlength="${login ? 4 : 8}" required placeholder="${profile.appLanguage === 'en' ? (login ? 'your password' : 'at least 8 characters') : (login ? 'jouw wachtwoord' : 'minimaal 8 tekens')}"></label><button class="button primary">${login ? t.login : t.signup}</button></form>${googleLoginButton(googleText)}<p class="auth-message" id="auth-message" aria-live="polite"></p><button class="login-link" data-action="auth-mode">${login ? t.createAccount : `${t.haveAccount} ${t.logIn}`}</button></section></main>`;
+  bindGoogleLogin(googleText);
+  root.querySelector('#auth-form').onsubmit = async event => { event.preventDefault(); const email = root.querySelector('#auth-email').value.trim().toLowerCase(); const password = root.querySelector('#auth-password').value; const message = root.querySelector('#auth-message'); if (!login) { pendingSignUp = { email, password }; view = 'adult-confirmation'; render(); return; } message.textContent = `${t.login}…`; const result = await signIn(email, password); if (result.error) { message.textContent = result.error.message; return; } cloudUser = result.data.user; setAnalyticsUser(cloudUser); profile.account = { email, provider: 'supabase' }; profile.guest = false; saveProfile(profile); if (!hasAdultConfirmation(cloudUser)) { view = 'adult-confirmation'; render(); return; } await finishSignedInExperience(); };
+  root.querySelector('[data-action="auth-mode"]').onclick = () => { authMode = login ? 'signup' : 'login'; render(); };
   root.querySelector('[data-action="back-auth"]').onclick = () => { authMode = 'choice'; render(); };
 }
 
@@ -570,7 +620,7 @@ async function boot() {
   if (!profile.appLanguage) { startAnalytics({ appVersion: RELEASE }); registerServiceWorker(); view = 'app-language'; render(); return; }
   try {
     const sessionState = await currentSession(); cloudUser = sessionState?.user || null;
-    if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; profile.guest = false; await syncCloudProgress(); await syncTracingProgress(); await syncMathProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name'; }
+    if (cloudUser) { profile.account = { email: cloudUser.email, provider: 'supabase' }; profile.guest = false; if (hasAdultConfirmation(cloudUser)) { await syncCloudProgress(); await syncTracingProgress(); await syncMathProgress(); view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name'; } else view = 'adult-confirmation'; }
     else if (profile.guest) { profile.account = null; view = profile.childName ? (profile.selectedLanguage ? (profile.selectedGame ? selectedGameView() : 'games') : 'languages') : 'child-name'; }
     else { profile.account = null; view = 'auth'; }
     saveProfile(profile);
@@ -580,7 +630,7 @@ async function boot() {
 }
 function renderHome() { const language = pack(); const progress = languageProgress(profile, language.metadata.id); const completed = progress.completed.length; const t = copy(); root.innerHTML = `${header()}<main class="screen"><section class="home-grid"><div class="welcome"><div class="eyebrow" style="color:#e9e5ff">${language.metadata.flag} ${language.metadata.nativeName}</div><h1>${ui().hello}</h1><p>${ui().dailyIntro}</p><button class="daily" data-action="daily">▶ ${ui().daily}</button></div><aside class="reward"><div class="eyebrow">${ui().growth}</div><div class="stars">${'⭐'.repeat(Math.min(3, Math.max(1, profile.rewards.stars || 1)))}</div><strong>${completed} / ${language.curriculum.length} ${ui().worlds}</strong><div class="progress"><span style="width:${completed / language.curriculum.length * 100}%"></span></div></aside></section><div class="level-heading"><button class="back" data-action="games">← ${t.games}</button><div><div class="eyebrow">${t.wordBuilders}</div><h2>${t.chooseLevel}</h2></div></div><section class="lesson-list" aria-label="${ui().worlds}">${language.curriculum.map((lesson, index) => { const locked = index > completed; return `<button class="lesson" data-lesson="${index}" ${locked ? 'disabled' : ''}><span class="lesson-icon">${locked ? '🔒' : lesson.icon}</span><span><strong>${lesson.title}</strong><small>${lesson.skill === 'letter' ? ui().sounds : ui().building}</small></span><span class="lesson-progress">${progress.completed.includes(index) ? '✓' : `${Math.min(10, progress.activeLesson === index ? progress.wordIndex || 0 : 0)}/10`}</span></button>`; }).join('')}</section></main>`; root.querySelector('[data-action="daily"]').onclick = () => startLesson(progress.activeLesson || 0); root.querySelector('[data-action="games"]').onclick = () => { view = 'games'; render(); }; root.querySelectorAll('[data-lesson]').forEach(button => button.onclick = () => startLesson(Number(button.dataset.lesson))); bindHeader(); }
 
-function bindHeader() { root.querySelector('[data-action="hub"]')?.addEventListener('click', () => { view = profile.selectedLanguage ? 'games' : 'languages'; render(); }); root.querySelector('[data-action="child-name"]')?.addEventListener('click', () => { returnView = view; view = 'child-name'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { if (view === 'parent') return; returnView = view; openAdultGate('parent'); }); const stats = root.querySelector('.stat-row'); if (cloudUser) { if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip account-session-action signout'; button.dataset.action = 'signout'; button.textContent = copy().signOut; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', () => { returnView = view; openAdultGate('signout'); }); } else { if (stats && !stats.querySelector('[data-action="signin"]')) { const button = document.createElement('button'); button.className = 'chip account-session-action signin'; button.dataset.action = 'signin'; button.textContent = copy().logIn; stats.appendChild(button); } root.querySelector('[data-action="signin"]')?.addEventListener('click', () => { returnView = view; openAdultGate('login'); }); } }
+function bindHeader() { root.querySelector('[data-action="hub"]')?.addEventListener('click', () => { view = profile.selectedLanguage ? 'games' : 'languages'; render(); }); root.querySelector('[data-action="child-name"]')?.addEventListener('click', () => { returnView = view; view = 'child-name'; render(); }); root.querySelector('[data-action="parent"]')?.addEventListener('click', () => { if (view === 'parent') return; returnView = view; openAdultGate('parent'); }); const stats = root.querySelector('.stat-row'); if (cloudUser) { if (stats && !stats.querySelector('[data-action="signout"]')) { const button = document.createElement('button'); button.className = 'chip account-session-action signout'; button.dataset.action = 'signout'; button.textContent = copy().signOut; stats.appendChild(button); } root.querySelector('[data-action="signout"]')?.addEventListener('click', () => { returnView = view; openAdultGate('signout'); }); } else { if (stats && !stats.querySelector('[data-action="signin"]')) { const button = document.createElement('button'); button.className = 'chip account-session-action signin'; button.dataset.action = 'signin'; button.textContent = copy().logIn; stats.appendChild(button); } root.querySelector('[data-action="signin"]')?.addEventListener('click', () => { returnView = view; authMode = 'login'; view = 'auth'; render(); }); } }
 
 function legacyRender1() { if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'child-name') renderChildName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'letters') renderLetters(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
 
@@ -735,7 +785,7 @@ function renderTemplates() {
   bindHeader();
 }
 
-function render() { applyTemplate(); setDocumentLanguage(profile.appLanguage || 'nl'); if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'adult-gate') renderAdultGate(); else if (view === 'delete-account') renderDeleteAccount(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'templates') renderTemplates(); else if (view === 'number-house-levels') renderNumberHouseLevels(); else if (view === 'number-houses') renderNumberHouses(); else if (view === 'letters') renderLetters(); else if (view === 'custom-tracing-input') renderCustomTracingInput(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); decorateWithMascot(); if (!root.querySelector('[data-action="sound-toggle"]')) root.insertAdjacentHTML('beforeend', soundButton(true)); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
+function render() { applyTemplate(); setDocumentLanguage(profile.appLanguage || 'nl'); if (view === 'app-language') renderAppLanguage(); else if (view === 'auth') renderAuth(); else if (view === 'adult-confirmation') renderAdultConfirmation(); else if (view === 'adult-gate') renderAdultGate(); else if (view === 'delete-account') renderDeleteAccount(); else if (view === 'child-name') renderChildName(); else if (view === 'native-name') renderNativeName(); else if (view === 'languages') renderLanguages(); else if (view === 'games') renderGames(); else if (view === 'templates') renderTemplates(); else if (view === 'number-house-levels') renderNumberHouseLevels(); else if (view === 'number-houses') renderNumberHouses(); else if (view === 'letters') renderLetters(); else if (view === 'custom-tracing-input') renderCustomTracingInput(); else if (view === 'tracing') renderTracing(); else if (view === 'game') renderGame(); else if (view === 'parent') renderParent(); else renderHome(); decorateWithMascot(); if (!root.querySelector('[data-action="sound-toggle"]')) root.insertAdjacentHTML('beforeend', soundButton(true)); if (!root.querySelector('.release-tag')) root.insertAdjacentHTML('beforeend', `<span class="release-tag">v${RELEASE}</span>`); }
 
 document.addEventListener('click', event => { const button = event.target.closest('[data-action="templates"]'); if (button) { returnView = view; view = 'templates'; render(); } });
 

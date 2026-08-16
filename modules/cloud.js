@@ -13,13 +13,22 @@ export async function currentSession() {
   return data.session;
 }
 
-export async function signUp(email, password) { return lumioSupabase ? lumioSupabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } }) : { data: { session: null, user: null }, error: offlineError() }; }
+export async function signUp(email, password, adultConfirmed = false) { return lumioSupabase ? lumioSupabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: adultConfirmed ? { lumio_adult_confirmed: true, lumio_adult_confirmation_version: '2026-08-16' } : {} } }) : { data: { session: null, user: null }, error: offlineError() }; }
 export async function signIn(email, password) { return lumioSupabase ? lumioSupabase.auth.signInWithPassword({ email, password }) : { data: { session: null, user: null }, error: offlineError() }; }
 export async function signInWithGoogle() {
   if (!lumioSupabase) return { data: null, error: offlineError() };
   if (!/^https?:$/.test(window.location.protocol)) return { data: null, error: new Error('Google sign-in is available in the online version of Lumio.') };
   const redirectTo = `${window.location.origin}${window.location.pathname}`;
   return lumioSupabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+}
+export async function confirmAdultAccount() {
+  if (!lumioSupabase) return { data: { user: null }, error: offlineError() };
+  return lumioSupabase.auth.updateUser({
+    data: {
+      lumio_adult_confirmed: true,
+      lumio_adult_confirmation_version: '2026-08-16'
+    }
+  });
 }
 export async function signOut() { return lumioSupabase ? lumioSupabase.auth.signOut() : { error: null }; }
 

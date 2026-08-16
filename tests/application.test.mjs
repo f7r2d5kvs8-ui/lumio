@@ -75,7 +75,7 @@ test('all explicit navigation destinations are handled by the main renderer', as
   const fallbackViews = new Set(['home']);
   const unhandled = [...assignedViews].filter(view => !handledViews.has(view) && !fallbackViews.has(view));
   assert.deepEqual(unhandled, []);
-  for (const required of ['app-language', 'auth', 'child-name', 'languages', 'games', 'letters', 'custom-tracing-input', 'tracing', 'game', 'number-house-levels', 'number-houses', 'templates', 'parent']) assert.equal(handledViews.has(required), true, required);
+  for (const required of ['app-language', 'auth', 'adult-confirmation', 'child-name', 'languages', 'games', 'letters', 'custom-tracing-input', 'tracing', 'game', 'number-house-levels', 'number-houses', 'templates', 'parent']) assert.equal(handledViews.has(required), true, required);
 });
 
 test('every user text field has an explicit validation path', async () => {
@@ -90,7 +90,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.8\.1'/);
+  assert.match(standalone, /const RELEASE = '0\.8\.2'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
@@ -157,15 +157,19 @@ test('math screen and voices use the correct operation-specific instruction', as
   assert.doesNotMatch(app, /number-house-prompt">\$\{math\.prompt\}/);
 });
 
-test('Google sign-in is available only after entering the adult-managed account flow', async () => {
+test('account creation is concise and every cloud account receives the adult check', async () => {
   const app = await readFile(resolve(root, 'app.js'), 'utf8');
   const cloud = await readFile(resolve(root, 'modules/cloud.js'), 'utf8');
   assert.match(app, /const googleAuthCopy = \{[\s\S]*nl:[\s\S]*en:[\s\S]*fa:/);
   assert.equal((app.match(/\$\{googleLoginButton\(googleText\)\}/g) || []).length, 1);
-  assert.match(app, /function openAdultGate\(target\)/);
-  assert.match(app, /data-action="signup"[\s\S]*openAdultGate\('signup'\)/);
-  assert.match(app, /function bindGoogleLogin\(googleText, requireConsent = false\)[\s\S]*await signInWithGoogle\(\)/);
-  assert.match(app, /bindGoogleLogin\(googleText, true\)/);
+  assert.match(app, /pendingSignUp = \{ email, password \}; view = 'adult-confirmation'/);
+  assert.match(app, /function renderAdultConfirmation\(\)/);
+  assert.match(app, /if \(!hasAdultConfirmation\(cloudUser\)\) \{ view = 'adult-confirmation'/);
+  assert.match(app, /function bindGoogleLogin\(googleText\)[\s\S]*await signInWithGoogle\(\)/);
+  assert.match(app, /bindGoogleLogin\(googleText\)/);
+  assert.doesNotMatch(app, /id="parent-consent"/);
+  assert.match(cloud, /auth\.updateUser\([\s\S]*lumio_adult_confirmed: true/);
+  assert.match(cloud, /signUp\(email, password, adultConfirmed = false\)[\s\S]*lumio_adult_confirmed: true/);
   assert.equal((app.match(/<svg viewBox="0 0 24 24" aria-hidden="true">/g) || []).length, 1);
   assert.match(cloud, /signInWithOAuth\(\{ provider: 'google', options: \{ redirectTo \} \}\)/);
   assert.match(cloud, /redirectTo = `\$\{window\.location\.origin\}\$\{window\.location\.pathname\}`/);
@@ -176,7 +180,7 @@ test('the header always offers the correct account action', async () => {
   const css = await readFile(resolve(root, 'games.css'), 'utf8');
   assert.match(app, /if \(cloudUser\)[\s\S]*dataset\.action = 'signout'[\s\S]*button\.textContent = copy\(\)\.signOut/);
   assert.match(app, /else \{[\s\S]*dataset\.action = 'signin'[\s\S]*button\.textContent = copy\(\)\.logIn/);
-  assert.match(app, /\[data-action="signin"\][\s\S]*returnView = view; openAdultGate\('login'\)/);
+  assert.match(app, /\[data-action="signin"\][\s\S]*authMode = 'login'; view = 'auth'/);
   assert.match(app, /view = returnView \|\| \(profile\.childName/);
   assert.match(css, /\.account-session-action\{white-space:nowrap;cursor:pointer\}/);
 });
@@ -216,7 +220,7 @@ test('advertising controls are removed and subscription information stays in the
   assert.doesNotMatch(storage, /adsEnabled/);
   assert.doesNotMatch(languages, /adSetting|adMessage/);
   assert.doesNotMatch(app, /id="ads"|preferences\.adsEnabled/);
-  assert.match(app, /subscriptionNote:'Lumio contains no advertising/);
+  assert.match(app, /subscriptionNote:'Lumio has no ads/);
 });
 
 test('publishing privacy, deletion, and Data safety resources are present', async () => {
@@ -229,10 +233,13 @@ test('publishing privacy, deletion, and Data safety resources are present', asyn
     readFile(resolve(root, 'supabase/functions/delete-account/index.ts'), 'utf8'),
   ]);
   assert.match(app, /view === 'adult-gate'/);
+  assert.match(app, /view === 'adult-confirmation'/);
   assert.match(app, /view === 'delete-account'/);
   assert.match(app, /href="privacy\.html"/);
   assert.match(cloud, /functions\.invoke\('delete-account'/);
   assert.match(privacy, /Retention and deletion/);
+  assert.match(privacy, /at least 18/);
+  assert.match(privacy, /does not collect a date of birth/);
   assert.match(deletion, /Delete your account and data/);
   assert.match(dataSafety, /Adult email address/);
   assert.match(edgeFunction, /auth\.admin\.deleteUser\(user\.id, false\)/);
