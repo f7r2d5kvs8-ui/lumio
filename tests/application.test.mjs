@@ -78,6 +78,15 @@ test('all explicit navigation destinations are handled by the main renderer', as
   for (const required of ['app-language', 'auth', 'adult-confirmation', 'child-name', 'languages', 'games', 'letters', 'custom-tracing-input', 'tracing', 'game', 'number-house-levels', 'number-houses', 'templates', 'parent']) assert.equal(handledViews.has(required), true, required);
 });
 
+test('welcome and app-language screens provide a simple language path', async () => {
+  const app = await readFile(resolve(root, 'app.js'), 'utf8');
+  assert.match(app, /data-action="choose-app-language"/);
+  assert.match(app, /languageTarget = 'welcome'; view = 'app-language'/);
+  assert.match(app, /const systemAppLanguage =/);
+  assert.match(app, /const text = appLanguagePageCopy\[displayLanguage\]/);
+  assert.doesNotMatch(app, /Choose app language<br><small>/);
+});
+
 test('every user text field has an explicit validation path', async () => {
   const app = await readFile(resolve(root, 'app.js'), 'utf8');
   assert.match(app, /id="child-name"[\s\S]*?validateLatinName/);
@@ -90,7 +99,7 @@ test('every user text field has an explicit validation path', async () => {
 
 test('generated standalone app contains the same validation and release', async () => {
   const standalone = await readFile(resolve(root, 'index.html'), 'utf8');
-  assert.match(standalone, /const RELEASE = '0\.8\.3'/);
+  assert.match(standalone, /const RELEASE = '0\.8\.4'/);
   assert.match(standalone, /function validateLatinName/);
   assert.match(standalone, /function validateLocalizedName/);
   assert.match(standalone, /function validateTracingText/);
